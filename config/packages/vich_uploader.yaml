@@ -1,0 +1,8 @@
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        sponsor_logo:
+            uri_prefix: /uploads/sponsors
+            upload_destination: '%kernel.project_dir%/public/uploads/sponsors'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
