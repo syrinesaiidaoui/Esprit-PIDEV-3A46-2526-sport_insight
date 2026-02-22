@@ -6,19 +6,25 @@ use App\Entity\ProductOrder\Order;
 use App\Entity\ProductOrder\OrderItem;
 use App\Form\ProductOrder\OrderType;
 use App\Repository\OrderRepository;
+use App\Service\OrderNotificationService;
 use App\Service\ValidationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 #[Route('/order')]
 class OrderController extends AbstractController
 {
-    public function __construct(private readonly ValidationService $validationService)
-    {
-    }
+    public function __construct(
+        private readonly ValidationService $validationService,
+        #[Autowire(service: 'state_machine.order_status')]
+        private readonly WorkflowInterface $orderWorkflow,
+        private readonly OrderNotificationService $orderNotificationService
+    ) {}
 
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(Request $request, OrderRepository $orderRepository): Response
@@ -191,14 +197,38 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('app_order_index');
         }
 
-        $allowedStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'rejected'];
-        if (!in_array($status, $allowedStatuses, true)) {
+        $transitionByStatus = [
+            'confirmed' => 'pay',
+            'shipped' => 'ship',
+            'delivered' => 'deliver',
+            'rejected' => 'reject',
+        ];
+
+        if (!isset($transitionByStatus[$status])) {
             $this->addFlash('error', 'Statut non valide.');
             return $this->redirectToRoute('app_order_index');
         }
 
-        $order->setStatus($status);
+        $transition = $transitionByStatus[$status];
+        if (!$this->orderWorkflow->can($order, $transition)) {
+            $this->addFlash('error', sprintf(
+                'Transition invalide: %s -> %s',
+                (string) $order->getStatus(),
+                $status
+            ));
+            return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
+        }
+
+        $this->orderWorkflow->apply($order, $transition);
         $entityManager->flush();
+
+        if ($status === 'shipped') {
+            try {
+                $this->orderNotificationService->sendShippingNotification($order);
+            } catch (\Throwable) {
+                $this->addFlash('warning', "Statut mis a jour, mais l'email d'expedition n'a pas pu etre envoye.");
+            }
+        }
 
         $this->addFlash('success', sprintf('Commande #%d mise a jour: %s', (int) $order->getId(), $status));
         return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);

@@ -4,12 +4,15 @@ namespace App\Controller\FrontOffice;
 
 use App\Entity\ProductOrder\Order;
 use App\Service\CartService;
+use App\Service\OrderNotificationService;
 use App\Service\ValidationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Workflow\WorkflowInterface;
 // security attribute import removed for public/no-login mode
 
 #[Route('/checkout', name: 'app_checkout_')]
@@ -20,7 +23,10 @@ class CheckoutController extends AbstractController
         Request $request,
         CartService $cartService,
         ValidationService $validationService,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        OrderNotificationService $orderNotificationService,
+        #[Autowire(service: 'state_machine.order_status')]
+        WorkflowInterface $orderWorkflow
     ): Response {
         $cart = $cartService->getCart();
 
@@ -85,6 +91,8 @@ class CheckoutController extends AbstractController
 
             if (empty($errors)) {
                 try {
+                    $createdOrders = [];
+
                     // Create orders for each product in cart
                     foreach ($cart as $item) {
                         $order = new Order();
@@ -99,7 +107,10 @@ class CheckoutController extends AbstractController
                         $order->setPaymentMethod($paymentMethod);
                         if ($paymentMethod === 'online') {
                             $order->setPaymentStatus('paid');
-                            $order->setStatus('confirmed');
+                            $order->setStatus('pending');
+                            if ($orderWorkflow->can($order, 'pay')) {
+                                $orderWorkflow->apply($order, 'pay');
+                            }
                         } else {
                             $order->setPaymentStatus('pending');
                             $order->setStatus('pending');
@@ -111,13 +122,30 @@ class CheckoutController extends AbstractController
                             ''
                         ));
 
-                        // For now, we don't have a User association, but you can add one
-                        // For demo purposes, we'll use a generic message
-                        
+                        $orderErrors = $validationService->validate($order);
+                        if (!empty($orderErrors)) {
+                            foreach ($orderErrors as $field => $messages) {
+                                foreach ($messages as $message) {
+                                    $this->addFlash('error', sprintf('%s: %s', $field, $message));
+                                }
+                            }
+                            return $this->redirectToRoute('app_checkout_index');
+                        }
+
                         $entityManager->persist($order);
+                        $createdOrders[] = $order;
                     }
 
                     $entityManager->flush();
+
+                    try {
+                        $orderNotificationService->sendOrderConfirmation($email, $name, $createdOrders);
+                        if ($paymentMethod === 'online') {
+                            $orderNotificationService->sendPaymentConfirmation($email, $name, $createdOrders);
+                        }
+                    } catch (\Throwable) {
+                        $this->addFlash('warning', "Commande validee, mais certains emails n'ont pas pu etre envoyes.");
+                    }
 
                     // Clear cart
                     $cartService->clearCart();

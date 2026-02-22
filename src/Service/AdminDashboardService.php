@@ -41,6 +41,7 @@ class AdminDashboardService
 
         $daily = $this->initDailyBuckets(14);
         $monthly = $this->initMonthlyBuckets(6);
+        $productSales = [];
 
         foreach ($orders as $order) {
             if (!$order instanceof Order) {
@@ -67,6 +68,19 @@ class AdminDashboardService
             if ($isRevenueStatus) {
                 $overview['totalSales'] += $quantity;
                 $overview['totalRevenue'] += $lineTotal;
+
+                $productName = $order->getProduct()?->getName();
+                if ($productName) {
+                    if (!isset($productSales[$productName])) {
+                        $productSales[$productName] = [
+                            'name' => $productName,
+                            'quantity' => 0,
+                            'revenue' => 0.0,
+                        ];
+                    }
+                    $productSales[$productName]['quantity'] += $quantity;
+                    $productSales[$productName]['revenue'] += $lineTotal;
+                }
             }
 
             if ($orderDate instanceof \DateTimeInterface) {
@@ -91,12 +105,14 @@ class AdminDashboardService
         }
 
         $overview['totalRevenue'] = round($overview['totalRevenue'], 2);
+        usort($productSales, static fn (array $a, array $b): int => $b['quantity'] <=> $a['quantity']);
 
         return [
             'overview' => $overview,
             'statusBreakdown' => $statusCounts,
             'dailyStats' => array_values($daily),
             'monthlyStats' => array_values($monthly),
+            'topSellingProducts' => array_slice($productSales, 0, 5),
         ];
     }
 

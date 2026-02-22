@@ -4,13 +4,6 @@
 {% block page_title %}Admin Dashboard{% endblock %}
 
 {% block body %}
-{% set maxDailyRevenue = 0 %}
-{% for day in dailyStats %}
-    {% if day.revenue > maxDailyRevenue %}
-        {% set maxDailyRevenue = day.revenue %}
-    {% endif %}
-{% endfor %}
-
 <section class="admin-kpis">
     <article class="stat-card">
         <div class="stat-card-label">Total sales</div>
@@ -52,20 +45,24 @@
 <section class="data-table" style="margin-bottom: 20px;">
     <div class="data-table-header">
         <div>
-            <h3>Daily revenue progress (last 14 days)</h3>
-            <p class="muted">Quick trend of business performance</p>
+            <h3>Revenue chart (Symfony UX Chart.js)</h3>
+            <p class="muted">Monthly revenue trend for admin reporting</p>
         </div>
     </div>
     <div style="padding: 20px 24px;">
-        <div style="display:grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 10px; align-items:end; min-height: 190px;">
-            {% for day in dailyStats %}
-                {% set height = maxDailyRevenue > 0 ? ((day.revenue / maxDailyRevenue) * 150)|round(0, 'ceil') : 4 %}
-                <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                    <div style="width:100%; max-width:38px; height: {{ height }}px; border-radius:8px 8px 4px 4px; background: linear-gradient(180deg, #10b981 0%, #047857 100%);" title="${{ day.revenue|number_format(2, '.', ',') }}"></div>
-                    <div style="font-size:11px; color:#6b7280;">{{ day.label }}</div>
-                </div>
-            {% endfor %}
+        {{ render_chart(revenueChart) }}
+    </div>
+</section>
+
+<section class="data-table" style="margin-bottom: 20px;">
+    <div class="data-table-header">
+        <div>
+            <h3>Top selling products</h3>
+            <p class="muted">Best performing products by units sold</p>
         </div>
+    </div>
+    <div style="padding: 20px 24px;">
+        {{ render_chart(topProductsChart) }}
     </div>
 </section>
 

@@ -6,6 +6,7 @@ use App\Entity\ProductOrder\Product;
 use App\Repository\ProductRepository;
 use App\Service\ValidationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +24,8 @@ class ProductApiController extends AbstractController
     public function __construct(
         private ValidationService $validationService,
         private EntityManagerInterface $entityManager,
-        private ProductRepository $productRepository
+        private ProductRepository $productRepository,
+        private PaginatorInterface $paginator
     ) {}
 
     #[Route('', name: 'create', methods: ['POST'])]
@@ -196,23 +198,52 @@ class ProductApiController extends AbstractController
     }
 
     #[Route('', name: 'list', methods: ['GET'])]
-    public function list(): Response
+    public function list(Request $request): Response
     {
         try {
-            $products = $this->productRepository->findAll();
+            $page = max(1, (int) $request->query->get('page', 1));
+            $perPage = (int) $request->query->get('perPage', 10);
+            $perPage = max(1, min(100, $perPage));
+
+            $qb = $this->productRepository->createQueryBuilder('p')
+                ->orderBy('p.id', 'ASC');
+
+            $pagination = $this->paginator->paginate($qb, $page, $perPage);
             $data = [];
 
-            foreach ($products as $index => $product) {
-                $data[] = $this->normalizeProductEntity($product, $index);
-            }
+            if ($pagination->getTotalItemCount() > 0) {
+                foreach ($pagination->getItems() as $index => $product) {
+                    if (!$product instanceof Product) {
+                        continue;
+                    }
 
-            if (empty($data)) {
-                $data = $this->loadProductsFromJson();
+                    $absoluteIndex = (($page - 1) * $perPage) + $index;
+                    $data[] = $this->normalizeProductEntity($product, $absoluteIndex);
+                }
+            } else {
+                $jsonProducts = $this->loadProductsFromJson();
+                $jsonPagination = $this->paginator->paginate($jsonProducts, $page, $perPage);
+
+                foreach ($jsonPagination->getItems() as $item) {
+                    if (is_array($item)) {
+                        $data[] = $item;
+                    }
+                }
+
+                $pagination = $jsonPagination;
             }
 
             return $this->json([
                 'success' => true,
                 'count' => count($data),
+                'pagination' => [
+                    'page' => $pagination->getCurrentPageNumber(),
+                    'perPage' => $pagination->getItemNumberPerPage(),
+                    'totalItems' => $pagination->getTotalItemCount(),
+                    'totalPages' => $pagination->getPageCount(),
+                    'hasNextPage' => $pagination->getCurrentPageNumber() < $pagination->getPageCount(),
+                    'hasPreviousPage' => $pagination->getCurrentPageNumber() > 1,
+                ],
                 'products' => $data
             ], Response::HTTP_OK);
 

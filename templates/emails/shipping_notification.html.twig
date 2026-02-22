@@ -1,0 +1,10 @@
+<h2>Your order is on the way</h2>
+<p>Order <strong>#{{ order.id }}</strong> has been shipped.</p>
+
+<ul>
+    <li>Product: {{ order.product ? order.product.name : 'N/A' }}</li>
+    <li>Quantity: {{ order.quantity }}</li>
+    <li>Shipping address: {{ order.shippingAddress ?: 'N/A' }}</li>
+</ul>
+
+<p>Thank you for your trust.</p>

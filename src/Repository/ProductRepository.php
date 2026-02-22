@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\ProductOrder\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -41,16 +42,21 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function searchProducts(?string $q = null, ?string $category = null, ?string $sort = null): array
     {
+        return $this->createSearchQueryBuilder($q, $category, $sort)->getQuery()->getResult();
+    }
+
+    public function createSearchQueryBuilder(?string $q = null, ?string $category = null, ?string $sort = null): QueryBuilder
+    {
         $qb = $this->createQueryBuilder('p');
 
         if ($q) {
             $qb->andWhere('LOWER(p.name) LIKE :q')
-               ->setParameter('q', '%' . strtolower($q) . '%');
+                ->setParameter('q', '%' . strtolower($q) . '%');
         }
 
         if ($category) {
             $qb->andWhere('p.category = :cat')
-               ->setParameter('cat', $category);
+                ->setParameter('cat', $category);
         }
 
         switch ($sort) {
@@ -64,7 +70,7 @@ class ProductRepository extends ServiceEntityRepository
                 $qb->orderBy('p.name', 'ASC');
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     /**

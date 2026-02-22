@@ -251,8 +251,128 @@
         background: #f8fafc;
     }
 
-    .user-message { text-align: right; margin-bottom: 8px; }
-    .ai-message { text-align: left; margin-bottom: 8px; color: #065f46; }
+    .user-message {
+        text-align: right;
+        margin-bottom: 10px;
+        line-height: 1.45;
+    }
+
+    .user-bubble {
+        display: inline-block;
+        max-width: 85%;
+        background: linear-gradient(140deg, #1f6b49, #2b8b60);
+        color: #fff;
+        border-radius: 14px 14px 4px 14px;
+        padding: 9px 11px;
+        font-weight: 600;
+    }
+
+    .ai-message {
+        text-align: left;
+        margin-bottom: 10px;
+        color: #0f172a;
+    }
+
+    .ai-card {
+        background: #ffffff;
+        border: 1px solid #dbe2ea;
+        border-left: 4px solid #1f6b49;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 8px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .ai-title {
+        font-family: "Barlow Condensed", "Segoe UI", sans-serif;
+        letter-spacing: .2px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f5132;
+        margin-bottom: 7px;
+    }
+
+    .ai-row {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 6px;
+        margin-bottom: 6px;
+        align-items: start;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .ai-label {
+        color: #334155;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: .4px;
+    }
+
+    .ai-value {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .ai-value.price {
+        color: #0f5132;
+        font-weight: 800;
+        font-size: 16px;
+    }
+
+    .ai-value.stock-ok {
+        color: #15803d;
+        font-weight: 800;
+    }
+
+    .ai-value.stock-out {
+        color: #b91c1c;
+        font-weight: 800;
+    }
+
+    .ai-actions {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .ai-link-chip {
+        display: inline-block;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .2px;
+        border: 1px solid #cbd5e1;
+        color: #0f172a;
+        background: #f8fafc;
+    }
+
+    .ai-link-chip.primary {
+        background: #0f5132;
+        border-color: #0f5132;
+        color: #fff;
+    }
+
+    .ai-generic {
+        white-space: pre-line;
+        line-height: 1.5;
+        font-family: Georgia, "Times New Roman", serif;
+        color: #134e4a;
+        background: #fff;
+        border: 1px solid #dbe2ea;
+        border-left: 4px solid #14b8a6;
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    .ai-image-link {
+        color: #0e7490;
+        font-weight: 700;
+        text-decoration: underline;
+        word-break: break-all;
+    }
 
     #ai-chat-form {
         display: flex;
@@ -481,6 +601,25 @@
             {% endfor %}
         </div>
 
+        {% if totalPages is defined and page is defined and totalPages > 1 %}
+            {% set currentQuery = app.request.query.all %}
+            <nav aria-label="Pagination des produits" style="margin-top:14px;">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item{% if page <= 1 %} disabled{% endif %}">
+                        <a class="page-link" href="{{ path('front_equipement_index', currentQuery|merge({page: page - 1})) }}">Precedent</a>
+                    </li>
+                    {% for p in 1..totalPages %}
+                        <li class="page-item{% if p == page %} active{% endif %}">
+                            <a class="page-link" href="{{ path('front_equipement_index', currentQuery|merge({page: p})) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item{% if page >= totalPages %} disabled{% endif %}">
+                        <a class="page-link" href="{{ path('front_equipement_index', currentQuery|merge({page: page + 1})) }}">Suivant</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+
         <div class="helper-grid">
             <div class="front-card">
                 <h3 style="font-size:25px;margin:0 0 8px;">Personnalisation</h3>
@@ -634,7 +773,105 @@ document.addEventListener('DOMContentLoaded', function () {
         const userText = input.value.trim();
         if (!userText) return;
 
-        messages.innerHTML += `<div class="user-message"><strong>Vous :</strong> ${userText}</div>`;
+        const escapeHtml = (text) => String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+        const toLinkChip = (label, path, primary = false) => {
+            if (!path || !path.startsWith('/')) return '';
+            const safeLabel = escapeHtml(label);
+            const safePath = escapeHtml(path);
+            return `<a class="ai-link-chip ${primary ? 'primary' : ''}" href="${safePath}">${safeLabel}</a>`;
+        };
+
+        const renderAssistantReply = (reply) => {
+            const text = (reply || '').trim();
+            if (!text) {
+                return '<div class="ai-generic">Impossible de repondre pour le moment.</div>';
+            }
+
+            const lines = text.split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length > 0);
+            const map = {};
+            const actions = [];
+
+            lines.forEach((line) => {
+                const separatorIndex = line.indexOf(':');
+                if (separatorIndex > 0) {
+                    const key = line.slice(0, separatorIndex).trim().toLowerCase();
+                    const value = line.slice(separatorIndex + 1).trim();
+                    if (line.startsWith('- ')) {
+                        actions.push({ key: key.replace(/^-+\s*/, ''), value });
+                    } else {
+                        map[key] = value;
+                    }
+                }
+                if (line.startsWith('- ')) {
+                    const actionLine = line.replace(/^-+\s*/, '');
+                    const idx = actionLine.indexOf(':');
+                    if (idx > 0) {
+                        actions.push({
+                            key: actionLine.slice(0, idx).trim().toLowerCase(),
+                            value: actionLine.slice(idx + 1).trim()
+                        });
+                    }
+                }
+            });
+
+            const hasStructuredProduct =
+                Object.prototype.hasOwnProperty.call(map, 'product') ||
+                Object.prototype.hasOwnProperty.call(map, 'price') ||
+                Object.prototype.hasOwnProperty.call(map, 'availability');
+
+            if (!hasStructuredProduct) {
+                return `<div class="ai-generic">${escapeHtml(text)}</div>`;
+            }
+
+            const product = map['product'] || 'Product';
+            const price = map['price'] || '';
+            const availability = map['availability'] || '';
+            const description = map['description'] || '';
+            const image = map['image'] || '';
+
+            const availabilityClass = /out/i.test(availability) ? 'stock-out' : 'stock-ok';
+
+            let html = `<div class="ai-card">`;
+            html += `<div class="ai-title">${escapeHtml(product)}</div>`;
+            if (price) {
+                html += `<div class="ai-row"><span class="ai-label">Price</span><span class="ai-value price">${escapeHtml(price)}</span></div>`;
+            }
+            if (availability) {
+                html += `<div class="ai-row"><span class="ai-label">Stock</span><span class="ai-value ${availabilityClass}">${escapeHtml(availability)}</span></div>`;
+            }
+            if (description) {
+                html += `<div class="ai-row"><span class="ai-label">Details</span><span class="ai-value">${escapeHtml(description)}</span></div>`;
+            }
+            if (image) {
+                const safeImage = escapeHtml(image);
+                if (image.startsWith('/')) {
+                    html += `<div class="ai-row"><span class="ai-label">Image</span><span class="ai-value"><a class="ai-image-link" href="${safeImage}" target="_blank" rel="noopener">${safeImage}</a></span></div>`;
+                } else {
+                    html += `<div class="ai-row"><span class="ai-label">Image</span><span class="ai-value">${safeImage}</span></div>`;
+                }
+            }
+
+            const viewAction = actions.find((a) => a.key.includes('view product'));
+            const addAction = actions.find((a) => a.key.includes('add to cart'));
+            const cartAction = actions.find((a) => a.key.includes('view cart'));
+            if (viewAction || addAction || cartAction) {
+                html += '<div class="ai-actions">';
+                if (viewAction) html += toLinkChip('View product', viewAction.value);
+                if (addAction) html += toLinkChip('Add to cart', addAction.value, true);
+                if (cartAction) html += toLinkChip('View cart', cartAction.value);
+                html += '</div>';
+            }
+            html += `</div>`;
+            return html;
+        };
+
+        messages.innerHTML += `<div class="user-message"><span class="user-bubble">${escapeHtml(userText)}</span></div>`;
         input.value = '';
         messages.scrollTop = messages.scrollHeight;
 
@@ -647,16 +884,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify({ message: userText })
             });
 
-            const data = await response.json();
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                data = null;
+            }
+
             const loading = document.getElementById('loading');
             if (loading) loading.remove();
 
-            messages.innerHTML += `<div class="ai-message"><strong>IA :</strong> ${data.reply || 'Impossible de repondre pour le moment.'}</div>`;
+            if (response.redirected || response.status === 401 || response.status === 403) {
+                messages.innerHTML += `<div class="ai-message">${renderAssistantReply('Session expiree. Merci de vous reconnecter pour utiliser l assistant boutique.')}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+                return;
+            }
+
+            if (!response.ok) {
+                const serverMessage = data && data.reply ? data.reply : `Erreur serveur (${response.status}).`;
+                messages.innerHTML += `<div class="ai-message">${renderAssistantReply(serverMessage)}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+                return;
+            }
+
+            messages.innerHTML += `<div class="ai-message">${renderAssistantReply((data && data.reply) ? data.reply : 'Impossible de repondre pour le moment.')}</div>`;
             messages.scrollTop = messages.scrollHeight;
         } catch (error) {
             const loading = document.getElementById('loading');
             if (loading) loading.remove();
-            messages.innerHTML += '<div class="ai-message">Erreur de connexion. Veuillez reessayer.</div>';
+            messages.innerHTML += `<div class="ai-message">${renderAssistantReply('Erreur de connexion. Veuillez reessayer.')}</div>`;
         }
     });
 });

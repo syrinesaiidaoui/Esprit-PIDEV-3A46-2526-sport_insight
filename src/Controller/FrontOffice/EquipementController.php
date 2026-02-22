@@ -8,40 +8,38 @@ use App\Entity\ProductOrder\Product;
 use App\Repository\ProductRepository;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use App\Service\OrderNotificationService;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 #[Route('/equipement')]
 class EquipementController extends AbstractController
 {
-    private HttpClientInterface $httpClient;
-
-    public function __construct(HttpClientInterface $httpClient)
-    {
-        $this->httpClient = $httpClient;
-    }
-
     // =========================
     //  Product listing
     // =========================
     #[Route('/', name: 'front_equipement_index')]
-    public function index(ProductRepository $repo, Request $request, EntityManagerInterface $em): Response
+    public function index(ProductRepository $repo, Request $request, EntityManagerInterface $em, PaginatorInterface $paginator): Response
     {
         $this->syncJsonCatalogToDatabase($repo, $em);
 
         $q = $request->query->get('q');
         $category = $request->query->get('category');
         $sort = $request->query->get('sort');
+        $page = max(1, (int) $request->query->get('page', 1));
+        $perPage = 9;
 
-        $products = $repo->searchProducts($q, $category, $sort);
+        $productsQuery = $repo->createSearchQueryBuilder($q, $category, $sort);
+        $pagination = $paginator->paginate($productsQuery, $page, $perPage);
+        $products = $pagination->getItems();
         $categories = $repo->findDistinctCategories();
 
         $apiProducts = [];
@@ -70,6 +68,9 @@ class EquipementController extends AbstractController
 
         return $this->render('front_office/equipement/index.html.twig', [
             'products' => $products,
+            'page' => $pagination->getCurrentPageNumber(),
+            'totalPages' => $pagination->getPageCount(),
+            'totalProducts' => $pagination->getTotalItemCount(),
             'categories' => $categories,
             'apiProducts' => $apiProducts,
             'apiProductsUrl' => $this->generateUrl('api_catalog_products'),
@@ -203,7 +204,15 @@ class EquipementController extends AbstractController
     //  Checkout
     // =========================
     #[Route('/checkout', name: 'front_equipement_checkout', methods: ['GET', 'POST'])]
-    public function checkout(Request $request, EntityManagerInterface $em, ProductRepository $repo, MailerInterface $mailer, CsrfTokenManagerInterface $csrfManager): Response
+    public function checkout(
+        Request $request,
+        EntityManagerInterface $em,
+        ProductRepository $repo,
+        CsrfTokenManagerInterface $csrfManager,
+        OrderNotificationService $orderNotificationService,
+        #[Autowire(service: 'state_machine.order_status')]
+        WorkflowInterface $orderWorkflow
+    ): Response
     {
         $session = $request->getSession();
         $cart = $session->get('cart', []);
@@ -304,10 +313,13 @@ class EquipementController extends AbstractController
             $order->setShippingAddress($shippingAddress);
             $order->setBillingAddress($shippingAddress);
             $order->setPaymentMethod($paymentMethod);
-            $order->setTotalAmount(number_format((float)$lineTotal, 2, '.', ''));
+            $order->setTotalAmount(number_format((float) $product->getPrice() * (int) $qty, 2, '.', ''));
             if ($paymentMethod === 'online') {
                 $order->setPaymentStatus('paid');
-                $order->setStatus('confirmed');
+                $order->setStatus('pending');
+                if ($orderWorkflow->can($order, 'pay')) {
+                    $orderWorkflow->apply($order, 'pay');
+                }
             } else {
                 $order->setPaymentStatus('pending');
                 $order->setStatus('pending');
@@ -349,17 +361,13 @@ class EquipementController extends AbstractController
         $session->set('invoice_text', $invoiceText);
         $session->set('invoice_filename', sprintf('facture-%s.txt', strtolower($invoiceNumber)));
 
-        $emailBody = nl2br($invoiceText);
-        $email = (new Email())
-            ->from('no-reply@sport-insight.local')
-            ->to($emailInput)
-            ->subject('Confirmation de commande - Sport Insight')
-            ->html('<h2>Merci pour votre commande</h2><p>Voici votre recapitulatif :</p><pre>' . $emailBody . '</pre>');
-
         try {
-            $mailer->send($email);
-        } catch (\Throwable $e) {
-            $this->addFlash('warning', "Commande validee, mais l'email n'a pas pu etre envoye.");
+            $orderNotificationService->sendOrderConfirmation($emailInput, $fullName, $orders);
+            if ($paymentMethod === 'online') {
+                $orderNotificationService->sendPaymentConfirmation($emailInput, $fullName, $orders);
+            }
+        } catch (\Throwable) {
+            $this->addFlash('warning', "Commande validee, mais certains emails n'ont pas pu etre envoyes.");
         }
 
         $session->remove('cart');
@@ -422,82 +430,9 @@ class EquipementController extends AbstractController
             ], 500);
         }
 
-        if (!$this->isStoreRelatedMessage($userMessage, $catalog)) {
-            return new JsonResponse([
-                'reply' => "Bonjour ! Je peux vous aider uniquement sur les produits Sport Insight. Posez-moi une question sur les articles football, les tenues, le stock ou les prix."
-            ]);
-        }
-
-        $apiKey = $_ENV['OPENAI_API_KEY'] ?? $_SERVER['OPENAI_API_KEY'] ?? getenv('OPENAI_API_KEY');
-        if (!$apiKey || $apiKey === 'your_openai_api_key_here') {
-            return new JsonResponse([
-                'reply' => 'IA non configuree pour le moment. Ajoutez une cle OPENAI_API_KEY valide dans votre environnement local.'
-            ], 500);
-        }
-
-        $catalogContext = $this->formatCatalogForPrompt($catalog);
-        $systemPrompt = <<<PROMPT
-Tu es un assistant de vente Sport Insight.
-Tu dois parler uniquement des produits et des commandes de cette boutique.
-
-Regles:
-- Recommande des produits selon le budget, l'usage, la taille et le stock.
-- Mentionne le prix et le stock dans chaque recommandation.
-- Si l'utilisateur demande un critere indisponible, propose les options les plus proches du catalogue.
-- Si l'utilisateur parle de tshirt/tee/shirt, associe cela aux produits type maillot et pose une courte question de suivi sur la taille/couleur.
-- N'invente jamais de produits absents du catalogue.
-- Si la question est hors contexte boutique, reponds exactement:
-"Bonjour ! Je peux vous aider uniquement sur les produits Sport Insight. Posez-moi une question sur les articles football, les tenues, le stock ou les prix."
-
-Catalogue:
-{$catalogContext}
-PROMPT;
-
-        try {
-            $response = $this->httpClient->request(
-                'POST',
-                'https://api.openai.com/v1/chat/completions',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $apiKey,
-                        'Content-Type' => 'application/json',
-                    ],
-                    'json' => [
-                        'model' => 'gpt-4o-mini',
-                        'messages' => [
-                            [
-                                'role' => 'system',
-                                'content' => $systemPrompt,
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => $userMessage,
-                            ],
-                        ],
-                        'temperature' => 0.5,
-                        'max_tokens' => 280,
-                    ],
-                ]
-            );
-
-            $aiData = $response->toArray(false);
-            if (isset($aiData['error']['message'])) {
-                return new JsonResponse([
-                    'reply' => $this->buildFallbackRecommendation($userMessage, $catalog)
-                ]);
-            }
-
-            $reply = trim((string)($aiData['choices'][0]['message']['content'] ?? ''));
-            if ($reply === '') {
-                $reply = $this->buildFallbackRecommendation($userMessage, $catalog);
-            }
-
-            return new JsonResponse(['reply' => $reply]);
-        } catch (\Throwable $e) {
-            return new JsonResponse([
-                'reply' => $this->buildFallbackRecommendation($userMessage, $catalog)
-            ]);
-        }
+        return new JsonResponse([
+            'reply' => $this->buildShopAssistantReply($userMessage, $catalog)
+        ]);
     }
 
     private function buildStoreCatalog(ProductRepository $productRepo): array
@@ -516,13 +451,21 @@ PROMPT;
             $knownNames[$nameKey] = true;
 
             $catalog[] = [
+                'id' => $product->getId(),
                 'name' => $name,
                 'category' => $product->getCategory() ?: 'N/A',
                 'price' => (float)$product->getPrice(),
                 'stock' => (int)$product->getStock(),
                 'size' => $product->getSize() ?: 'N/A',
                 'brand' => $product->getBrand() ?: 'N/A',
-                'description' => $product->getDescription() ?: 'Aucune description',
+                'description' => sprintf(
+                    '%s product by %s, size %s.',
+                    $product->getCategory() ?: 'Shop',
+                    $product->getBrand() ?: 'Generic',
+                    $product->getSize() ?: 'N/A'
+                ),
+                'slug' => $this->slugify($name),
+                'imageUrl' => $this->buildImageUrl((string)$product->getImage()),
             ];
         }
 
@@ -549,6 +492,7 @@ PROMPT;
                     $knownNames[$nameKey] = true;
 
                     $catalog[] = [
+                        'id' => isset($item['id']) ? (int)$item['id'] : (count($catalog) + 1),
                         'name' => $name,
                         'category' => (string)($item['category'] ?? 'N/A'),
                         'price' => (float)($item['price'] ?? 0),
@@ -556,6 +500,8 @@ PROMPT;
                         'size' => (string)($item['size'] ?? 'N/A'),
                         'brand' => (string)($item['brand'] ?? 'N/A'),
                         'description' => (string)($item['description'] ?? 'Aucune description'),
+                        'slug' => $this->slugify($name),
+                        'imageUrl' => $this->buildImageUrl((string)($item['image'] ?? '')),
                     ];
                 }
             }
@@ -587,11 +533,10 @@ PROMPT;
     {
         $normalized = mb_strtolower($message);
         $keywords = [
-            'football', 'soccer', 'product', 'products', 'equipement', 'equipment',
-            'ball', 'boots', 'cleats', 'jersey', 'maillot', 'shirt', 'tshirt', 't-shirt', 'tee',
-            'kit', 'outfit', 'color', 'couleur', 'price', 'prix', 'stock',
-            'size', 'taille', 'brand', 'marque', 'buy', 'order', 'commande', 'cart', 'panier',
-            'recommend', 'recommand', 'promo', 'sale'
+            'product', 'products', 'search', 'details', 'detail', 'price', 'stock', 'image',
+            'cart', 'add to cart', 'remove', 'payment', 'pay', 'checkout',
+            'shipping', 'delivery', 'order', 'orders', 'tracking', 'track',
+            'return', 'returns', 'refund', 'account'
         ];
 
         foreach ($keywords as $keyword) {
@@ -610,70 +555,228 @@ PROMPT;
         return false;
     }
 
-    private function buildFallbackRecommendation(string $message, array $catalog): string
+    private function buildShopAssistantReply(string $message, array $catalog): string
     {
         $normalized = mb_strtolower($message);
-        $wantsShirt = str_contains($normalized, 'tshirt')
-            || str_contains($normalized, 't-shirt')
-            || str_contains($normalized, 'shirt')
-            || str_contains($normalized, 'tee')
-            || str_contains($normalized, 'jersey')
-            || str_contains($normalized, 'maillot');
-
-        $inStock = array_values(array_filter($catalog, static function (array $product): bool {
-            return ((int)($product['stock'] ?? 0)) > 0;
-        }));
-
-        if (empty($inStock)) {
-            return "Nous n'avons actuellement aucun article en stock. Je peux quand meme vous aider a parcourir les categories.";
+        if ($this->isPaymentQuestion($normalized)) {
+            return "Available payment methods:\n"
+                . "- Credit/Debit Card\n"
+                . "- PayPal\n"
+                . "- Cash on Delivery (if available)\n\n"
+                . "Checkout: /checkout";
         }
 
-        if ($wantsShirt) {
-            $shirtLike = array_values(array_filter($inStock, static function (array $product): bool {
-                $name = mb_strtolower((string)($product['name'] ?? ''));
-                $category = mb_strtolower((string)($product['category'] ?? ''));
-                return str_contains($name, 'jersey')
-                    || str_contains($name, 'shirt')
-                    || str_contains($name, 'tshirt')
-                    || str_contains($name, 't-shirt')
-                    || str_contains($name, 'maillot')
-                    || str_contains($category, 'jersey')
-                    || str_contains($category, 'shirt');
-            }));
-
-            $candidates = !empty($shirtLike) ? $shirtLike : $inStock;
-            $top = array_slice($candidates, 0, 3);
-
-            $lines = [];
-            foreach ($top as $product) {
-                $lines[] = sprintf(
-                    "- %s (%s USD, stock: %d, taille: %s)",
-                    (string)($product['name'] ?? 'Produit'),
-                    number_format((float)($product['price'] ?? 0), 2, '.', ''),
-                    (int)($product['stock'] ?? 0),
-                    (string)($product['size'] ?? 'N/A')
-                );
+        if ($this->isTrackingQuestion($normalized)) {
+            $orderNumber = $this->extractOrderNumber($message);
+            if ($orderNumber === null) {
+                return "Please share your order number so I can help track it.\n\n"
+                    . "My Orders: /account/orders";
             }
 
-            return "Tres bon choix. Pour un style tshirt/maillot, je recommande :\n"
-                . implode("\n", $lines)
-                . "\nQuelle taille et quelle couleur preferez-vous ?";
+            return "Thanks. I noted order number {$orderNumber}. You can track status and updates here:\n"
+                . "My Orders: /account/orders";
         }
 
-        $top = array_slice($inStock, 0, 3);
-        $lines = [];
-        foreach ($top as $product) {
-            $lines[] = sprintf(
-                "- %s (%s USD, stock: %d)",
-                (string)($product['name'] ?? 'Produit'),
-                number_format((float)($product['price'] ?? 0), 2, '.', ''),
-                (int)($product['stock'] ?? 0)
+        if ($this->isReturnQuestion($normalized)) {
+            return "Return policy:\n"
+                . "- Returns are accepted within the eligible return window.\n"
+                . "- Item must be unused and in original condition.\n"
+                . "- Refund is processed after return validation.\n\n"
+                . "Returns page: /returns";
+        }
+
+        if ($this->isProductQuestion($normalized, $catalog)) {
+            $product = $this->findBestMatchingProduct($normalized, $catalog);
+            if ($product === null) {
+                return "Sorry, I could not find that product. You can browse all products here: /products";
+            }
+
+            return $this->formatProductResponse($product);
+        }
+
+        if ($this->isStoreRelatedMessage($message, $catalog)) {
+            return "I can help with products, cart, orders, payment, shipping, and returns. "
+                . "Please share the product name or your order number.";
+        }
+
+        return "I am the Shop Assistant and can only help with products, orders, payment, shipping, and returns. How can I assist you with your shopping today?";
+    }
+
+    private function isProductQuestion(string $normalized, array $catalog): bool
+    {
+        $productKeywords = [
+            'product', 'products', 'search', 'find', 'details', 'detail', 'price', 'stock', 'image',
+            'show', 'buy'
+        ];
+
+        foreach ($productKeywords as $keyword) {
+            if (str_contains($normalized, $keyword)) {
+                return true;
+            }
+        }
+
+        foreach ($catalog as $product) {
+            $name = mb_strtolower((string)($product['name'] ?? ''));
+            if ($name !== '' && str_contains($normalized, $name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isPaymentQuestion(string $normalized): bool
+    {
+        return str_contains($normalized, 'how can i pay')
+            || str_contains($normalized, 'payment')
+            || str_contains($normalized, 'pay')
+            || str_contains($normalized, 'paypal')
+            || str_contains($normalized, 'card');
+    }
+
+    private function isTrackingQuestion(string $normalized): bool
+    {
+        return str_contains($normalized, 'tracking')
+            || str_contains($normalized, 'track')
+            || str_contains($normalized, 'where is my order')
+            || str_contains($normalized, 'order status');
+    }
+
+    private function isReturnQuestion(string $normalized): bool
+    {
+        return str_contains($normalized, 'return')
+            || str_contains($normalized, 'returns')
+            || str_contains($normalized, 'refund')
+            || str_contains($normalized, 'exchange');
+    }
+
+    private function extractOrderNumber(string $message): ?string
+    {
+        if (preg_match('/#?([A-Z0-9][A-Z0-9\-]{4,})/i', $message, $matches) !== 1) {
+            return null;
+        }
+
+        return strtoupper((string)$matches[1]);
+    }
+
+    private function findBestMatchingProduct(string $normalized, array $catalog): ?array
+    {
+        foreach ($catalog as $product) {
+            $name = mb_strtolower((string)($product['name'] ?? ''));
+            if ($name !== '' && str_contains($normalized, $name)) {
+                return $product;
+            }
+        }
+
+        $tokens = preg_split('/[^a-z0-9]+/i', $normalized) ?: [];
+        $tokens = array_values(array_filter($tokens, static fn (string $token): bool => strlen($token) >= 3));
+        if (empty($tokens)) {
+            return null;
+        }
+
+        $bestProduct = null;
+        $bestScore = 0;
+        foreach ($catalog as $product) {
+            $haystack = mb_strtolower(
+                (string)($product['name'] ?? '') . ' '
+                . (string)($product['category'] ?? '') . ' '
+                . (string)($product['brand'] ?? '')
             );
+            $score = 0;
+            foreach ($tokens as $token) {
+                if (str_contains($haystack, $token)) {
+                    $score++;
+                }
+            }
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestProduct = $product;
+            }
         }
 
-        return "Voici les produits populaires disponibles actuellement :\n"
-            . implode("\n", $lines)
-            . "\nIndiquez votre budget ou categorie preferee et je vais affiner la selection.";
+        return $bestScore > 0 ? $bestProduct : null;
+    }
+
+    private function formatProductResponse(array $product): string
+    {
+        $name = (string)($product['name'] ?? 'Unknown Product');
+        $price = number_format((float)($product['price'] ?? 0), 2, '.', '');
+        $stock = (int)($product['stock'] ?? 0);
+        $availability = $stock > 0 ? 'In stock' : 'Out of stock';
+        $description = trim((string)($product['description'] ?? ''));
+        if ($description === '') {
+            $description = 'No description available.';
+        }
+
+        $id = $this->resolveProductId($product, $name);
+        $slug = trim((string)($product['slug'] ?? ''));
+        $viewRef = $slug !== '' ? $slug : ($id > 0 ? (string)$id : $this->slugify($name));
+
+        $lines = [
+            "Product: {$name}",
+            "Price: \${$price}",
+            "Availability: {$availability}",
+            "Description: {$description}",
+        ];
+
+        $imageUrl = trim((string)($product['imageUrl'] ?? ''));
+        if ($imageUrl !== '') {
+            $lines[] = "Image: {$imageUrl}";
+        }
+
+        $lines[] = '';
+        $lines[] = 'Buy now:';
+        $lines[] = "- View product: /products/{$viewRef}";
+        $lines[] = "- Add to cart: /cart/add/{$id}";
+        $lines[] = '- View cart: /cart';
+
+        return implode("\n", $lines);
+    }
+
+    private function resolveProductId(array $product, string $name): int
+    {
+        $id = (int)($product['id'] ?? 0);
+        if ($id > 0) {
+            return $id;
+        }
+
+        if (preg_match('/(\d+)/', $name, $matches) === 1) {
+            return max(1, (int)$matches[1]);
+        }
+
+        return 1;
+    }
+
+    private function buildImageUrl(string $image): string
+    {
+        $value = trim($image);
+        if ($value === '') {
+            return '';
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, '/')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, 'api/')) {
+            return '/' . $value;
+        }
+
+        return '/uploads/' . ltrim($value, '/');
+    }
+
+    private function slugify(string $value): string
+    {
+        $value = mb_strtolower(trim($value));
+        $value = preg_replace('/[^a-z0-9]+/i', '-', $value) ?? '';
+        $value = trim($value, '-');
+
+        return $value !== '' ? $value : 'product';
     }
 
     private function buildInvoiceText(
