@@ -5,10 +5,7 @@ namespace App\Controller\BackOffice;
 use App\Entity\ContratSponsor;
 use App\Form\ContratSponsorType;
 use App\Repository\ContratSponsorRepository;
-<<<<<<< HEAD
 use App\Service\CoachNotificationService;
-=======
->>>>>>> origin/rym-sponsoring
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,11 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ContratSponsorController extends AbstractController
 {
     #[Route(name: 'app_contrat_sponsor_index', methods: ['GET'])]
-<<<<<<< HEAD
     public function index(Request $request, ContratSponsorRepository $contratSponsorRepository, EntityManagerInterface $entityManager, CoachNotificationService $notificationService): Response
-=======
-    public function index(Request $request, ContratSponsorRepository $contratSponsorRepository): Response
->>>>>>> origin/rym-sponsoring
     {
         $sponsorNom = $request->query->get('sponsor_nom');
         $dateDebut = $request->query->get('date_debut');
@@ -45,7 +38,6 @@ final class ContratSponsorController extends AbstractController
             $contrats = $contratSponsorRepository->findAll();
         }
 
-<<<<<<< HEAD
         // Vérifier les contrats expirés et envoyer les notifications
         foreach ($contrats as $contrat) {
             if ($contrat->isExpired() && !$contrat->isNotified()) {
@@ -64,9 +56,6 @@ final class ContratSponsorController extends AbstractController
             }
         }
         $entityManager->flush();
-
-=======
->>>>>>> origin/rym-sponsoring
         return $this->render('back_office/contrat_sponsor/index.html.twig', [
             'contrat_sponsors' => $contrats,
             'sponsor_nom' => $sponsorNom,

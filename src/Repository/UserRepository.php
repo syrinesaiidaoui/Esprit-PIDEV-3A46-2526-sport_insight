@@ -57,7 +57,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     //            ->getOneOrNullResult()
     //        ;
     //    }
-<<<<<<< HEAD
 
     /**
      * @return User[] Returns all users with admin role
@@ -70,6 +69,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
-=======
->>>>>>> origin/rym-sponsoring
 }

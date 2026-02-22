@@ -258,12 +258,9 @@
             "./templates/base.html.twig"
         ]
     },
-<<<<<<< HEAD
     "symfony/ux-chartjs": {
         "version": "v2.32.0"
     },
-=======
->>>>>>> origin/rym-sponsoring
     "symfony/ux-turbo": {
         "version": "2.32",
         "recipe": {
@@ -312,7 +309,6 @@
     },
     "twig/extra-bundle": {
         "version": "v3.23.0"
-<<<<<<< HEAD
     },
     "vich/uploader-bundle": {
         "version": "2.9",
@@ -325,7 +321,5 @@
         "files": [
             "./config/packages/vich_uploader.yaml"
         ]
-=======
->>>>>>> origin/rym-sponsoring
     }
 }

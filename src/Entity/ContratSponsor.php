@@ -48,15 +48,11 @@ class ContratSponsor
     )]
     private ?string $description = null;
 
-<<<<<<< HEAD
     #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
     private ?string $statut = 'Actif';
 
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $notified = false;
-
-=======
->>>>>>> origin/rym-sponsoring
     public function getId(): ?int
     {
         return $this->id;
@@ -133,7 +129,6 @@ class ContratSponsor
 
         return $this;
     }
-<<<<<<< HEAD
 
     public function getStatut(): ?string
     {
@@ -163,6 +158,4 @@ class ContratSponsor
     {
         return $this->dateFin < new \DateTime();
     }
-=======
->>>>>>> origin/rym-sponsoring
 }

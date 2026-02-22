@@ -4,7 +4,6 @@ namespace App\Controller\BackOffice;
 
 use App\Repository\SponsorRepository;
 use App\Repository\ContratSponsorRepository;
-<<<<<<< HEAD
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,18 +14,11 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Psr\Log\LoggerInterface;
-=======
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
->>>>>>> origin/rym-sponsoring
 
 #[Route('/admin/sponsoring')]
 class SponsoringController extends AbstractController
 {
     #[Route('/', name: 'back_sponsoring_index')]
-<<<<<<< HEAD
     public function index(
         Request $request, 
         SponsorRepository $sponsorRepository, 
@@ -36,9 +28,6 @@ class SponsoringController extends AbstractController
         UserRepository $userRepository,
         LoggerInterface $logger
     ): Response
-=======
-    public function index(Request $request, SponsorRepository $sponsorRepository, ContratSponsorRepository $contratSponsorRepository): Response
->>>>>>> origin/rym-sponsoring
     {
         $sponsors = $sponsorRepository->findAll();
         
@@ -61,7 +50,6 @@ class SponsoringController extends AbstractController
         } else {
             $contrats = $contratSponsorRepository->findAll();
         }
-<<<<<<< HEAD
 
         // Mettre à jour le statut des contrats expirés et envoyer les emails
         $now = new \DateTime();
@@ -120,22 +108,17 @@ class SponsoringController extends AbstractController
         $budgetTotal = array_reduce($sponsors, fn($carry, $sponsor) => $carry + $sponsor->getBudget(), 0);
         $montantTotal = array_reduce($contrats, fn($carry, $contrat) => $carry + $contrat->getMontant(), 0);
         $valeurMoyenne = count($contrats) > 0 ? $montantTotal / count($contrats) : 0;
-=======
->>>>>>> origin/rym-sponsoring
         
         return $this->render('back_office/sponsoring/index.html.twig', [
             'sponsors' => $sponsors,
             'contrats' => $contrats,
             'sponsor_nom' => $sponsorNom,
             'date_debut' => $dateDebut,
-<<<<<<< HEAD
             'totalSponsors' => $totalSponsors,
             'totalContrats' => $totalContrats,
             'budgetTotal' => $budgetTotal,
             'montantTotal' => $montantTotal,
             'valeurMoyenne' => $valeurMoyenne,
-=======
->>>>>>> origin/rym-sponsoring
         ]);
     }
 }
