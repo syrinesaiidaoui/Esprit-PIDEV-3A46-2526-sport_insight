@@ -25,10 +25,13 @@ return [
     '@hotwired/turbo' => [
         'version' => '7.3.0',
     ],
+<<<<<<< HEAD
     'chart.js' => [
         'version' => '4.5.1',
     ],
     '@kurkle/color' => [
         'version' => '0.3.4',
     ],
+=======
+>>>>>>> origin/rym-sponsoring
 ];

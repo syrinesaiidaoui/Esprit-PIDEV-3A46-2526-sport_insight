@@ -44,6 +44,7 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Graphiques -->
     <div class="row g-4 mb-4">
         <div class="col-lg-6">
@@ -108,6 +109,8 @@
         </div>
     </div>
 
+=======
+>>>>>>> origin/rym-sponsoring
     <div class="data-table">
         <div class="data-table-header">
             <h3>Liste des contrats sponsors</h3>
@@ -153,6 +156,7 @@
         <table>
             <thead>
                 <tr>
+<<<<<<< HEAD
                     <th>Logo</th>
                     <th>Sponsor</th>
                     <th>Montant</th>
@@ -160,6 +164,13 @@
                     <th>Fin</th>
                     <th>Équipe</th>
                     <th>Statut</th>
+=======
+                    <th>Sponsor</th>
+                    <th>Montant</th>
+                    <th>Débuit</th>
+                    <th>Fin</th>
+                    <th>Équipe</th>
+>>>>>>> origin/rym-sponsoring
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -167,6 +178,7 @@
                 {% if contrats|length > 0 %}
                     {% for contrat in contrats %}
                         <tr>
+<<<<<<< HEAD
                             <td>
                                 {% if contrat.sponsor.logoName %}
                                     <img src="{{ asset('uploads/sponsors/' ~ contrat.sponsor.logoName) }}" alt="{{ contrat.sponsor.nom }}" height="40" style="border-radius: 4px;">
@@ -174,12 +186,15 @@
                                     <span class="badge badge-secondary">Aucun</span>
                                 {% endif %}
                             </td>
+=======
+>>>>>>> origin/rym-sponsoring
                             <td><strong>{{ contrat.sponsor.nom }}</strong></td>
                             <td>{{ contrat.montant }} DT</td>
                             <td>{{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '-' }}</td>
                             <td>{{ contrat.dateFin ? contrat.dateFin|date('d/m/Y') : '-' }}</td>
                             <td>{{ contrat.equipe.nom ?? '-' }}</td>
                             <td>
+<<<<<<< HEAD
                                 {% if contrat.isExpired() %}
                                     <span class="badge badge-danger">Expiré</span>
                                 {% else %}
@@ -187,6 +202,8 @@
                                 {% endif %}
                             </td>
                             <td>
+=======
+>>>>>>> origin/rym-sponsoring
                                 <a href="{{ path('app_contrat_sponsor_edit', {'id': contrat.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
                                 <a href="{{ path('app_contrat_sponsor_pdf', {'id': contrat.id}) }}" class="btn btn-sm btn-outline-info" target="_blank">PDF</a>
                                 <form method="post" action="{{ path('app_contrat_sponsor_delete', {'id': contrat.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" style="display:inline;">
@@ -198,7 +215,11 @@
                     {% endfor %}
                 {% else %}
                     <tr>
+<<<<<<< HEAD
                         <td colspan="8" style="text-align:center; padding: 20px;">Aucun contrat sponsor trouvé</td>
+=======
+                        <td colspan="6" style="text-align:center; padding: 20px;">Aucun contrat sponsor trouvé</td>
+>>>>>>> origin/rym-sponsoring
                     </tr>
                 {% endif %}
             </tbody>
@@ -215,6 +236,7 @@
         .data-table-header h3 {
             margin: 0;
         }
+<<<<<<< HEAD
 
         .card {
             background: white;
@@ -240,5 +262,7 @@
         .card-body {
             padding: 20px;
         }
+=======
+>>>>>>> origin/rym-sponsoring
     </style>
 {% endblock %}

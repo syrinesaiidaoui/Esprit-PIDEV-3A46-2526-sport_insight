@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "0a6721b8549c374b238fcb3cbbd696cc",
+=======
+    "content-hash": "85f6805b01a60473f5583cf3ef5e1fc9",
+>>>>>>> origin/rym-sponsoring
     "packages": [
         {
             "name": "composer/semver",
@@ -1263,6 +1267,7 @@
             "time": "2025-03-06T22:45:56+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "jms/metadata",
             "version": "2.9.0",
             "source": {
@@ -1327,6 +1332,8 @@
             "time": "2025-11-30T20:12:26+00:00"
         },
         {
+=======
+>>>>>>> origin/rym-sponsoring
             "name": "monolog/monolog",
             "version": "3.10.0",
             "source": {
@@ -7017,6 +7024,7 @@
             "time": "2026-01-05T12:44:39+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "symfony/ux-chartjs",
             "version": "v2.32.0",
             "source": {
@@ -7101,6 +7109,8 @@
             "time": "2025-12-16T07:08:36+00:00"
         },
         {
+=======
+>>>>>>> origin/rym-sponsoring
             "name": "symfony/ux-turbo",
             "version": "v2.32.0",
             "source": {
@@ -7854,6 +7864,7 @@
             "time": "2026-01-23T21:00:41+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "vich/uploader-bundle",
             "version": "v2.9.1",
             "source": {
@@ -7962,6 +7973,8 @@
             "time": "2025-12-10T08:23:38+00:00"
         },
         {
+=======
+>>>>>>> origin/rym-sponsoring
             "name": "webmozart/assert",
             "version": "2.1.2",
             "source": {

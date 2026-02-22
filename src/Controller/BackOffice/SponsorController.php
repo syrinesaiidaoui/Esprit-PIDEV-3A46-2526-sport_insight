@@ -10,7 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use Symfony\Component\String\Slugger\SluggerInterface;
+=======
+>>>>>>> origin/rym-sponsoring
 
 #[Route('/admin/sponsor')]
 final class SponsorController extends AbstractController
@@ -42,13 +45,18 @@ final class SponsorController extends AbstractController
     }
 
     #[Route('/new', name: 'app_sponsor_new', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+=======
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+>>>>>>> origin/rym-sponsoring
     {
         $sponsor = new Sponsor();
         $form = $this->createForm(SponsorType::class, $sponsor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             // Gérer l'upload du logo
             $logoFile = $request->files->get('sponsor')['logoFile'] ?? null;
             if ($logoFile) {
@@ -64,6 +72,8 @@ final class SponsorController extends AbstractController
                 $sponsor->setLogoName($newFilename);
             }
             
+=======
+>>>>>>> origin/rym-sponsoring
             $entityManager->persist($sponsor);
             $entityManager->flush();
 
@@ -85,12 +95,17 @@ final class SponsorController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_sponsor_edit', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function edit(Request $request, Sponsor $sponsor, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+=======
+    public function edit(Request $request, Sponsor $sponsor, EntityManagerInterface $entityManager): Response
+>>>>>>> origin/rym-sponsoring
     {
         $form = $this->createForm(SponsorType::class, $sponsor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             // Gérer l'upload du logo
             $logoFile = $request->files->get('sponsor')['logoFile'] ?? null;
             if ($logoFile) {
@@ -106,6 +121,8 @@ final class SponsorController extends AbstractController
                 $sponsor->setLogoName($newFilename);
             }
             
+=======
+>>>>>>> origin/rym-sponsoring
             $entityManager->flush();
 
             return $this->redirectToRoute('app_sponsor_index', [], Response::HTTP_SEE_OTHER);

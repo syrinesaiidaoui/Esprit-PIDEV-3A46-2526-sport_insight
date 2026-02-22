@@ -37,15 +37,22 @@
         "symfony/string": "6.4.*",
         "symfony/translation": "6.4.*",
         "symfony/twig-bundle": "6.4.*",
+<<<<<<< HEAD
         "symfony/ux-chartjs": "^2.32",
+=======
+>>>>>>> origin/rym-sponsoring
         "symfony/ux-turbo": "^2.32",
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.23",
+<<<<<<< HEAD
         "twig/twig": "^2.12|^3.0",
         "vich/uploader-bundle": "^2.9"
+=======
+        "twig/twig": "^2.12|^3.0"
+>>>>>>> origin/rym-sponsoring
     },
     "config": {
         "allow-plugins": {

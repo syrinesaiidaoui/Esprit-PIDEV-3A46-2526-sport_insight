@@ -5,7 +5,10 @@ namespace App\Form;
 use App\Entity\Sponsor;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+<<<<<<< HEAD
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+=======
+>>>>>>> origin/rym-sponsoring
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -48,10 +51,20 @@ class SponsorType extends AbstractType
                     'min' => '0',
                 ],
             ])
+<<<<<<< HEAD
             ->add('logoFile', FileType::class, [
                 'label' => 'Logo du sponsor',
                 'required' => false,
                 'mapped' => false,
+=======
+            ->add('logo', TextType::class, [
+                'label' => 'Logo (URL ou chemin)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Entrez l\'URL du logo ou le chemin du fichier',
+                ],
+>>>>>>> origin/rym-sponsoring
             ])
         ;
     }

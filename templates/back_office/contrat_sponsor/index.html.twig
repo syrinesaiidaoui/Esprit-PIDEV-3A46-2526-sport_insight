@@ -57,11 +57,18 @@
                 <table class="table table-striped">
                     <thead class="table-light">
                         <tr>
+<<<<<<< HEAD
                         <th>ID</th>
                             <th>Date début</th>
                             <th>Date fin</th>
                             <th>Montant</th>
                             <th>Statut</th>
+=======
+                            <th>ID</th>
+                            <th>Date début</th>
+                            <th>Date fin</th>
+                            <th>Montant</th>
+>>>>>>> origin/rym-sponsoring
                             <th>Description</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -74,6 +81,7 @@
                             <td>{{ contrat_sponsor.dateFin ? contrat_sponsor.dateFin|date('d/m/Y') : '-' }}</td>
                             <td><strong>{{ contrat_sponsor.montant }}€</strong></td>
                             <td>
+<<<<<<< HEAD
                                 {% if contrat_sponsor.statut == 'Expiré' %}
                                     <span class="badge badge-expired">Expiré</span>
                                 {% elseif contrat_sponsor.statut == 'Actif' %}
@@ -83,6 +91,8 @@
                                 {% endif %}
                             </td>
                             <td>
+=======
+>>>>>>> origin/rym-sponsoring
                                 {% if contrat_sponsor.description %}
                                     <span title="{{ contrat_sponsor.description }}">{{ contrat_sponsor.description|length > 50 ? contrat_sponsor.description|slice(0, 50) ~ '...' : contrat_sponsor.description }}</span>
                                 {% else %}
@@ -257,6 +267,7 @@
             color: white;
             transform: translateY(-1px);
         }
+<<<<<<< HEAD
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -275,5 +286,7 @@
             color: #16a34a;
             border: 1px solid #16a34a;
         }
+=======
+>>>>>>> origin/rym-sponsoring
     </style>
 {% endblock %}

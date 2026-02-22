@@ -8,8 +8,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+<<<<<<< HEAD
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\HttpFoundation\File\File;
+=======
+>>>>>>> origin/rym-sponsoring
 
 #[ORM\Entity(repositoryClass: SponsorRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQUE_sponsor_nom', columns: ['nom'])]
@@ -17,7 +20,10 @@ use Symfony\Component\HttpFoundation\File\File;
     fields: ['nom'],
     message: 'Ce sponsor existe déjà dans la base de données'
 )]
+<<<<<<< HEAD
 #[Vich\Uploadable]
+=======
+>>>>>>> origin/rym-sponsoring
 class Sponsor
 {
     #[ORM\Id]
@@ -56,6 +62,7 @@ class Sponsor
     private ?float $budget = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+<<<<<<< HEAD
     private ?string $logoName = null;
 
     #[Vich\UploadableField(mapping: 'sponsor_logo', fileNameProperty: 'logoName')]
@@ -65,6 +72,9 @@ class Sponsor
         mimeTypesMessage: 'Le fichier doit être une image (JPEG, PNG, GIF, WebP)'
     )]
     private ?File $logoFile = null;
+=======
+    private ?string $logo = null;
+>>>>>>> origin/rym-sponsoring
 
     /**
      * @var Collection<int, ContratSponsor>
@@ -130,6 +140,7 @@ class Sponsor
         return $this;
     }
 
+<<<<<<< HEAD
     public function getLogoName(): ?string
     {
         return $this->logoName;
@@ -155,11 +166,20 @@ class Sponsor
     public function getLogo(): ?string
     {
         return $this->logoName;
+=======
+    public function getLogo(): ?string
+    {
+        return $this->logo;
+>>>>>>> origin/rym-sponsoring
     }
 
     public function setLogo(?string $logo): static
     {
+<<<<<<< HEAD
         $this->logoName = $logo;
+=======
+        $this->logo = $logo;
+>>>>>>> origin/rym-sponsoring
 
         return $this;
     }
