@@ -126,7 +126,7 @@ final class EntrainementController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, \App\Service\NotificationService $notifier): Response
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -136,6 +136,12 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
+            // Notify chosen players
+            foreach ($entrainement->getJoueurs() as $joueur) {
+                $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+            }
+
+            $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
             return $this->redirectToRoute('front_entrainement_index');
         }
 

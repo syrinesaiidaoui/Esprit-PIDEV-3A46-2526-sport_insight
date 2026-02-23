@@ -334,7 +334,26 @@
                 border-left: 0.3em solid transparent;
             }
         </style>
-
+{% if app.user %}
+<div class="nav-item dropdown">
+    <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
+        🔔 
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notif-count">
+{{ app.user.notifications|filter(n => n.isRead == false)|length }}
+        </span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown">
+        {% for notif in app.user.notifications|slice(0, 5) %}
+            <a class="dropdown-item {{ notif.isRead ? '' : 'fw-bold' }}" href="#">
+                {{ notif.message }} <br>
+                <small class="text-muted">{{ notif.createdAt|date('d/m H:i') }}</small>
+            </a>
+        {% else %}
+            <span class="dropdown-item">Aucune notification</span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
         <ul class="nav-links">
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle {{ app.request.get('_route') starts with 'front_entrainement' or app.request.get('_route') starts with 'front_participation' or app.request.get('_route') starts with 'front_evaluation' ? 'active' : '' }}" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -402,5 +421,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block javascripts %}{% endblock %}
+
 </body>
+
 </html>
