@@ -1,9 +1,20 @@
+{% set currentTheme = app.request.session.get('theme_mode', 'light') %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="{{ currentTheme }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sport Insight Boutique{% endblock %}</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('front_theme_mode');
+                if (savedTheme === 'light' || savedTheme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,6 +33,29 @@
             --warn: #f59e0b;
             --danger: #ef4444;
             --ok: #22c55e;
+            --page-bg: radial-gradient(circle at 0% 0%, #eef8f1 0, #f8faf9 44%, #f3f5f4 100%);
+            --top-navbar-bg: #111827;
+            --hero-grad: linear-gradient(120deg, var(--pitch-900), var(--pitch-600));
+            --card-bg: #ffffff;
+            --footer-bg: var(--pitch-900);
+            --footer-text: #c2d5ca;
+            --btn-secondary-border: #cbd5e1;
+            --btn-secondary-text: #334155;
+        }
+
+        [data-theme="dark"] {
+            --line: #334155;
+            --surface: #0f172a;
+            --ink: #e2e8f0;
+            --muted: #94a3b8;
+            --page-bg: radial-gradient(circle at 0% 0%, #0b1221 0, #0b1220 44%, #0a101d 100%);
+            --top-navbar-bg: #030712;
+            --hero-grad: linear-gradient(120deg, #052e2b, #0f766e);
+            --card-bg: #111827;
+            --footer-bg: #020617;
+            --footer-text: #94a3b8;
+            --btn-secondary-border: #334155;
+            --btn-secondary-text: #cbd5e1;
         }
 
         * { box-sizing: border-box; }
@@ -29,7 +63,7 @@
         body {
             margin: 0;
             font-family: 'Manrope', sans-serif;
-            background: radial-gradient(circle at 0% 0%, #eef8f1 0, #f8faf9 44%, #f3f5f4 100%);
+            background: var(--page-bg);
             color: var(--ink);
         }
 
@@ -39,7 +73,7 @@
         }
 
         .top-navbar {
-            background: #111827;
+            background: var(--top-navbar-bg);
             padding: 0 40px;
             height: 64px;
             display: flex;
@@ -146,7 +180,7 @@
             max-width: 1320px;
             border-radius: 20px;
             overflow: hidden;
-            background: linear-gradient(120deg, var(--pitch-900), var(--pitch-600));
+            background: var(--hero-grad);
             color: #fff;
             padding: 52px 34px;
         }
@@ -176,7 +210,7 @@
         }
 
         .front-card {
-            background: #fff;
+            background: var(--card-bg);
             border: 1px solid var(--line);
             border-radius: 16px;
             padding: 18px;
@@ -215,19 +249,53 @@
         }
 
         .btn-secondary {
-            border: 1px solid #cbd5e1 !important;
-            color: #334155 !important;
-            background: #fff !important;
+            border: 1px solid var(--btn-secondary-border) !important;
+            color: var(--btn-secondary-text) !important;
+            background: var(--card-bg) !important;
         }
 
         .site-footer {
             margin-top: 54px;
-            background: var(--pitch-900);
-            color: #c2d5ca;
+            background: var(--footer-bg);
+            color: var(--footer-text);
             padding: 26px 16px;
             text-align: center;
             font-size: 13px;
         }
+
+        .theme-fab {
+            position: fixed;
+            left: 22px;
+            bottom: 22px;
+            width: 62px;
+            height: 62px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: linear-gradient(145deg, #0f172a, #111827);
+            color: #e5e7eb;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            z-index: 998;
+            box-shadow: 0 14px 28px rgba(2, 6, 23, 0.45);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        [data-theme="dark"] .theme-fab {
+            background: linear-gradient(145deg, #065f46, #047857);
+            color: #ecfeff;
+            border-color: rgba(45, 212, 191, 0.45);
+        }
+
+        [data-theme="dark"] .badge-soft { background: #163a34; color: #99f6e4; }
+        [data-theme="dark"] .btn-chip { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.16); }
+        [data-theme="dark"] .flash-success { background: #052e1a; color: #bbf7d0; border-color: #166534; }
+        [data-theme="dark"] .flash-warning { background: #422006; color: #fde68a; border-color: #92400e; }
+        [data-theme="dark"] .flash-danger,
+        [data-theme="dark"] .flash-error { background: #450a0a; color: #fecaca; border-color: #991b1b; }
 
         .flash-stack {
             margin-bottom: 16px;
@@ -266,6 +334,7 @@
             .hero h1 { font-size: 35px; }
             .section-title { font-size: 28px; }
             .page-container { padding: 0 12px; }
+            .theme-fab { left: 12px; bottom: 12px; width: 56px; height: 56px; }
         }
     </style>
     {% block stylesheets %}{% endblock %}
@@ -316,12 +385,54 @@
     </div>
 
     {% block extra_chat %}{% endblock %}
+    <button type="button" id="theme-fab" class="theme-fab" aria-label="Toggle theme">THEME</button>
 
     <footer class="site-footer">
         <p>&copy; {{ "now"|date("Y") }} Sport Insight Boutique Football. Tous droits reserves.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            var button = document.getElementById('theme-fab');
+            if (!button) {
+                return;
+            }
+            var themeUrls = {
+                light: '{{ path('app_theme_set', {mode: 'light'}) }}',
+                dark: '{{ path('app_theme_set', {mode: 'dark'}) }}'
+            };
+
+            function currentMode() {
+                return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            }
+
+            function refreshLabel(mode) {
+                button.textContent = mode === 'dark' ? 'LIGHT' : 'DARK';
+                button.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+            }
+
+            function applyMode(mode) {
+                document.documentElement.setAttribute('data-theme', mode);
+                refreshLabel(mode);
+                try {
+                    localStorage.setItem('front_theme_mode', mode);
+                } catch (e) {}
+            }
+
+            refreshLabel(currentMode());
+
+            button.addEventListener('click', function () {
+                var next = currentMode() === 'dark' ? 'light' : 'dark';
+                applyMode(next);
+
+                fetch(themeUrls[next], {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }).catch(function () {});
+            });
+        })();
+    </script>
     {% include '_partials/global_form_ux.html.twig' %}
     {% block javascripts %}{% endblock %}
 </body>
