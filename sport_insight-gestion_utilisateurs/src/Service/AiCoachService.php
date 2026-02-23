@@ -15,6 +15,18 @@ class AiCoachService
         $this->apiKey = 'AIzaSyBT31YcxJOY8PWZadw_oaNWXX-p8DF3958';
     }
 
+    private function matchSport(string $type): string
+    {
+        $type = strtolower(trim($type));
+        if (str_contains($type, 'foot')) return 'football';
+        if (str_contains($type, 'basket')) return 'basketball';
+        if (str_contains($type, 'tenn')) return 'tennis';
+        if (str_contains($type, 'nata') || str_contains($type, 'swim')) return 'natation';
+        if (str_contains($type, 'muscu') || str_contains($type, 'physique') || str_contains($type, 'body')) return 'musculation';
+        if (str_contains($type, 'athle') || str_contains($type, 'course') || str_contains($type, 'run')) return 'athletisme';
+        return 'sport';
+    }
+
     /**
      * Returns a structured array with advice, exercises, and scores analysis
      */
@@ -245,12 +257,26 @@ class AiCoachService
 
     private function getTrainingTip(string $type, float $moyenne): string
     {
+        $sport = $this->matchSport($type);
+        
+        $tips = [
+            'football' => "Travaillez votre explosivité sur les premiers mètres et votre vision de jeu.",
+            'basketball' => "Focus sur la détente verticale et la précision au tir sous fatigue.",
+            'tennis' => "Améliorez votre jeu de jambes et votre endurance de fond de court.",
+            'natation' => "Concentrez-vous sur l'hydrodynamisme et la régularité de vos battements.",
+            'musculation' => "Priorisez la forme d'exécution avant la charge. N'oubliez pas le cardio.",
+            'athletisme' => "Le travail de foulée et la gestion du souffle sont vos priorités.",
+            'sport' => "Visez la régularité : 3 séances par semaine est l'idéal pour progresser."
+        ];
+
+        $baseTip = $tips[$sport] ?? $tips['sport'];
+
         if ($moyenne < 10) {
-            return "Visez la régularité : 3 séances par semaine est l'idéal pour progresser rapidement. Chaque entraînement compte !";
+            return $baseTip . " Commencez par des bases solides.";
         } elseif ($moyenne < 15) {
-            return "Variez les intensités : alternez séances légères (récupération) et séances intenses pour stimuler votre progression.";
+            return $baseTip . " Variez les intensités pour franchir un palier.";
         }
-        return "Optimisez votre récupération : sommeil de qualité, nutrition adaptée et étirements sont vos meilleurs alliés à ce niveau.";
+        return $baseTip . " Optimisez votre récupération pour maintenir ce niveau expert.";
     }
 
     private function getMotivation(float $moyenne): string

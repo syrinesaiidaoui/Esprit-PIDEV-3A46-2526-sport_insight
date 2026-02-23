@@ -52,4 +52,16 @@ class AiCoachController extends AbstractController
             ], 500);
         }
     }
+
+    #[Route('/front/coach/api/food-search', name: 'front_ai_food_search_api')]
+    public function searchFood(Request $request, NutritionService $nutritionService): JsonResponse
+    {
+        $q = $request->query->get('q', '');
+        if (empty($q)) {
+            return new JsonResponse(['error' => 'Veuillez entrer un aliment.'], 400);
+        }
+
+        $data = $nutritionService->findNutrition($q);
+        return new JsonResponse($data);
+    }
 }

@@ -12,8 +12,24 @@ class NutritionService
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        // API Ninjas free key — get yours at https://api-ninjas.com/
+        // Using the API Ninjas key
         $this->apiKey = 'H1lpa2vrpr1et07YB7738cCBzCWYEXYNaF0DLzEy';
+    }
+
+    private function matchSport(string $type): string
+    {
+        $type = strtolower(trim($type));
+        if (str_contains($type, 'foot')) return 'football';
+        if (str_contains($type, 'basket')) return 'basketball';
+        if (str_contains($type, 'tenn')) return 'tennis';
+        if (str_contains($type, 'nata') || str_contains($type, 'swim')) return 'natation';
+        if (str_contains($type, 'muscu') || str_contains($type, 'physique') || str_contains($type, 'body')) return 'musculation';
+        if (str_contains($type, 'athle') || str_contains($type, 'course') || str_contains($type, 'run')) return 'athletisme';
+        if (str_contains($type, 'vel') || str_contains($type, 'cycl')) return 'cyclisme';
+        if (str_contains($type, 'box')) return 'boxe';
+        if (str_contains($type, 'yoga') || str_contains($type, 'pilat')) return 'yoga';
+        
+        return $type;
     }
 
     /**
@@ -54,10 +70,13 @@ class NutritionService
             'natation' => ['protein' => 28, 'carbs' => 52, 'fat' => 20],
             'musculation' => ['protein' => 40, 'carbs' => 35, 'fat' => 25],
             'athletisme' => ['protein' => 25, 'carbs' => 55, 'fat' => 20],
+            'cyclisme' => ['protein' => 20, 'carbs' => 65, 'fat' => 15],
+            'boxe' => ['protein' => 35, 'carbs' => 45, 'fat' => 20],
+            'yoga' => ['protein' => 20, 'carbs' => 50, 'fat' => 30],
         ];
 
-        $type = strtolower(trim($type));
-        $profile = $sportProfiles[$type] ?? ['protein' => 30, 'carbs' => 45, 'fat' => 25];
+        $matchedType = $this->matchSport($type);
+        $profile = $sportProfiles[$matchedType] ?? ['protein' => 30, 'carbs' => 45, 'fat' => 25];
 
         // Adjust for physical score
         if ($p < 10) {
@@ -258,6 +277,54 @@ class NutritionService
     }
 
     /**
+     * Search specific food nutrition
+     */
+    public function findNutrition(string $query): ?array
+    {
+        if (empty($this->apiKey) || empty($query)) {
+            return [];
+        }
+
+        // Basic translation for French users
+        $translations = [
+            'poulet' => 'chicken',
+            'oeuf' => 'egg',
+            'oeufs' => 'eggs',
+            'viande' => 'meat',
+            'poisson' => 'fish',
+            'riz' => 'rice',
+            'pates' => 'pasta',
+            'pomme' => 'apple',
+            'banane' => 'banana',
+            'lait' => 'milk',
+            'pain' => 'bread',
+            'beurre' => 'butter',
+            'fromage' => 'cheese',
+        ];
+
+        $searchQuery = strtolower(trim($query));
+        foreach ($translations as $fr => $en) {
+            $searchQuery = str_replace($fr, $en, $searchQuery);
+        }
+
+        try {
+            $response = $this->client->request('GET', 'https://api.api-ninjas.com/v1/nutrition', [
+                'headers' => ['X-Api-Key' => $this->apiKey],
+                'query' => ['query' => $searchQuery],
+                'timeout' => 8,
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                // API Ninjas v1/nutrition returns a flat JSON array directly
+                return $response->toArray();
+            }
+            return [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
      * Try to fetch real nutrition data from API Ninjas (CalorieNinjas)
      */
     private function fetchFoodNutrition(string $type): ?array
@@ -267,29 +334,26 @@ class NutritionService
         }
 
         $sportFoods = [
-            'football' => 'chicken breast and brown rice',
-            'basketball' => 'pasta with turkey',
-            'tennis' => 'salmon with quinoa',
-            'natation' => 'oatmeal with banana',
-            'musculation' => 'eggs and sweet potato',
-            'athletisme' => 'chicken and pasta',
+            'football' => '200g chicken breast, 150g brown rice, broccoli',
+            'basketball' => '200g turkey breast, 200g whole wheat pasta',
+            'tennis' => '150g salmon fillet, 100g quinoa, asparagus',
+            'natation' => 'bowl of oatmeal, 1 banana, honey, 2 eggs',
+            'musculation' => '250g grilled beef, 200g sweet potato, spinach',
+            'athletisme' => '150g chicken breast, 200g pasta, 1 apple',
+            'cyclisme' => '300g pasta with tomato sauce, 1 banana',
+            'boxe' => '200g lean beef, 1 cup of brown rice, salad',
+            'yoga' => 'avocado toast with 2 poached eggs, green smoothie',
         ];
 
-        $query = $sportFoods[strtolower(trim($type))] ?? 'chicken breast and rice';
-
-        try {
-            $response = $this->client->request('GET', 'https://api.api-ninjas.com/v1/nutrition', [
-                'headers' => ['X-Api-Key' => $this->apiKey],
-                'query' => ['query' => $query],
-                'timeout' => 8,
-            ]);
-
-            if ($response->getStatusCode() === 200) {
-                return $response->toArray();
-            }
-            return null;
-        } catch (\Exception $e) {
-            return null;
+        $matchedType = $this->matchSport($type);
+        // If it matched a known sport, use the predefined query. 
+        // Otherwise, assume the user might have entered a food query directly.
+        $query = $sportFoods[$matchedType] ?? $type;
+        
+        if (empty($query)) {
+            $query = '200g chicken breast and 150g rice';
         }
+
+        return $this->findNutrition($query);
     }
 }

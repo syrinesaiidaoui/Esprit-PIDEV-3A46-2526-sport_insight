@@ -1406,6 +1406,67 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     .meals-grid { grid-template-columns: 1fr; }
     .supplements-grid { grid-template-columns: 1fr; }
   }
+
+  /* Interactive Food Calculator */
+  .food-calculator {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    color: white;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+  }
+  .food-calc-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .food-calc-form {
+    display: flex;
+    gap: 12px;
+  }
+  .food-calc-input {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .food-calc-input:focus {
+    background: rgba(255,255,255,0.15);
+    border-color: #22c55e;
+  }
+  .food-calc-btn {
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .food-calc-btn:hover { background: #16a34a; transform: translateY(-1px); }
+  .food-results-area {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .food-calc-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    display: block;
+  }
 </style>
 
 <div id="aiModal" class="modal-overlay">
@@ -1482,7 +1543,21 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
           <div class="nutri-loading-spinner"></div>
           <div style="font-size:14px; font-weight:600; color:#b45309;">Préparation de ton plan nutrition...</div>
         </div>
-        <div id="nutritionContent" style="display:none;"></div>
+        <div id="nutritionContent" style="display:none;">
+          <!-- Food Calculator -->
+          <div class="food-calculator">
+            <div class="food-calc-title">🧪 Calculateur d'Aliments</div>
+            <div class="food-calc-form">
+              <input type="text" id="foodSearchInput" class="food-calc-input" placeholder="Ex: 3 oeufs, 100g de poulet, une banane...">
+              <button type="button" class="food-calc-btn" onclick="searchSpecificFood()">Calculer</button>
+            </div>
+            <small class="food-calc-hint">Astuce: Entrez les quantités pour plus de précision (ex: "200g riz").</small>
+            
+            <div id="foodSearchResults" class="food-results-area"></div>
+          </div>
+          
+          <div id="nutritionMainBody"></div>
+        </div>
       </div>
 
       <!-- Tips Tab -->
@@ -1730,6 +1805,46 @@ function loadNutritionData() {
     });
 }
 
+function searchSpecificFood() {
+  const input = document.getElementById('foodSearchInput');
+  const resultsArea = document.getElementById('foodSearchResults');
+  const query = input.value.trim();
+  
+  if (!query) return;
+  
+  const btn = document.querySelector('.food-calc-btn');
+  const originalText = btn.textContent;
+  btn.textContent = '...';
+  btn.disabled = true;
+  resultsArea.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.6);">Recherche en cours...</div>';
+
+  fetch(`/front/coach/api/food-search?q=${encodeURIComponent(query)}`)
+    .then(r => r.json())
+    .then(data => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      
+      // Handle both array and {items: []} formats just in case
+      const items = Array.isArray(data) ? data : (data.items || []);
+      
+      if (!items || items.length === 0) {
+        resultsArea.innerHTML = '<div style="font-size:12px; color:#94a3b8;">Aucun résultat trouvé pour cet aliment. Essayez un terme plus simple ou en anglais (ex: "100g steak").</div>';
+        return;
+      }
+      
+      let html = '';
+      items.forEach(food => {
+        html += renderApiFoodCard(food);
+      });
+      resultsArea.innerHTML = html;
+    })
+    .catch(() => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      resultsArea.innerHTML = '<div style="color:#f87171; font-size:12px;">Erreur lors de la recherche.</div>';
+    });
+}
+
 function renderNutrition(data) {
   let html = '';
 
@@ -1927,7 +2042,7 @@ function renderNutrition(data) {
     </div>
   `;
 
-  document.getElementById('nutritionContent').innerHTML = html;
+  document.getElementById('nutritionMainBody').innerHTML = html;
 
   // Animate macro bars
   setTimeout(() => {
@@ -1935,6 +2050,45 @@ function renderNutrition(data) {
       bar.style.width = bar.dataset.width;
     });
   }, 100);
+}
+
+// Extracted for reuse
+function renderApiFoodCard(food) {
+  const maxProtein = 50, maxCarbs = 80, maxFat = 40;
+  
+  // Try multiple common key names / fallbacks
+  const protein  = parseFloat(food.protein_g ?? food.protein ?? 0);
+  const carbs    = parseFloat(food.carbohydrates_total_g ?? food.carbohydrates ?? 0);
+  const fat      = parseFloat(food.fat_total_g ?? food.fat ?? 0);
+  const calories = parseFloat(food.calories ?? 0);
+  const serving  = parseFloat(food.serving_size_g ?? 100);
+
+  return `
+    <div class="api-food-card" style="border: 1px solid #e2e8f0; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+      <div class="api-food-name" style="color: #1e293b; font-size: 16px;">${food.name}</div>
+      <div class="api-food-serving">Portion analysée : ${serving}g</div>
+      <div class="api-food-calories">
+        <span style="font-size:18px;">🔥</span>
+        <span class="cal-val">${Math.round(calories)}</span>
+        <span class="cal-label">kcal</span>
+      </div>
+      <div class="api-nutrient-row">
+        <span class="api-nutrient-name">🥩 Protéines</span>
+        <span class="api-nutrient-value" style="color:#1e293b;">${protein.toFixed(1)}g</span>
+      </div>
+      <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#ef4444; width:${Math.min(protein / maxProtein * 100, 100)}%"></div></div>
+      <div class="api-nutrient-row">
+        <span class="api-nutrient-name">🌾 Glucides</span>
+        <span class="api-nutrient-value" style="color:#1e293b;">${carbs.toFixed(1)}g</span>
+      </div>
+      <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#f59e0b; width:${Math.min(carbs / maxCarbs * 100, 100)}%"></div></div>
+      <div class="api-nutrient-row">
+        <span class="api-nutrient-name">🥑 Lipides</span>
+        <span class="api-nutrient-value" style="color:#1e293b;">${fat.toFixed(1)}g</span>
+      </div>
+      <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#22c55e; width:${Math.min(fat / maxFat * 100, 100)}%"></div></div>
+    </div>
+  `;
 }
 
 function closeAiModal() {
