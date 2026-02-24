@@ -212,69 +212,38 @@
             
             const imageData = canvas.toDataURL('image/jpeg');
 
-            const fetchUrl = '{{ path('app_commentaire_verify_face') }}';
-            console.log("Fetching Face Verification from:", fetchUrl);
-
-            fetch(fetchUrl, {
+            fetch('{{ path('app_commentaire_verify_face') }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: imageData })
             })
-            .then(res => {
-                if (!res.ok) {
-                    return res.text().then(text => {
-                        console.error("Server Error Response:", text);
-                        throw new Error(`Server returned ${res.status}: ${text.substring(0, 100)}`);
-                    });
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
                 loading.style.display = 'none';
                 if (data.verified) {
                     success.style.display = 'block';
-                    if (data.message) {
-                        success.innerHTML = `✅ ${data.message}`;
-                    } else {
-                        success.innerHTML = `✅ Identité vérifiée avec succès ! Vous pouvez publier.`;
-                    }
+                    success.innerHTML = `✅ ${data.message || 'Identité vérifiée avec succès !'}`;
+                    
                     submitBtn.disabled = false;
                     submitBtn.style.opacity = '1';
                     submitBtn.style.cursor = 'pointer';
                     verifiedInput.value = "1";
+
+                    // Stop camera
                     if (videoStream) {
                         videoStream.getTracks().forEach(track => track.stop());
                     }
                     document.getElementById('camera_container').style.display = 'none';
+                    document.getElementById('start_camera_btn').style.display = 'none';
                 } else {
                     errorView.style.display = 'block';
-                    if (data.error && (data.error.includes('127.0.0.1:8001') || data.error.includes('Face++'))) {
-                        errorView.innerHTML = `❌ Erreur: ${data.error}`;
-                    } else {
-                        errorView.innerHTML = `❌ Échec: ${data.error || 'Visage non reconnu'}`;
-                    }
+                    errorView.innerHTML = `❌ ${data.error || 'Visage non reconnu'}`;
                 }
             })
             .catch(err => {
                 loading.style.display = 'none';
                 errorView.style.display = 'block';
-                
-                let errorMsg = err.message || 'Connexion impossible';
-                if (errorMsg.includes('Photo de profil absente') || errorMsg.includes('profil n\'a pas de photo')) {
-                    errorView.innerHTML = `❌ ${errorMsg.split(':')[1] || errorMsg} <br><br> <a href="{{ path('app_profile_edit') }}" class="btn btn-sm btn-primary" style="color:white; text-decoration:none; margin-top:8px; display:inline-block;">Go to my Profile 👤</a>`;
-                } else if (err.message && err.message.includes('{')) {
-                    try {
-                        const jsonErr = JSON.parse(err.message.substring(err.message.indexOf('{')));
-                        errorView.innerHTML = `❌ Erreur: ${jsonErr.error || 'Erreur inconnue'}`;
-                        if (jsonErr.error && (jsonErr.error.includes('profil') || jsonErr.error.includes('Photo'))) {
-                             errorView.innerHTML += `<br><br> <a href="{{ path('app_profile_edit') }}" class="btn btn-sm btn-primary" style="color:white; text-decoration:none; margin-top:8px; display:inline-block;">Go to my Profile 👤</a>`;
-                        }
-                    } catch(e) {
-                        errorView.innerHTML = `❌ Erreur technique: ${err.message}`;
-                    }
-                } else {
-                    errorView.innerHTML = `❌ Erreur technique: ${err.message}`;
-                }
+                errorView.innerHTML = `❌ Erreur technique : ${err.message}`;
             });
         }
 

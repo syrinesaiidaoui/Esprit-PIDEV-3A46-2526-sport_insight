@@ -22,37 +22,49 @@ async def verify_face(
     reference_image_path: str = Form(...)
 ):
     try:
-        # 1. Save captured image from base64
+        # 1. Validate and prep captured image
+        if "," in captured_image_base64:
+            header, encoded = captured_image_base64.split(",", 1)
+        else:
+            encoded = captured_image_base64
+
+        # Use a unique filename for concurrent requests if needed, but for local single user, captured.jpg is fine
         captured_path = os.path.join(TEMP_DIR, "captured.jpg")
-        header, encoded = captured_image_base64.split(",", 1)
+        
         with open(captured_path, "wb") as f:
             f.write(base64.b64decode(encoded))
 
-        # 2. Perform verification using DeepFace
-        # We use 'VGG-Face' or 'Facenet' for performance/accuracy balance
+        # 2. Check if reference image exists
+        if not os.path.exists(reference_image_path):
+            return {"verified": False, "error": f"Reference image not found at {reference_image_path}"}
+
+        # 3. Perform verification using DeepFace
+        # VGG-Face is usually pre-installed/accessible and reliable
         result = DeepFace.verify(
             img1_path=captured_path,
             img2_path=reference_image_path,
             enforce_detection=True,
             model_name="VGG-Face",
-            detector_backend="opencv"
+            detector_backend="opencv",
+            align=True
         )
 
         logger.info(f"Verification result: {result['verified']} (Distance: {result['distance']})")
 
         return {
-            "verified": result["verified"],
-            "distance": result["distance"],
-            "threshold": result["threshold"],
+            "verified": bool(result["verified"]),
+            "distance": float(result["distance"]),
+            "threshold": float(result["threshold"]),
             "model": result["model"],
             "detector_backend": result["detector_backend"]
         }
 
     except Exception as e:
-        logger.error(f"Error during verification: {str(e)}")
+        error_msg = str(e)
+        logger.error(f"Error during verification: {error_msg}")
         return {
             "verified": False,
-            "error": str(e)
+            "error": error_msg
         }
 
 if __name__ == "__main__":

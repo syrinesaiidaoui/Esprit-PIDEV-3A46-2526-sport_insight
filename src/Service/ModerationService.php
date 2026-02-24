@@ -22,57 +22,39 @@ class ModerationService
     public function verifyFace(string $capturedBase64, string $referencePath): array
     {
         try {
-            $apiKey = $this->params->get('app.facepp_api_key');
-            $apiSecret = $this->params->get('app.facepp_api_secret');
+            // Local FastAPI endpoint (running via scripts/face_api.py)
+            $apiUrl = 'http://127.0.0.1:8001/verify';
 
-            if ($apiKey === 'your_api_key_here' || empty($apiKey)) {
-                // FALLBACK: If we are in dev mode, allow a "Mock" success to avoid blocking the user
-                $env = $this->params->get('kernel.environment');
-                if ($env === 'dev') {
-                    return [
-                        'verified' => true,
-                        'message' => 'MODE DÉVELOPPEMENT : Vérification simulée (Face++ non configuré)',
-                        'confidence' => 100,
-                        'threshold' => 75
-                    ];
-                }
-
-                return [
-                    'verified' => false,
-                    'error' => 'Face++ API Key non configurée dans le .env',
-                ];
-            }
-
-            // Remove header from base64 if present (e.g. "data:image/jpeg;base64,")
-            if (strpos($capturedBase64, ',') !== false) {
-                $capturedBase64 = explode(',', $capturedBase64)[1];
-            }
-
-            $response = $this->httpClient->request('POST', 'https://api-cn.faceplusplus.com/facepp/v3/compare', [
+            // Check if service is up (optional, but good for error messaging)
+            $response = $this->httpClient->request('POST', $apiUrl, [
                 'body' => [
-                    'api_key' => $apiKey,
-                    'api_secret' => $apiSecret,
-                    'image_base64_1' => $capturedBase64,
-                    'image_base64_2' => base64_encode(file_get_contents($referencePath)),
+                    'captured_image_base64' => $capturedBase64,
+                    'reference_image_path' => $referencePath,
                 ],
             ]);
 
             $data = $response->toArray();
 
-            // Face++ returns a confidence score (0 to 100)
-            // Typically thresholds are: 1e-3: 65.3, 1e-4: 73.9, 1e-5: 80.7
-            $confidence = $data['confidence'] ?? 0;
-            $threshold = $data['thresholds']['1e-4'] ?? 73.9;
-
             return [
-                'verified' => $confidence >= $threshold,
-                'confidence' => $confidence,
-                'threshold' => $threshold,
+                'verified' => $data['verified'] ?? false,
+                'confidence' => isset($data['distance']) ? (1 - $data['distance']) * 100 : 0, // Mock confidence
+                'threshold' => isset($data['threshold']) ? $data['threshold'] : 0,
+                'error' => $data['error'] ?? null,
+                'message' => ($data['verified'] ?? false) ? 'Identité vérifiée via local AI' : ($data['error'] ?? 'Visage non reconnu'),
             ];
         } catch (\Exception $e) {
+            // Check for connection error to suggest starting the Python service
+            $errorMsg = $e->getMessage();
+            if (str_contains($errorMsg, '127.0.0.1:8001')) {
+                return [
+                    'verified' => false,
+                    'error' => 'Le service de reconnaissance faciale est hors ligne. (Avez-vous lancé "python scripts/face_api.py" ?)',
+                ];
+            }
+
             return [
                 'verified' => false,
-                'error' => 'Erreur Face++ : ' . $e->getMessage(),
+                'error' => 'Erreur technique : ' . $errorMsg,
             ];
         }
     }
