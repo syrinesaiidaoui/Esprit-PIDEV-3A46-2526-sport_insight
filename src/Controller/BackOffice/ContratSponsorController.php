@@ -71,8 +71,24 @@ final class ContratSponsorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle optional sponsor logo upload from contract form
+            $uploadedLogo = $form->get('sponsorLogoFile')->getData();
+            if ($uploadedLogo) {
+                $sponsor = $contratSponsor->getSponsor();
+                if ($sponsor) {
+                    $sponsor->setLogoFile($uploadedLogo);
+                    // Mettre à jour la date de modification
+                    $sponsor->setUpdatedAt(new \DateTimeImmutable());
+                    $entityManager->persist($sponsor);
+                }
+            }
+
             $entityManager->persist($contratSponsor);
             $entityManager->flush();
+
+            if ($uploadedLogo) {
+                $this->addFlash('success', 'Logo téléchargé avec succès');
+            }
 
             $referer = $request->headers->get('referer', '');
             $route = str_contains($referer, '/admin') ? 'back_sponsoring_index' : 'front_sponsoring_index';
@@ -97,11 +113,34 @@ final class ContratSponsorController extends AbstractController
     #[Route('/{id}/edit', name: 'app_contrat_sponsor_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, ContratSponsor $contratSponsor, EntityManagerInterface $entityManager): Response
     {
+        // Stocker l'ancien nom du logo pour comparaison
+        $originalLogoName = $contratSponsor->getSponsor() ? $contratSponsor->getSponsor()->getLogoName() : null;
+        
         $form = $this->createForm(ContratSponsorType::class, $contratSponsor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle optional sponsor logo upload from contract edit form
+            $uploadedLogo = $form->get('sponsorLogoFile')->getData();
+            if ($uploadedLogo) {
+                $sponsor = $contratSponsor->getSponsor();
+                if ($sponsor) {
+                    $sponsor->setLogoFile($uploadedLogo);
+                    // Mettre à jour la date de modification
+                    $sponsor->setUpdatedAt(new \DateTimeImmutable());
+                    $entityManager->persist($sponsor);
+                }
+            }
+
             $entityManager->flush();
+
+            // Vérifier si le logo a été mis à jour
+            if ($uploadedLogo && $contratSponsor->getSponsor()) {
+                $newLogoName = $contratSponsor->getSponsor()->getLogoName();
+                if ($newLogoName && $newLogoName !== $originalLogoName) {
+                    $this->addFlash('success', 'Logo mis à jour: ' . $newLogoName);
+                }
+            }
 
             $referer = $request->headers->get('referer', '');
             $route = str_contains($referer, '/admin') ? 'back_sponsoring_index' : 'front_sponsoring_index';

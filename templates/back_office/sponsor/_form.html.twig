@@ -1,4 +1,4 @@
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}, 'multipart': true}) }}
     
     {# Afficher les erreurs globales du formulaire #}
     {% if form.vars.errors|length > 0 %}

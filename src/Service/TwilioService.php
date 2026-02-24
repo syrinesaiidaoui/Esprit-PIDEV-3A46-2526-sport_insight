@@ -12,16 +12,19 @@ class TwilioService
     private string $fromPhone;
     private ?Client $client = null;
     private LoggerInterface $logger;
+    private string $defaultCountry;
 
     public function __construct(
         string $sid,
         string $authToken,
         string $fromPhone,
+        string $defaultCountry = '',
         LoggerInterface $logger
     ) {
         $this->sid = $sid;
         $this->authToken = $authToken;
         $this->fromPhone = $fromPhone;
+        $this->defaultCountry = $defaultCountry ?: '+216';
         $this->logger = $logger;
     }
 
@@ -31,6 +34,11 @@ class TwilioService
     private function getClient(): Client
     {
         if (!$this->client) {
+            // Configure SSL certificate for Windows/PHP
+            if (file_exists('C:\php\cacert.pem')) {
+                ini_set('openssl.cafile', 'C:\php\cacert.pem');
+            }
+            
             $this->client = new Client($this->sid, $this->authToken);
         }
         return $this->client;
@@ -46,22 +54,25 @@ class TwilioService
     public function sendSms(string $toPhone, string $message): bool
     {
         try {
-            // Validate phone numbers
-            if (!$this->isValidPhone($toPhone)) {
-                $this->logger->warning("Invalid recipient phone number: {$toPhone}");
+            // Normalize and validate phone numbers
+            $normalizedTo = $this->normalizePhone($toPhone);
+            $normalizedFrom = $this->normalizePhone($this->fromPhone);
+
+            if (!$this->isValidPhone($normalizedTo)) {
+                $this->logger->warning("Invalid recipient phone number after normalization: {$toPhone} -> {$normalizedTo}");
                 return false;
             }
 
-            if (!$this->isValidPhone($this->fromPhone)) {
-                $this->logger->error("Invalid sender phone number configured: {$this->fromPhone}");
+            if (!$this->isValidPhone($normalizedFrom)) {
+                $this->logger->error("Invalid sender phone number configured: {$this->fromPhone} -> {$normalizedFrom}");
                 return false;
             }
 
             // Send SMS via Twilio
             $sms = $this->getClient()->messages->create(
-                $toPhone,
+                $normalizedTo,
                 [
-                    'from' => $this->fromPhone,
+                    'from' => $normalizedFrom,
                     'body' => $message,
                 ]
             );
@@ -106,5 +117,44 @@ class TwilioService
     {
         // E.164 format: + followed by 1-15 digits
         return preg_match('/^\+[1-9]\d{1,14}$/', $phone) === 1;
+    }
+
+    /**
+     * Try to normalize a phone number to E.164 using sensible defaults.
+     * - If already starts with + and digits, keep it (clean non-digits)
+     * - If it's local (e.g. 8 digits for Tunisia), prepend default country code
+     */
+    private function normalizePhone(string $phone): string
+    {
+        $phone = trim($phone);
+        if ($phone === '') {
+            return '';
+        }
+
+        // Keep leading + if present, remove other non-digits
+        if (strpos($phone, '+') === 0) {
+            $digits = preg_replace('/\D+/', '', $phone);
+            return '+' . $digits;
+        }
+
+        // Remove non-digits
+        $digits = preg_replace('/\D+/', '', $phone);
+
+        // Common local format: 8 digits (Tunisia) -> prepend default country
+        if (strlen($digits) === 8) {
+            return $this->defaultCountry . $digits;
+        }
+
+        // If starts with 0 and then 8 digits, strip leading 0 and prepend default
+        if (preg_match('/^0(\d{8})$/', $digits, $m)) {
+            return $this->defaultCountry . $m[1];
+        }
+
+        // Fallback: if looks like 9-15 digits, try to add +
+        if (preg_match('/^\d{9,15}$/', $digits)) {
+            return '+' . $digits;
+        }
+
+        return '';
     }
 }

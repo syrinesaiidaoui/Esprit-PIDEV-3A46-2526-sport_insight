@@ -16,10 +16,12 @@
                 <div class="sponsor-card">
                     <div class="sponsor-card-header">
                         {% if contrat.sponsor.logo %}
-                            <img src="{{ asset('uploads/sponsors/' ~ contrat.sponsor.logo) }}" 
-                                 alt="{{ contrat.sponsor.nom }}" 
-                                 class="sponsor-logo">
-                        {% else %}
+                            {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
+                            {% if logo %}
+                                <img src="{{ asset('uploads/logos/' ~ logo) }}" 
+                                     alt="{{ contrat.sponsor.nom }}" 
+                                     title="{{ contrat.sponsor.nom }}" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                            {% else %}
                             <div class="sponsor-logo-placeholder">
                                 {{ contrat.sponsor.nom | length > 0 ? contrat.sponsor.nom[0] : 'S' }}
                             </div>

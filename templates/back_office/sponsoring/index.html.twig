@@ -151,6 +151,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>Logo</th>
                     <th>Sponsor</th>
                     <th>Montant</th>
                     <th>Début</th>
@@ -164,6 +165,14 @@
                 {% if contrats|length > 0 %}
                     {% for contrat in contrats %}
                         <tr>
+                            <td>
+                                {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
+                                {% if logo %}
+                                    <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ contrat.sponsor.nom }}" style="height:40px; width:auto; object-fit:contain; border-radius:4px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                                {% else %}
+                                    <div style="height:40px; width:40px; display:flex; align-items:center; justify-content:center; background:#f3f4f6; border-radius:4px; color:#6b7280;">{{ contrat.sponsor.nom[0] ?? 'S' }}</div>
+                                {% endif %}
+                            </td>
                             <td><strong>{{ contrat.sponsor.nom }}</strong></td>
                             <td>{{ contrat.montant }} DT</td>
                             <td>{{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '-' }}</td>

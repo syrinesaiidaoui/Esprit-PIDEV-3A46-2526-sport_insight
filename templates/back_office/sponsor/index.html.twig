@@ -76,8 +76,9 @@
                         <tr>
 <<<<<<< HEAD
                             <td>
-                                {% if sponsor.logoName %}
-                                    <img src="{{ asset('uploads/sponsors/' ~ sponsor.logoName) }}" alt="{{ sponsor.nom }}" height="40" style="border-radius: 4px;">
+                                {% set logo = sponsor.logoName ?? sponsor.logo %}
+                                {% if logo %}
+                                    <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ sponsor.nom }}" height="40" style="border-radius: 4px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
                                 {% else %}
                                     <span class="badge badge-secondary">Aucun</span>
                                 {% endif %}

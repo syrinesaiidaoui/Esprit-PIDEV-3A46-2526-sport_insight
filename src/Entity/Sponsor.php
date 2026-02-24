@@ -58,8 +58,12 @@ class Sponsor
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $logoName = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $adresse = null;
+    #[Vich\UploadableField(mapping: 'sponsor_logo', fileNameProperty: 'logoName')]
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
@@ -146,11 +150,26 @@ class Sponsor
     public function setLogoFile(?File $file = null): void
     {
         $this->logoFile = $file;
+        if (null !== $file) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
     }
 
     public function getLogoFile(): ?File
     {
         return $this->logoFile;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 
     public function getLogo(): ?string

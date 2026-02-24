@@ -24,6 +24,7 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\TwilioService:
         arguments:
-            $side: '%env(TWILIO_SID)%'
+            $sid: '%env(TWILIO_SID)%'
             $authToken: '%env(TWILIO_AUTH_TOKEN)%'
             $fromPhone: '%env(TWILIO_PHONE)%'
+            $defaultCountry: '%env(TWILIO_DEFAULT_COUNTRY)%'

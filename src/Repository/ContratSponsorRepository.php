@@ -63,10 +63,10 @@ class ContratSponsorRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find contracts expiring within N days (for upcoming expiration alerts)
+     * Find contracts expiring within N days (for upcoming expiration alerts) + already expired contracts
      *
      * @param int $days Number of days ahead to check
-     * @return ContratSponsor[] Array of contracts soon to expire
+     * @return ContratSponsor[] Array of contracts expired or expiring soon
      */
     public function findExpiringWithinDays(int $days = 7): array
     {
@@ -77,12 +77,8 @@ class ContratSponsorRepository extends ServiceEntityRepository
             ->addSelect('s', 'e')
             ->innerJoin('c.sponsor', 's')
             ->innerJoin('c.equipe', 'e')
-            ->where('c.dateFin > :today')
-            ->andWhere('c.dateFin <= :future')
-            ->andWhere('c.statut != :expired')
-            ->setParameter('today', $today->format('Y-m-d'))
+            ->where('c.dateFin <= :future')
             ->setParameter('future', $futureDate->format('Y-m-d'))
-            ->setParameter('expired', 'Expiré')
             ->orderBy('c.dateFin', 'ASC')
             ->getQuery()
             ->getResult();

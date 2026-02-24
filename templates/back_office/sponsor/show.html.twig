@@ -31,19 +31,17 @@
                         <th>Budget</th>
                         <td><strong>{{ sponsor.budget }}€</strong></td>
                     </tr>
-<<<<<<< HEAD
                     <tr>
                         <th>Logo</th>
                         <td>
-                            {% if sponsor.logoName %}
-                                <img src="{{ asset('uploads/sponsors/' ~ sponsor.logoName) }}" alt="{{ sponsor.nom }}" width="100" style="border-radius: 6px;">
+                            {% set logo = sponsor.logoName ?? sponsor.logo %}
+                            {% if logo %}
+                                <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ sponsor.nom }}" width="100" style="border-radius: 6px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
                             {% else %}
                                 <span class="text-muted">Aucun logo</span>
                             {% endif %}
                         </td>
                     </tr>
-=======
->>>>>>> origin/rym-sponsoring
                 </tbody>
             </table>
         </div>

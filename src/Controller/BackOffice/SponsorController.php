@@ -49,22 +49,19 @@ final class SponsorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gérer l'upload du logo
-            $logoFile = $request->files->get('sponsor')['logoFile'] ?? null;
-            if ($logoFile) {
-                $originalFilename = pathinfo($logoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename)->toString();
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$logoFile->guessExtension();
-                
-                $logoFile->move(
-                    $this->getParameter('kernel.project_dir').'/public/uploads/sponsors',
-                    $newFilename
-                );
-                
-                $sponsor->setLogoName($newFilename);
+            // If a file was uploaded ensure it's passed to the entity (mapped field usually does this)
+            $uploaded = $form->get('logoFile')->getData();
+            if ($uploaded) {
+                $sponsor->setLogoFile($uploaded);
+                $entityManager->persist($sponsor);
             }
+
             $entityManager->persist($sponsor);
             $entityManager->flush();
+
+            if ($uploaded) {
+                $this->addFlash('success', 'Logo téléchargé: ' . $sponsor->getLogoName());
+            }
 
             return $this->redirectToRoute('app_sponsor_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -86,25 +83,30 @@ final class SponsorController extends AbstractController
     #[Route('/{id}/edit', name: 'app_sponsor_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Sponsor $sponsor, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
+        // Stocker l'ancien nom du logo pour comparaison
+        $originalLogoName = $sponsor->getLogoName();
+        
         $form = $this->createForm(SponsorType::class, $sponsor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gérer l'upload du logo
-            $logoFile = $request->files->get('sponsor')['logoFile'] ?? null;
-            if ($logoFile) {
-                $originalFilename = pathinfo($logoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename)->toString();
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$logoFile->guessExtension();
-                
-                $logoFile->move(
-                    $this->getParameter('kernel.project_dir').'/public/uploads/sponsors',
-                    $newFilename
-                );
-                
-                $sponsor->setLogoName($newFilename);
+            $uploaded = $form->get('logoFile')->getData();
+            
+            if ($uploaded) {
+                // Nouveau fichier téléchargé - le définir pour le traitement par VichUploader
+                $sponsor->setLogoFile($uploaded);
+                // Mettre à jour la date de modification
+                $sponsor->setUpdatedAt(new \DateTimeImmutable());
             }
+
+            // Sauvegarder les modifications
             $entityManager->flush();
+
+            // Vérifier si le logo a été mis à jour
+            $newLogoName = $sponsor->getLogoName();
+            if ($uploaded && $newLogoName && $newLogoName !== $originalLogoName) {
+                $this->addFlash('success', 'Logo mis à jour: ' . $newLogoName);
+            }
 
             return $this->redirectToRoute('app_sponsor_index', [], Response::HTTP_SEE_OTHER);
         }

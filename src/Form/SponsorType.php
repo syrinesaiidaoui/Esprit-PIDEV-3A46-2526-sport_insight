@@ -51,7 +51,7 @@ class SponsorType extends AbstractType
             ->add('logoFile', FileType::class, [
                 'label' => 'Logo du sponsor',
                 'required' => false,
-                'mapped' => false,
+                'mapped' => true,
             ])
         ;
     }

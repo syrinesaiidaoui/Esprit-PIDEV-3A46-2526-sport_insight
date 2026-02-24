@@ -8,6 +8,20 @@
             <h1>Éditer le sponsor "{{ sponsor.nom }}"</h1>
         </div>
 
+        {# Afficher le logo actuel #}
+        <div class="card form-card" style="margin-bottom: 20px;">
+            <h3>Logo actuel</h3>
+            {% set logo = sponsor.logoName ?? sponsor.logo %}
+            {% if logo %}
+                <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ sponsor.nom }}" width="150" style="border-radius: 6px; border: 1px solid #ddd;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+            {% else %}
+                <p class="text-muted">Aucun logo</p>
+            {% endif %}
+            <p style="margin-top: 10px; font-size: 14px; color: var(--text-muted);">
+                <i class="lucide-info"></i> Téléchargez un nouveau logo pour le remplacer
+            </p>
+        </div>
+
         <div class="card form-card">
             {{ include('back_office/sponsor/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
         </div>

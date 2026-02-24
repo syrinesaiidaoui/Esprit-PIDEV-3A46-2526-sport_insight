@@ -24,11 +24,12 @@
                 {% for contrat in sponsors_contrats %}
                     <div class="sponsor-item">
                         <div class="sponsor-item-logo">
-                            {% if contrat.sponsor.logo %}
-                                <img src="{{ asset('uploads/sponsors/' ~ contrat.sponsor.logo) }}" 
-                                     alt="{{ contrat.sponsor.nom }}" 
-                                     title="{{ contrat.sponsor.nom }}">
-                            {% else %}
+                                {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
+                                {% if logo %}
+                                    <img src="{{ asset('uploads/logos/' ~ logo) }}" 
+                                         alt="{{ contrat.sponsor.nom }}" 
+                                         title="{{ contrat.sponsor.nom }}" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                                {% else %}
                                 <div class="sponsor-placeholder">
                                     {{ contrat.sponsor.nom[0] ?? 'S' }}
                                 </div>

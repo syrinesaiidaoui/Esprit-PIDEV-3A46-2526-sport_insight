@@ -13,7 +13,7 @@ use App\Repository\ContratSponsorRepository;
 class SponsoringController extends AbstractController
 {
     #[Route('/', name: 'front_sponsoring_index')]
-    public function index(Request $request, SponsorRepository $sponsorRepository, ContratSponsorRepository $contratSponsorRepository): Response
+    public function index(Request $request, SponsorRepository $sponsorRepository, ContratSponsorRepository $contratSponsorRepository, \Knp\Component\Pager\PaginatorInterface $paginator): Response
     {
         $sponsors = $sponsorRepository->findAll();
 
@@ -30,7 +30,7 @@ class SponsoringController extends AbstractController
         }
 
         if ($sponsorNom || $dateDebutObj) {
-            $contrats = $contratSponsorRepository->searchContrats($sponsorNom, $dateDebutObj);
+            $query = $contratSponsorRepository->searchContrats($sponsorNom, $dateDebutObj);
         } else {
             $qb = $contratSponsorRepository->createQueryBuilder('c')
                 ->addSelect('s')
@@ -38,12 +38,18 @@ class SponsoringController extends AbstractController
                 ->innerJoin('c.sponsor', 's')
                 ->innerJoin('c.equipe', 'e')
                 ->orderBy('c.dateDebut', 'DESC');
-            $contrats = $qb->getQuery()->getResult();
+            $query = $qb->getQuery();
         }
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            2 // items per page
+        );
 
         return $this->render('front_office/sponsoring/index.html.twig', [
             'sponsors' => $sponsors,
-            'contrats' => $contrats,
+            'contrats' => $pagination,
             'sponsor_nom' => $sponsorNom,
             'date_debut' => $dateDebut,
         ]);

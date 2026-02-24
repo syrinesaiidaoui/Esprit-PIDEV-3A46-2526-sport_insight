@@ -39,6 +39,11 @@ class ContractExpirationCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        // Allow this command to run longer than PHP's default 30s limit
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(0);
+        }
+
         $today = new \DateTime();
         $daysAhead = (int) $input->getOption('days-ahead');
         $dryRun = $input->getOption('dry-run');
@@ -77,13 +82,22 @@ class ContractExpirationCommand extends Command
                 continue;
             }
 
-            // Prepare SMS message
-            $smsMessage = sprintf(
-                "Alerte: Contrat %s avec %s a expiré le %s. Veuillez contacter l'administrateur.",
-                $contractNumber,
-                $sponsorName,
-                $expirationDate
-            );
+            // Prepare SMS message based on expiration status
+            $today = new \DateTime();
+            $contractEndDate = $contrat->getDateFin();
+            
+            if ($contractEndDate < $today) {
+                // Contract is already expired
+                $smsMessage = "Le contrat est expiré";
+            } else {
+                // Contract is expiring soon
+                $smsMessage = sprintf(
+                    "Alerte: Contrat %s avec %s expire le %s. Veuillez contacter l'administrateur.",
+                    $contractNumber,
+                    $sponsorName,
+                    $expirationDate
+                );
+            }
 
             // Send SMS or simulate
             if ($dryRun) {

@@ -32,9 +32,10 @@
                         <div class="sponsor-card-header">
                             {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
                             {% if logo %}
-                                <img src="{{ asset('uploads/sponsors/' ~ logo) }}" 
+                                <img src="{{ asset('uploads/logos/' ~ logo) }}" 
                                      alt="{{ contrat.sponsor.nom }}" 
-                                     class="sponsor-logo">
+                                     class="sponsor-logo"
+                                     onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
                             {% else %}
                                 <div class="sponsor-logo-placeholder">
                                     {{ contrat.sponsor.nom[0] ?? 'S' }}
@@ -66,6 +67,10 @@
                         </div>
                     </div>
                 {% endfor %}
+            </div>
+            
+            <div class="d-flex justify-content-center mt-4" style="display: flex; justify-content: center; margin-top: 2rem;">
+                {{ knp_pagination_render(contrats) }}
             </div>
         {% else %}
             <div class="alert alert-info" style="text-align: center; padding: 30px;">
