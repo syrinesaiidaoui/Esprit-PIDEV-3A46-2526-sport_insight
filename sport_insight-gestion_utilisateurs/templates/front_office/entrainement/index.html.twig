@@ -413,19 +413,41 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
 (() => {
   const input = document.getElementById('entrainement-search');
   const results = document.getElementById('entrainement-results');
-  if (!input || !results) return;
+  const sortBy = document.querySelector('select[name="sort_by"]');
+  const sortDir = document.querySelector('select[name="sort_dir"]');
+
+  if (!input || !results || !sortBy || !sortDir) return;
+  
   const url = '{{ path('front_entrainement_search') }}';
   let timer = null;
-  input.addEventListener('input', (e) => {
+
+  const refresh = () => {
+    const q = input.value;
+    const sBy = sortBy.value;
+    const sDir = sortDir.value;
+    const fullUrl = `${url}?q=${encodeURIComponent(q)}&sort_by=${sBy}&sort_dir=${sDir}`;
+    
+    // Add loading effect
+    results.style.opacity = '0.5';
+    
+    fetch(fullUrl)
+      .then(r => r.json())
+      .then(data => { 
+        results.innerHTML = data.html; 
+        results.style.opacity = '1';
+      })
+      .catch(() => {
+        results.style.opacity = '1';
+      });
+  };
+
+  input.addEventListener('input', () => {
     clearTimeout(timer);
-    timer = setTimeout(() => {
-      const q = input.value;
-      fetch(url + '?q=' + encodeURIComponent(q))
-        .then(r => r.json())
-        .then(data => { results.innerHTML = data.html; })
-        .catch(() => {});
-    }, 250);
+    timer = setTimeout(refresh, 250);
   });
+
+  sortBy.addEventListener('change', refresh);
+  sortDir.addEventListener('change', refresh);
 })();
 </script>
 
@@ -1723,10 +1745,22 @@ function renderExercises(exercises) {
         </div>
         <div class="exercise-card-body">
           <div class="exercise-card-name">${ex.name}</div>
-          <div class="exercise-card-desc">${ex.description}</div>
+          <div class="exercise-card-desc" style="margin-bottom:12px;">${ex.description}</div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #f1f5f9;">
+            <div style="font-size:11px; color:#64748b;">
+               <div style="font-weight:700; color:var(--text); font-size:12px;">${ex.sets || 'N/A'}</div>
+               <div style="text-transform:uppercase; letter-spacing:0.5px; font-size:9px;">Séries</div>
+            </div>
+            <div style="font-size:11px; color:#64748b; border-left:1px solid #e2e8f0; padding-left:8px;">
+               <div style="font-weight:700; color:var(--text); font-size:12px;">${ex.reps || 'N/A'}</div>
+               <div style="text-transform:uppercase; letter-spacing:0.5px; font-size:9px;">Répétitions</div>
+            </div>
+          </div>
+
           <div class="exercise-card-meta">
             <span class="exercise-meta-item">⏱️ ${ex.duration}</span>
-            <span class="exercise-meta-item">🔥 ${ex.intensity}</span>
+            <span class="exercise-meta-item">⚡ ${ex.intensity}</span>
           </div>
         </div>
       </div>
@@ -1990,44 +2024,7 @@ function renderNutrition(data) {
     html += `<p style="font-size:13px; color:#6b7280; margin-bottom:14px;">Valeurs nutritionnelles réelles pour les aliments recommandés, fournies par l'API Ninjas</p>`;
     html += `<div class="api-foods-grid">`;
     data.api_foods.forEach((food, i) => {
-      const maxProtein = 50, maxCarbs = 80, maxFat = 40;
-      const protein  = parseFloat(food.protein_g)            || 0;
-      const carbs    = parseFloat(food.carbohydrates_total_g) || 0;
-      const fat      = parseFloat(food.fat_total_g)          || 0;
-      const fiber    = parseFloat(food.fiber_g)              || 0;
-      const sugar    = parseFloat(food.sugar_g)              || 0;
-      const sodium   = parseFloat(food.sodium_mg)            || 0;
-      const calories = parseFloat(food.calories)             || 0;
-      const serving  = parseFloat(food.serving_size_g)       || 100;
-      html += `
-        <div class="api-food-card" style="animation-delay:${i * 0.08}s">
-          <div class="api-food-name">${food.name}</div>
-          <div class="api-food-serving">Portion : ${serving}g</div>
-          <div class="api-food-calories">
-            <span style="font-size:18px;">🔥</span>
-            <span class="cal-val">${Math.round(calories)}</span>
-            <span class="cal-label">kcal</span>
-          </div>
-          <div class="api-nutrient-row">
-            <span class="api-nutrient-name">🥩 Protéines</span>
-            <span class="api-nutrient-value">${protein.toFixed(1)}g</span>
-          </div>
-          <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#ef4444; width:${Math.min(protein / maxProtein * 100, 100)}%"></div></div>
-          <div class="api-nutrient-row">
-            <span class="api-nutrient-name">🌾 Glucides</span>
-            <span class="api-nutrient-value">${carbs.toFixed(1)}g</span>
-          </div>
-          <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#f59e0b; width:${Math.min(carbs / maxCarbs * 100, 100)}%"></div></div>
-          <div class="api-nutrient-row">
-            <span class="api-nutrient-name">🥑 Lipides</span>
-            <span class="api-nutrient-value">${fat.toFixed(1)}g</span>
-          </div>
-          <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#22c55e; width:${Math.min(fat / maxFat * 100, 100)}%"></div></div>
-          ${fiber > 0 ? `<div class="api-nutrient-row"><span class="api-nutrient-name">🌿 Fibres</span><span class="api-nutrient-value">${fiber.toFixed(1)}g</span></div>` : ''}
-          ${sugar > 0 ? `<div class="api-nutrient-row"><span class="api-nutrient-name">🍬 Sucres</span><span class="api-nutrient-value">${sugar.toFixed(1)}g</span></div>` : ''}
-          ${sodium > 0 ? `<div class="api-nutrient-row"><span class="api-nutrient-name">🧂 Sodium</span><span class="api-nutrient-value">${Math.round(sodium)}mg</span></div>` : ''}
-        </div>
-      `;
+      html += renderApiFoodCard(food, i);
     });
     html += `</div>`;
     html += `<div style="text-align:center;"><span class="api-badge"><span class="api-dot"></span> Données en temps réel — API Ninjas</span></div>`;
@@ -2053,40 +2050,60 @@ function renderNutrition(data) {
 }
 
 // Extracted for reuse
-function renderApiFoodCard(food) {
+function renderApiFoodCard(food, index = 0) {
   const maxProtein = 50, maxCarbs = 80, maxFat = 40;
   
-  // Try multiple common key names / fallbacks
-  const protein  = parseFloat(food.protein_g ?? food.protein ?? 0);
-  const carbs    = parseFloat(food.carbohydrates_total_g ?? food.carbohydrates ?? 0);
-  const fat      = parseFloat(food.fat_total_g ?? food.fat ?? 0);
-  const calories = parseFloat(food.calories ?? 0);
-  const serving  = parseFloat(food.serving_size_g ?? 100);
+  // Extremely robust key lookup for API Ninjas
+  const getVal = (keys) => {
+    for (const k of keys) {
+      if (food[k] !== undefined && food[k] !== null) return parseFloat(food[k]);
+    }
+    return 0;
+  };
+
+  const protein  = getVal(['protein_g', 'protein', 'protein_mg']);
+  const carbs    = getVal(['carbohydrates_total_g', 'carbohydrates', 'carbs_g', 'total_carbohydrates_g']);
+  const fat      = getVal(['fat_total_g', 'fat', 'lipids_g', 'total_fat_g']);
+  const calories = getVal(['calories', 'kcal', 'energy']);
+  const serving  = getVal(['serving_size_g', 'serving_size', 'weight_g']) || 100;
+  
+  // Extra specific for steak/chicken check
+  console.log('Food Item Data:', food.name, { protein, carbs, fat, calories });
 
   return `
-    <div class="api-food-card" style="border: 1px solid #e2e8f0; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
-      <div class="api-food-name" style="color: #1e293b; font-size: 16px;">${food.name}</div>
-      <div class="api-food-serving">Portion analysée : ${serving}g</div>
-      <div class="api-food-calories">
+    <div class="api-food-card" style="border: 1px solid #e2e8f0; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); animation-delay: ${index * 0.05}s;">
+      <div class="api-food-name" style="color: #1e293b; font-size: 16px; margin-bottom: 2px;">${food.name}</div>
+      <div class="api-food-serving" style="margin-bottom: 10px;">Portion : ${serving}g</div>
+      
+      <div class="api-food-calories" style="margin-bottom: 15px;">
         <span style="font-size:18px;">🔥</span>
-        <span class="cal-val">${Math.round(calories)}</span>
+        <span class="cal-val" style="font-size: 32px; color: #b45309;">${Math.round(calories)}</span>
         <span class="cal-label">kcal</span>
       </div>
+
       <div class="api-nutrient-row">
-        <span class="api-nutrient-name">🥩 Protéines</span>
-        <span class="api-nutrient-value" style="color:#1e293b;">${protein.toFixed(1)}g</span>
+        <span class="api-nutrient-name">🥩 <strong>Protéines</strong></span>
+        <span class="api-nutrient-value" style="color:#ef4444; font-weight: 800; font-size: 14px;">${protein.toFixed(1)}g</span>
       </div>
-      <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#ef4444; width:${Math.min(protein / maxProtein * 100, 100)}%"></div></div>
-      <div class="api-nutrient-row">
+      <div class="api-nutrient-bar" style="background: #fee2e2; height: 6px;">
+        <div class="api-nutrient-bar-fill" style="background:#ef4444; width:${Math.min((protein / maxProtein) * 100, 100)}%"></div>
+      </div>
+
+      <div class="api-nutrient-row" style="margin-top: 8px;">
         <span class="api-nutrient-name">🌾 Glucides</span>
-        <span class="api-nutrient-value" style="color:#1e293b;">${carbs.toFixed(1)}g</span>
+        <span class="api-nutrient-value" style="color:#1e293b; font-weight: 600;">${carbs.toFixed(1)}g</span>
       </div>
-      <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#f59e0b; width:${Math.min(carbs / maxCarbs * 100, 100)}%"></div></div>
-      <div class="api-nutrient-row">
+      <div class="api-nutrient-bar" style="height: 4px;">
+        <div class="api-nutrient-bar-fill" style="background:#f59e0b; width:${Math.min((carbs / maxCarbs) * 100, 100)}%"></div>
+      </div>
+
+      <div class="api-nutrient-row" style="margin-top: 8px;">
         <span class="api-nutrient-name">🥑 Lipides</span>
-        <span class="api-nutrient-value" style="color:#1e293b;">${fat.toFixed(1)}g</span>
+        <span class="api-nutrient-value" style="color:#1e293b; font-weight: 600;">${fat.toFixed(1)}g</span>
       </div>
-      <div class="api-nutrient-bar"><div class="api-nutrient-bar-fill" style="background:#22c55e; width:${Math.min(fat / maxFat * 100, 100)}%"></div></div>
+      <div class="api-nutrient-bar" style="height: 4px;">
+        <div class="api-nutrient-bar-fill" style="background:#22c55e; width:${Math.min((fat / maxFat) * 100, 100)}%"></div>
+      </div>
     </div>
   `;
 }

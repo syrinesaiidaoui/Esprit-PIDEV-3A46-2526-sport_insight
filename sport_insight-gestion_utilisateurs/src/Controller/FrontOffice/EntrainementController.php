@@ -79,13 +79,21 @@ final class EntrainementController extends AbstractController
     public function search(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, \App\Repository\EvaluationRepository $evaluationRepository): JsonResponse
     {
         $q = (string) $request->query->get('q', '');
+        $sortBy = (string) $request->query->get('sort_by', '');
+        $sortDir = (string) $request->query->get('sort_dir', 'asc');
 
         $qb = $entrainementRepository->createQueryBuilder('e');
         if ($q !== '') {
             $qb->andWhere('LOWER(e.type) LIKE :q OR LOWER(e.lieu) LIKE :q')
                ->setParameter('q', '%' . strtolower($q) . '%');
         }
-        $qb->orderBy('e.id', 'DESC');
+
+        if ($sortBy === 'dateEntrainement') {
+            $qb->orderBy('e.dateEntrainement', $sortDir === 'desc' ? 'DESC' : 'ASC');
+        } else {
+            $qb->orderBy('e.id', 'DESC');
+        }
+
         $entrainements = $qb->getQuery()->getResult();
 
         $participationMap = [];

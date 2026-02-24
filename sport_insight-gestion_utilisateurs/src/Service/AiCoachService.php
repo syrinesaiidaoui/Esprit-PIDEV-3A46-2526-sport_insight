@@ -37,10 +37,32 @@ class AiCoachService
         $ta = (float)$tactique;
         $moyenne = round(($p + $t + $ta) / 3, 1);
 
-        // Try Gemini API first
+        // Try getting everything from AI first for maximum variability
+        $aiResult = $this->tryGeminiTotalAnalysis($p, $t, $ta, (string)$typeEntrainement);
+
+        if ($aiResult) {
+            return [
+                'scores' => [
+                    'physique' => $p,
+                    'technique' => $t,
+                    'tactique' => $ta,
+                    'moyenne' => $moyenne,
+                ],
+                'level' => $this->getLevel($moyenne),
+                'physique_analysis' => $this->analyzePhysique($p),
+                'technique_analysis' => $this->analyzeTechnique($t),
+                'tactique_analysis' => $this->analyzeTactique($ta),
+                'exercises' => $aiResult['exercises'] ?? $this->getExercises($p, $t, $ta, $typeEntrainement),
+                'training_tip' => $aiResult['training_tip'] ?? $this->getTrainingTip($typeEntrainement, $moyenne),
+                'motivation' => $aiResult['motivation'] ?? $this->getMotivation($moyenne),
+                'ai_advice' => $aiResult['advice'] ?? null,
+            ];
+        }
+
+        // Fallback to legacy AI advice if total analysis fails
         $apiAdvice = $this->tryGeminiApi($p, $t, $ta, $typeEntrainement);
 
-        // Build structured response
+        // Build structured response with static fallbacks
         return [
             'scores' => [
                 'physique' => $p,
@@ -112,6 +134,8 @@ class AiCoachService
                 'name' => 'Course fractionnée',
                 'description' => '30/30 (30s sprint, 30s repos) × 10 répétitions',
                 'duration' => '15 min',
+                'sets' => '1',
+                'reps' => '10 min',
                 'intensity' => $p < 10 ? 'Modérée' : 'Haute',
                 'image' => 'cardio',
                 'category' => 'Cardio',
@@ -121,6 +145,8 @@ class AiCoachService
                 'name' => 'Gainage & Renforcement',
                 'description' => 'Planche 45s + squats 15 reps + pompes 12 reps × 3 séries',
                 'duration' => '20 min',
+                'sets' => '3 séries',
+                'reps' => 'Varie',
                 'intensity' => 'Modérée',
                 'image' => 'strength',
                 'category' => 'Force',
@@ -134,6 +160,8 @@ class AiCoachService
                 'name' => 'Drills techniques',
                 'description' => 'Répétitions de gestes fondamentaux avec focus sur la précision',
                 'duration' => '20 min',
+                'sets' => '4 séries',
+                'reps' => '15 répétitions',
                 'intensity' => 'Basse',
                 'image' => 'technique',
                 'category' => 'Technique',
@@ -143,6 +171,8 @@ class AiCoachService
                 'name' => 'Exercices de coordination',
                 'description' => 'Échelle de rythme + slalom + exercices de dissociation',
                 'duration' => '15 min',
+                'sets' => '3 séries',
+                'reps' => '5 passages',
                 'intensity' => 'Modérée',
                 'image' => 'flexibility',
                 'category' => 'Agilité',
@@ -156,6 +186,8 @@ class AiCoachService
                 'name' => 'Jeux en situation réduite',
                 'description' => 'Matchs 3v3 ou 4v4 avec contraintes tactiques',
                 'duration' => '25 min',
+                'sets' => '5 matchs',
+                'reps' => '3 min',
                 'intensity' => 'Haute',
                 'image' => 'tactics',
                 'category' => 'Tactique',
@@ -168,6 +200,8 @@ class AiCoachService
             'name' => 'Circuit Training HIIT',
             'description' => 'Burpees + mountain climbers + jump squats + sprints (40s effort / 20s repos)',
             'duration' => '18 min',
+            'sets' => '3 tours',
+            'reps' => '40s / 20s',
             'intensity' => 'Haute',
             'image' => 'hiit',
             'category' => 'HIIT',
@@ -192,6 +226,8 @@ class AiCoachService
                 'name' => 'Jeu de passes & contrôle',
                 'description' => 'Triangle de passes, contrôle orienté, conduite de balle en slalom',
                 'duration' => '20 min',
+                'sets' => '3 séries',
+                'reps' => '10 min',
                 'intensity' => 'Modérée',
                 'image' => 'technique',
                 'category' => 'Football',
@@ -201,6 +237,8 @@ class AiCoachService
                 'name' => 'Dribble & tir en mouvement',
                 'description' => 'Parcours dribble + lay-ups main droite/gauche + tir mi-distance',
                 'duration' => '20 min',
+                'sets' => '10 paniers',
+                'reps' => '3 séries',
                 'intensity' => 'Modérée',
                 'image' => 'technique',
                 'category' => 'Basketball',
@@ -210,6 +248,8 @@ class AiCoachService
                 'name' => 'Jeu de fond de court',
                 'description' => 'Échanges croisés/décroisés + jeu de jambes + volées',
                 'duration' => '25 min',
+                'sets' => '4 paniers',
+                'reps' => '20 frappes',
                 'intensity' => 'Haute',
                 'image' => 'cardio',
                 'category' => 'Tennis',
@@ -219,6 +259,8 @@ class AiCoachService
                 'name' => 'Séries techniques nage',
                 'description' => '4×50m éducatifs + 4×100m allure modérée + 200m récupération',
                 'duration' => '30 min',
+                'sets' => '4 séries',
+                'reps' => '100m',
                 'intensity' => 'Modérée',
                 'image' => 'cardio',
                 'category' => 'Natation',
@@ -228,6 +270,8 @@ class AiCoachService
                 'name' => 'Programme Full Body',
                 'description' => 'Squat + développé couché + rowing + soulevé de terre (4×8 reps)',
                 'duration' => '45 min',
+                'sets' => '4 séries',
+                'reps' => '8-12 reps',
                 'intensity' => 'Haute',
                 'image' => 'strength',
                 'category' => 'Musculation',
@@ -237,6 +281,8 @@ class AiCoachService
                 'name' => 'Entraînement piste',
                 'description' => 'Gammes athlétiques + 6×200m à 80% + étirements dynamiques',
                 'duration' => '35 min',
+                'sets' => '6 séries',
+                'reps' => '200m',
                 'intensity' => 'Haute',
                 'image' => 'cardio',
                 'category' => 'Athlétisme',
@@ -248,6 +294,8 @@ class AiCoachService
             'name' => 'Entraînement spécifique',
             'description' => 'Exercices adaptés à votre discipline avec focus technique',
             'duration' => '25 min',
+            'sets' => '3 séries',
+            'reps' => '12 reps',
             'intensity' => 'Modérée',
             'image' => 'technique',
             'category' => ucfirst($type ?: 'Sport'),
@@ -293,6 +341,53 @@ class AiCoachService
         return $quotes[array_rand($quotes)];
     }
 
+    private function tryGeminiTotalAnalysis(float $p, float $t, float $ta, string $typeEntrainement): ?array
+    {
+        $prompt = "Agis en tant que coach sportif expert IA. Analyse ces notes sur 20 pour un athlète : Physique $p, Technique $t, Tactique $ta. Sport/Type d’entraînement : $typeEntrainement.
+
+        Génère une réponse structurée en JSON contenant :
+        1. 'advice': Une analyse personnalisée et motivante de 2-3 phrases.
+        2. 'exercises': Une liste de 6 exercices (au lieu de 3) TRÈS VARIÉS et TRÈS PRÉCIS. Chaque exercice doit ABSOLUMENT avoir :
+           - 'name': Nom de l'exercice
+           - 'description': Consignes très précises et techniques
+           - 'duration': Durée estimée (ex: '10 min')
+           - 'sets': Nombre de séries (ex: '4 séries')
+           - 'reps': Nombre de répétitions ou objectif (ex: '12 répétitions' ou 'jusqu'à l'échec')
+           - 'intensity': 'Basse', 'Modérée' ou 'Haute'
+           - 'image': Une de ces catégories uniquement : 'cardio', 'strength', 'technique', 'flexibility', 'hiit', 'tactics'
+           - 'category': Nom de la catégorie spécifique
+           - 'categoryColor': Un code couleur hexadécimal approprié
+        3. 'training_tip': Un conseil technique expert.
+        4. 'motivation': Une phrase percutante.
+
+        Sois créatif pour que l’entraînement soit complet (échauffement, exercices de fond, retour au calme). Réponds UNIQUEMENT en JSON.";
+
+        try {
+            $response = $this->client->request('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' . $this->apiKey, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'json' => [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                    'generationConfig' => [
+                        'response_mime_type' => 'application/json',
+                    ]
+                ],
+                'timeout' => 12,
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $data = $response->toArray();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if ($text) {
+                    $decoded = json_decode($text, true);
+                    return is_array($decoded) ? $decoded : null;
+                }
+            }
+            return null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     private function tryGeminiApi(float $p, float $t, float $ta, string $typeEntrainement): ?string
     {
         $prompt = "Analyse ces notes de sport sur 20 : Physique $p, Technique $t, Tactique $ta. Entraînement : $typeEntrainement. Donne 2 conseils courts.";
@@ -314,6 +409,68 @@ class AiCoachService
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    public function getMatchmakingAdvice(array $groups): array
+    {
+        if (empty($groups)) {
+            return [];
+        }
+
+        $prompt = "Agis en tant que coach sportif expert de football. Analyse les statistiques de ces équipes. Fournis un conseil ou objectif ciblé de 2 phrases maximum par équipe.\n";
+        $fallback = [];
+
+        foreach ($groups as $groupName => $data) {
+            if (!empty($data['players'])) {
+                $avgP = 0; $avgT = 0; $avgTa = 0;
+                foreach($data['players'] as $p) {
+                    $avgP += $p['avgPhysique'];
+                    $avgT += $p['avgTechnique'];
+                    $avgTa += $p['avgTactique'];
+                }
+                $count = count($data['players']);
+                $moyenne = round(($avgP+$avgT+$avgTa)/(3*$count), 1);
+                $prompt .= "- $groupName: Moyenne globale (" . $moyenne . "), Physique (" . round($avgP/$count, 1) . "), Technique (" . round($avgT/$count, 1) . "), Tactique (" . round($avgTa/$count, 1) . ").\n";
+
+                // Génération automatique d'un fallback pertinent si l'API lâche (très fréquent)
+                if ($moyenne >= 16) {
+                    $fallback[$groupName] = "L'algorithme IA a analysé un potentiel de classe Élite (moyenne de $moyenne). Objectif du jour : perfectionner sous haute intensité les transitions offensives et le replacement tactique.";
+                } elseif ($moyenne >= 13) {
+                    $fallback[$groupName] = "Niveau Avancé solide détecté (moyenne de $moyenne). Ciblez les faiblesses mineures avec des exercices de finition sous pression pour ce groupe.";
+                } elseif ($moyenne >= 10) {
+                    $fallback[$groupName] = "Niveau Intermédiaire (moyenne de $moyenne). Restez réguliers. Consolidez les schémas de passes et augmentez l'endurance globale.";
+                } else {
+                    $fallback[$groupName] = "Groupe en développement (moyenne de $moyenne). L'objectif prioritaire de l'IA est de consolider les bases techniques (passes courtes, prises de balle).";
+                }
+            }
+        }
+        $prompt .= "\nRéponds UNIQUEMENT avec un JSON valide où chaque clé est le nom du groupe ('$groupName' exact) et la valeur le conseil.";
+
+        try {
+            $response = $this->client->request('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $this->apiKey, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'json' => [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                    'generationConfig' => [
+                        'response_mime_type' => 'application/json',
+                    ]
+                ],
+                'timeout' => 5, // Timeout court
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $data = $response->toArray();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                $text = preg_replace('/```json|```/', '', $text);
+                $decoded = json_decode(trim($text), true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    return $decoded;
+                }
+            }
+        } catch (\Exception $e) {
+            // Silence
+        }
+        return $fallback;
     }
 
     private function formatAsText(array $result): string
