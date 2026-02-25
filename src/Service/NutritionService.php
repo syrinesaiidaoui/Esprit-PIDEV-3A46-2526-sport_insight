@@ -12,8 +12,8 @@ class NutritionService
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        // Using the API Ninjas key
-        $this->apiKey = 'H1lpa2vrpr1et07YB7738cCBzCWYEXYNaF0DLzEy';
+        // Load API Ninjas key from environment instead of hard-coding it
+        $this->apiKey = $_ENV['API_NINJAS_KEY'] ?? getenv('API_NINJAS_KEY') ?? 'your_api_ninjas_key_here';
     }
 
     private function matchSport(string $type): string
