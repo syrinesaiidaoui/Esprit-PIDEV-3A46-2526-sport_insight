@@ -1,43 +1,2115 @@
 {% extends 'front_office/base.html.twig' %}
 
-{% block title %}Entrainement - Sport Insight{% endblock %}
+{% block title %}Entrainements - Admin{% endblock %}
+{% block page_title %}Entrainements{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f0f7f2;
+    --surface:   #ffffff;
+    --card:      #f8fdf9;
+    --border:    #d1e8d8;
+    --accent:    #16a34a;
+    --accent-lt: #22c55e;
+    --accent-dk: #14532d;
+    --accent2:   #ef4444;
+    --gold:      #f59e0b;
+    --text:      #1a2e22;
+    --muted:     #6b8f77;
+    --radius:    12px;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; margin: 0; }
+
+  /* ─── HERO BANNER ────────────────────────────────────────── */
+  .hero-banner {
+    position: relative; height: 240px; overflow: hidden;
+    border-radius: 0 0 24px 24px; margin-bottom: 32px;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1400&auto=format&fit=crop&q=80');
+    background-size: cover; background-position: center 30%;
+    filter: brightness(0.45) saturate(1.2);
+    transform: scale(1.04); transition: transform 8s ease;
+  }
+  .hero-banner:hover .hero-bg { transform: scale(1); }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(20,83,45,.78) 0%, rgba(22,163,74,.28) 60%, rgba(0,0,0,.05) 100%);
+  }
+  .hero-dots { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); opacity: .12; pointer-events: none; }
+  .hero-content {
+    position: relative; z-index: 2; height: 100%;
+    display: flex; align-items: flex-end; justify-content: space-between; padding: 28px 40px;
+  }
+  .page-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 8vw, 96px); letter-spacing: 4px; line-height: .9;
+    color: #fff; text-shadow: 0 4px 24px rgba(0,0,0,.4);
+  }
+  .page-heading small {
+    display: block; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500; letter-spacing: 4px;
+    text-transform: uppercase; color: #86efac; margin-bottom: 6px;
+  }
+  .hero-stats { display: flex; gap: 16px; align-items: flex-end; }
+  .stat-pill {
+    text-align: center; background: rgba(255,255,255,.12); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.22); border-radius: 14px; padding: 12px 22px; color: white;
+  }
+  .stat-pill .num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; line-height: 1; color: #4ade80; }
+  .stat-pill .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,.55); margin-top: 3px; }
+
+  /* ─── BUTTONS ────────────────────────────────────────────── */
+  .btn-add {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px; background: var(--accent); color: white;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px;
+    border: none; border-radius: var(--radius); text-decoration: none;
+    transition: transform .15s, box-shadow .2s, background .15s;
+    box-shadow: 0 4px 16px rgba(22,163,74,.3); cursor: pointer;
+  }
+  .btn-add:hover { background: var(--accent-lt); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(22,163,74,.4); color: white; }
+  .btn-add svg { width: 15px; height: 15px; }
+
+  /* ─── PAGE INNER ─────────────────────────────────────────── */
+  .page-inner { padding: 0 40px 60px; max-width: 1280px; margin: 0 auto; }
+
+  .action-row {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 20px;
+  }
+
+  /* ─── SEARCH BAR ─────────────────────────────────────────── */
+  .search-wrap {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 2px 12px rgba(22,163,74,.06); margin-bottom: 28px;
+  }
+  .search-wrap input, .search-wrap select {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 14px;
+    border-radius: 8px; outline: none; transition: border-color .2s, box-shadow .2s; min-width: 160px;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-wrap input:focus, .search-wrap select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(22,163,74,.12); }
+  .btn-search {
+    padding: 8px 20px; background: var(--accent); border: none; color: white;
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 600;
+    font-size: 13px; cursor: pointer; transition: background .2s, transform .15s;
+  }
+  .btn-search:hover { background: var(--accent-lt); transform: translateY(-1px); }
+
+  /* ─── CARDS GRID ─────────────────────────────────────────── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  /* Each training card */
+  .train-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    animation: cardIn .4s ease both;
+    display: flex;
+    flex-direction: column;
+  }
+  .train-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(22,163,74,.12);
+    border-color: #86efac;
+  }
+
+  /* Participation status styles */
+  .train-card.present {
+    border: 2px solid var(--accent);
+    box-shadow: 0 12px 36px rgba(34,197,94,.08);
+  }
+  .train-card.absent {
+    border: 2px solid var(--accent2);
+    box-shadow: 0 12px 36px rgba(239,68,68,.06);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .cards-grid .train-card:nth-child(1)  { animation-delay:.04s }
+  .cards-grid .train-card:nth-child(2)  { animation-delay:.08s }
+  .cards-grid .train-card:nth-child(3)  { animation-delay:.12s }
+  .cards-grid .train-card:nth-child(4)  { animation-delay:.16s }
+  .cards-grid .train-card:nth-child(5)  { animation-delay:.20s }
+  .cards-grid .train-card:nth-child(6)  { animation-delay:.24s }
+  .cards-grid .train-card:nth-child(7)  { animation-delay:.28s }
+  .cards-grid .train-card:nth-child(8)  { animation-delay:.32s }
+
+  /* Card image strip */
+  .train-card-img {
+    height: 130px;
+    background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop&q=70');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .train-card-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(20,83,45,.65) 0%, rgba(0,0,0,.1) 100%);
+  }
+
+  /* Type badge floated on image */
+  .train-card-type {
+    position: absolute;
+    top: 12px; left: 14px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: white;
+  }
+
+  /* Date badge on image */
+  .train-card-date {
+    position: absolute;
+    bottom: 12px; right: 14px;
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 11px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+  }
+
+  /* Card body */
+  .train-card-body {
+    padding: 18px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Location row */
+  .train-card-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .train-card-location::before { content: '📍'; font-size: 13px; }
+
+  /* Horaire row */
+  .train-card-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+  }
+  .train-card-time .time-icon { font-size: 15px; }
+  .train-card-time .time-txt {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-dk);
+    letter-spacing: .5px;
+  }
+  .train-card-time .time-sep { color: var(--accent); font-weight: 800; }
+  .train-card-time .time-duration {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* Card footer actions */
+  .train-card-footer {
+    padding: 12px 20px 16px;
+    border-top: 1px solid #eaf5ec;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn-action {
+    padding: 6px 14px; font-size: 12px; font-weight: 600;
+    border-radius: 8px; text-decoration: none; border: 1px solid transparent;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all .15s; white-space: nowrap; background: transparent;
+  }
+  .btn-view   { border-color: var(--border); color: var(--muted); }
+  .btn-view:hover   { border-color: var(--accent); color: var(--accent); background: #f0fdf4; }
+  .btn-delete { border-color: var(--border); color: var(--muted); }
+  .btn-delete:hover { border-color: var(--accent2); color: var(--accent2); background: #fef2f2; }
+
+  /* ─── EMPTY STATE ────────────────────────────────────────── */
+  .empty-state {
+    text-align: center; padding: 80px 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .empty-icon {
+    width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 20px;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1px solid #bbf7d0;
+    display: flex; align-items: center; justify-content: center; font-size: 32px;
+  }
+  .empty-state p { color: var(--muted); font-size: 15px; }
+
+  /* ─── MODAL ──────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(20,83,45,.2); backdrop-filter: blur(6px);
+    z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent2); border-radius: var(--radius);
+    width: 100%; max-width: 420px; padding: 32px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.12); animation: modalIn .2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.95) translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .modal-box h5 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; margin-bottom: 10px; color: var(--accent2); }
+  .modal-box p  { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 28px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: border-color .15s, color .15s; }
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+  .btn-confirm-delete { padding: 10px 24px; background: var(--accent2); border: none; color: white; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 16px rgba(239,68,68,.25); transition: box-shadow .15s, transform .15s; }
+  .btn-confirm-delete:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(239,68,68,.4); }
+
+  @media (max-width: 700px) {
+    .hero-content { flex-direction: column; align-items: flex-start; padding: 20px; }
+    .hero-stats { display: none; }
+    .page-inner { padding: 0 16px 40px; }
+    .search-wrap { flex-direction: column; align-items: stretch; }
+    .search-wrap input, .search-wrap select { min-width: 0; width: 100%; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block header_actions %}
+  <a href="{{ path('front_entrainement_new') }}" class="btn-add">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Ajouter
+  </a>
+{% endblock %}
 
 {% block body %}
-    <h2 class="section-title">Planning Entrainement</h2>
 
-    <div class="front-table">
-        <div class="front-table-header">
-            <h3>Seances a venir</h3>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Horaire</th>
-                    <th>Type</th>
-                    <th>Intensite</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>05/02/2026</td>
-                    <td>09:00 - 11:00</td>
-                    <td>Tactique</td>
-                    <td><span class="badge-warning">Moyenne</span></td>
-                </tr>
-                <tr>
-                    <td>06/02/2026</td>
-                    <td>15:00 - 17:30</td>
-                    <td>Physique</td>
-                    <td><span class="badge-danger">Haute</span></td>
-                </tr>
-                <tr>
-                    <td>07/02/2026</td>
-                    <td>10:00 - 12:00</td>
-                    <td>Technique</td>
-                    <td><span class="badge-success">Legere</span></td>
-                </tr>
-            </tbody>
-        </table>
+{# ── HERO BANNER ── #}
+<div class="hero-banner">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <svg class="hero-dots" width="200" height="200" viewBox="0 0 200 200" fill="none">
+    <circle cx="10" cy="10" r="3" fill="white"/><circle cx="40" cy="10" r="3" fill="white"/><circle cx="70" cy="10" r="3" fill="white"/><circle cx="100" cy="10" r="3" fill="white"/><circle cx="130" cy="10" r="3" fill="white"/><circle cx="160" cy="10" r="3" fill="white"/>
+    <circle cx="10" cy="40" r="3" fill="white"/><circle cx="40" cy="40" r="3" fill="white"/><circle cx="70" cy="40" r="3" fill="white"/><circle cx="100" cy="40" r="3" fill="white"/><circle cx="130" cy="40" r="3" fill="white"/><circle cx="160" cy="40" r="3" fill="white"/>
+    <circle cx="10" cy="70" r="3" fill="white"/><circle cx="40" cy="70" r="3" fill="white"/><circle cx="70" cy="70" r="3" fill="white"/><circle cx="100" cy="70" r="3" fill="white"/><circle cx="130" cy="70" r="3" fill="white"/><circle cx="160" cy="70" r="3" fill="white"/>
+    <circle cx="10" cy="100" r="3" fill="white"/><circle cx="40" cy="100" r="3" fill="white"/><circle cx="70" cy="100" r="3" fill="white"/><circle cx="100" cy="100" r="3" fill="white"/><circle cx="130" cy="100" r="3" fill="white"/><circle cx="160" cy="100" r="3" fill="white"/>
+    <circle cx="10" cy="130" r="3" fill="white"/><circle cx="40" cy="130" r="3" fill="white"/><circle cx="70" cy="130" r="3" fill="white"/><circle cx="100" cy="130" r="3" fill="white"/><circle cx="130" cy="130" r="3" fill="white"/><circle cx="160" cy="130" r="3" fill="white"/>
+  </svg>
+  <div class="hero-content">
+    <div class="page-heading">
+      <small>/ Gestion &amp; Suivi</small>
+      Entrainements
     </div>
+    <div class="hero-stats">
+      <div class="stat-pill">
+        <div class="num">{{ entrainements|length }}</div>
+        <div class="lbl">Sessions</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">🏃</div>
+        <div class="lbl">Actif</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-inner">
+
+  <div class="action-row">
+    <div style="font-size:14px; color:var(--muted)">
+      <strong style="color:var(--text)">{{ entrainements|length }}</strong> entrainement(s) au total
+    </div>
+    
+  </div>
+
+  <form method="get" class="search-wrap" onsubmit="return false;">
+    <input id="entrainement-search" type="text" name="search_type" value="{{ search_type|default('') }}" placeholder="🔍  Rechercher par type…">
+    <select name="sort_by">
+      <option value="">Trier par</option>
+      <option value="dateEntrainement" {% if sort_by == 'dateEntrainement' %}selected{% endif %}>Date</option>
+    </select>
+    <select name="sort_dir">
+      <option value="asc"  {% if sort_dir == 'asc'  %}selected{% endif %}>Ascendant</option>
+      <option value="desc" {% if sort_dir == 'desc' %}selected{% endif %}>Descendant</option>
+    </select>
+    <button type="submit" class="btn-search">Rechercher</button>
+  </form>
+
+  {# AJAX results container (initial render include) #}
+  <div id="entrainement-results">
+    {{ include('front_office/entrainement/_cards.html.twig', { entrainements: entrainements, participation_map: participation_map|default({}) }) }}
+  </div>
+
+</div>
+
+{# ── MODAL SUPPRESSION ── #}
+<div id="deleteModal" class="modal-overlay">
+  <div class="modal-box">
+    <h5>⚠ Confirmation</h5>
+    <p>Êtes-vous sûr de vouloir supprimer cet entrainement ?<br>Cette action est irréversible.</p>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeDeleteModal()">Annuler</button>
+      <form id="deleteForm" method="post" style="margin:0">
+        <input type="hidden" name="_token" id="deleteToken">
+        <button type="submit" class="btn-confirm-delete">Supprimer</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDeleteModal(id, token) {
+  document.getElementById('deleteToken').value = token;
+  document.getElementById('deleteForm').action = "{{ path('front_entrainement_delete', {'id': 'ID'}) }}".replace('ID', id);
+  document.getElementById('deleteModal').classList.add('show');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('show');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+</script>
+
+<script>
+(() => {
+  const input = document.getElementById('entrainement-search');
+  const results = document.getElementById('entrainement-results');
+  const sortBy = document.querySelector('select[name="sort_by"]');
+  const sortDir = document.querySelector('select[name="sort_dir"]');
+
+  if (!input || !results || !sortBy || !sortDir) return;
+  
+  const url = '{{ path('front_entrainement_search') }}';
+  let timer = null;
+
+  const refresh = () => {
+    const q = input.value;
+    const sBy = sortBy.value;
+    const sDir = sortDir.value;
+    const fullUrl = `${url}?q=${encodeURIComponent(q)}&sort_by=${sBy}&sort_dir=${sDir}`;
+    
+    // Add loading effect
+    results.style.opacity = '0.5';
+    
+    fetch(fullUrl)
+      .then(r => r.json())
+      .then(data => { 
+        results.innerHTML = data.html; 
+        results.style.opacity = '1';
+      })
+      .catch(() => {
+        results.style.opacity = '1';
+      });
+  };
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(refresh, 250);
+  });
+
+  sortBy.addEventListener('change', refresh);
+  sortDir.addEventListener('change', refresh);
+})();
+</script>
+
+{# ── AI COACH MODAL - PREMIUM EDITION ── #}
+<style>
+  /* ─── AI COACH MODAL STYLES ─────────────────────────────── */
+  #aiModal .modal-box {
+    max-width: 820px;
+    border-top: none;
+    border-radius: 20px;
+    padding: 0;
+    overflow: hidden;
+    background: #fff;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .ai-modal-header {
+    background: linear-gradient(135deg, #14532d 0%, #16a34a 50%, #22c55e 100%);
+    padding: 28px 32px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .ai-modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .ai-modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .ai-header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ai-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ai-avatar {
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .ai-header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .ai-header-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .ai-close-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    color: white;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+  }
+  .ai-close-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: rotate(90deg);
+  }
+
+  /* Level badge */
+  .ai-level-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    margin-top: 16px;
+  }
+  .level-ring {
+    width: 48px;
+    height: 48px;
+    position: relative;
+  }
+  .level-ring svg {
+    width: 48px;
+    height: 48px;
+    transform: rotate(-90deg);
+  }
+  .level-ring .bg { stroke: rgba(255,255,255,0.15); }
+  .level-ring .progress { transition: stroke-dashoffset 1s ease; }
+  .level-score {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  .level-info { color: white; }
+  .level-name {
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .level-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+  }
+
+  /* Tabs */
+  .ai-tabs {
+    display: flex;
+    border-bottom: 2px solid #f0f0f0;
+    padding: 0 24px;
+    background: #fafafa;
+  }
+  .ai-tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .ai-tab:hover { color: var(--accent); }
+  .ai-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .ai-tab-icon { font-size: 16px; }
+
+  /* Tab content */
+  .ai-tab-content {
+    display: none;
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(90vh - 300px);
+  }
+  .ai-tab-content.active { display: block; }
+
+  /* Score bars */
+  .score-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .score-card {
+    background: #f8faf9;
+    border: 1px solid #e8f0eb;
+    border-radius: 14px;
+    padding: 16px 20px;
+    animation: slideUp 0.4s ease both;
+  }
+  .score-card:nth-child(2) { animation-delay: 0.1s; }
+  .score-card:nth-child(3) { animation-delay: 0.2s; }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+  .score-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .score-card-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .score-card-label .emoji { font-size: 18px; }
+  .score-card-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+  .score-bar-track {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .score-card-message {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+    padding: 10px 14px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #f0f0f0;
+  }
+
+  /* Exercise cards */
+  .exercises-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .exercise-card {
+    background: white;
+    border: 1px solid #e8f0eb;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: slideUp 0.4s ease both;
+    cursor: default;
+  }
+  .exercise-card:nth-child(2) { animation-delay: 0.08s; }
+  .exercise-card:nth-child(3) { animation-delay: 0.16s; }
+  .exercise-card:nth-child(4) { animation-delay: 0.24s; }
+  .exercise-card:nth-child(5) { animation-delay: 0.32s; }
+  .exercise-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(22,163,74,0.12);
+    border-color: #bbf7d0;
+  }
+  .exercise-card-img {
+    height: 130px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .exercise-card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+  }
+  .exercise-category-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: white;
+    backdrop-filter: blur(4px);
+  }
+  .exercise-intensity-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+  }
+  .exercise-card-body {
+    padding: 14px 16px;
+  }
+  .exercise-card-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .exercise-card-desc {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .exercise-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: #9ca3af;
+  }
+  .exercise-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Tips tab */
+  .tip-card {
+    padding: 20px;
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    animation: slideUp 0.4s ease both;
+  }
+  .tip-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #14532d;
+    margin-bottom: 8px;
+  }
+  .tip-card-text {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.7;
+  }
+  .motivation-card {
+    padding: 24px;
+    background: linear-gradient(135deg, #14532d, #16a34a);
+    border-radius: 16px;
+    color: white;
+    text-align: center;
+    animation: slideUp 0.4s ease 0.1s both;
+  }
+  .motivation-quote {
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.7;
+    opacity: 0.95;
+  }
+  .motivation-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* AI badge */
+  .ai-powered-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1px solid #bbf7d0;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #16a34a;
+    margin-top: 16px;
+  }
+  .ai-powered-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Loading state */
+  .ai-loading {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .ai-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #16a34a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ai-loading-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #14532d;
+  }
+  .ai-loading-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+  }
+
+  /* Radar chart container */
+  .radar-container {
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #e8f0eb;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .radar-container canvas {
+    max-height: 200px;
+  }
+  .radar-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  /* ─── NUTRITION TAB STYLES ─────────────────────────────── */
+  .nutrition-section {
+    margin-bottom: 24px;
+  }
+  .nutrition-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: var(--text);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Calories & Macros overview */
+  .nutri-overview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .calorie-card {
+    background: linear-gradient(135deg, #fff7ed, #fef3c7);
+    border: 1px solid #fde68a;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    animation: slideUp 0.4s ease both;
+  }
+  .calorie-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: #b45309;
+    line-height: 1;
+  }
+  .calorie-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #92400e;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .calorie-sub {
+    font-size: 12px;
+    color: #a16207;
+    margin-top: 8px;
+  }
+  .hydration-card {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #93c5fd;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    animation: slideUp 0.4s ease 0.1s both;
+  }
+  .hydration-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: #1d4ed8;
+    line-height: 1;
+  }
+  .hydration-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1e40af;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .hydration-tips {
+    font-size: 11px;
+    color: #3b82f6;
+    margin-top: 8px;
+    text-align: left;
+    line-height: 1.6;
+  }
+
+  /* Macro bars */
+  .macro-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .macro-bar-item {
+    background: #f8faf9;
+    border: 1px solid #e8f0eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideUp 0.4s ease both;
+  }
+  .macro-bar-item:nth-child(2) { animation-delay: 0.08s; }
+  .macro-bar-item:nth-child(3) { animation-delay: 0.16s; }
+  .macro-icon {
+    font-size: 28px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .macro-info { flex: 1; }
+  .macro-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .macro-desc {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+  .macro-bar-track {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .macro-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .macro-percent {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    min-width: 50px;
+    text-align: right;
+  }
+
+  /* Meal cards */
+  .meals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .meal-card {
+    background: white;
+    border: 1px solid #e8f0eb;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: slideUp 0.4s ease both;
+  }
+  .meal-card:nth-child(2) { animation-delay: 0.08s; }
+  .meal-card:nth-child(3) { animation-delay: 0.16s; }
+  .meal-card:nth-child(4) { animation-delay: 0.24s; }
+  .meal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+  }
+  .meal-card-img {
+    height: 110px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .meal-card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.5) 100%);
+  }
+  .meal-time-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+  }
+  .meal-cal-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    padding: 4px 8px;
+    background: rgba(245,158,11,0.9);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+  }
+  .meal-card-body {
+    padding: 14px 16px;
+  }
+  .meal-card-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meal-food-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .meal-food-list li {
+    font-size: 12px;
+    color: #6b7280;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meal-food-list li::before { content: '•'; color: #22c55e; font-weight: 700; }
+
+  /* Pre/Post workout */
+  .workout-nutrition {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .workout-card {
+    border-radius: 16px;
+    overflow: hidden;
+    animation: slideUp 0.4s ease both;
+  }
+  .workout-card:last-child { animation-delay: 0.1s; }
+  .workout-card-header {
+    padding: 14px 18px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .workout-card-header.pre { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+  .workout-card-header.post { background: linear-gradient(135deg, #22c55e, #4ade80); }
+  .workout-card-body {
+    padding: 14px 18px;
+    background: white;
+    border: 1px solid #e8f0eb;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+  }
+  .workout-timing {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    background: #f9fafb;
+    border-radius: 8px;
+  }
+  .workout-food-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .workout-food-item:last-child { border-bottom: none; }
+  .workout-food-emoji { font-size: 20px; }
+  .workout-food-info { flex: 1; }
+  .workout-food-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .workout-food-benefit {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+  .workout-window {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #fef3c7;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #92400e;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* Supplements */
+  .supplements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .supplement-card {
+    padding: 14px;
+    background: #f8faf9;
+    border: 1px solid #e8f0eb;
+    border-radius: 12px;
+    animation: slideUp 0.4s ease both;
+    transition: all 0.2s;
+  }
+  .supplement-card:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 4px 16px rgba(22,163,74,0.08);
+  }
+  .supplement-card.recommended {
+    border-color: #86efac;
+    background: #f0fdf4;
+  }
+  .supplement-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .supplement-emoji { font-size: 20px; }
+  .supplement-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .supplement-rec-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    background: #22c55e;
+    color: white;
+    border-radius: 99px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .supplement-benefit {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+  .supplement-when {
+    font-size: 11px;
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  /* Nutrition tip card */
+  .nutri-tip-card {
+    padding: 20px;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #a7f3d0;
+    border-radius: 16px;
+    margin-top: 20px;
+    animation: slideUp 0.4s ease 0.2s both;
+  }
+  .nutri-tip-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #047857;
+    margin-bottom: 6px;
+  }
+  .nutri-tip-text {
+    font-size: 13px;
+    color: #065f46;
+    line-height: 1.7;
+  }
+
+  /* Nutrition loading */
+  .nutri-loading {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .nutri-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #f59e0b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+
+  /* API Foods section */
+  .api-foods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .api-food-card {
+    background: white;
+    border: 1px solid #e8f0eb;
+    border-radius: 14px;
+    padding: 18px;
+    transition: all 0.3s ease;
+    animation: slideUp 0.4s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .api-food-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #22c55e, #3b82f6);
+  }
+  .api-food-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-color: #bbf7d0;
+  }
+  .api-food-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+    text-transform: capitalize;
+  }
+  .api-food-serving {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 12px;
+  }
+  .api-food-calories {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    background: linear-gradient(135deg, #fff7ed, #fef3c7);
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .api-food-calories .cal-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: #b45309;
+    letter-spacing: 1px;
+  }
+  .api-food-calories .cal-label {
+    font-size: 11px;
+    color: #92400e;
+    font-weight: 600;
+  }
+  .api-nutrient-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 12px;
+  }
+  .api-nutrient-row:last-child { border-bottom: none; }
+  .api-nutrient-name {
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .api-nutrient-value {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .api-nutrient-bar {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 3px;
+    width: 60px;
+  }
+  .api-nutrient-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+  }
+  .api-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #fef3c7, #fff7ed);
+    border: 1px solid #fde68a;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #b45309;
+    margin-top: 14px;
+  }
+  .api-badge .api-dot {
+    width: 6px;
+    height: 6px;
+    background: #f59e0b;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @media (max-width: 600px) {
+    #aiModal .modal-box { max-width: 95vw; }
+    .exercises-grid { grid-template-columns: 1fr; }
+    .ai-header-content { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .ai-tabs { overflow-x: auto; }
+    .nutri-overview { grid-template-columns: 1fr; }
+    .workout-nutrition { grid-template-columns: 1fr; }
+    .meals-grid { grid-template-columns: 1fr; }
+    .supplements-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Interactive Food Calculator */
+  .food-calculator {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    color: white;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+  }
+  .food-calc-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .food-calc-form {
+    display: flex;
+    gap: 12px;
+  }
+  .food-calc-input {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .food-calc-input:focus {
+    background: rgba(255,255,255,0.15);
+    border-color: #22c55e;
+  }
+  .food-calc-btn {
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .food-calc-btn:hover { background: #16a34a; transform: translateY(-1px); }
+  .food-results-area {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .food-calc-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    display: block;
+  }
+</style>
+
+<div id="aiModal" class="modal-overlay">
+  <div class="modal-box">
+    <!-- Header -->
+    <div class="ai-modal-header">
+      <div class="ai-header-content">
+        <div class="ai-header-left">
+          <div class="ai-avatar">🤖</div>
+          <div>
+            <div class="ai-header-title">Ton Coach IA</div>
+            <div class="ai-header-subtitle">Analyse personnalisée</div>
+          </div>
+        </div>
+        <button class="ai-close-btn" onclick="closeAiModal()">✕</button>
+      </div>
+      <div id="aiLevelBadge" class="ai-level-badge" style="display:none;">
+        <div class="level-ring">
+          <svg viewBox="0 0 36 36">
+            <circle class="bg" cx="18" cy="18" r="15.5" fill="none" stroke-width="3"/>
+            <circle id="levelProgress" class="progress" cx="18" cy="18" r="15.5" fill="none" stroke="white" stroke-width="3"
+                    stroke-dasharray="97.4" stroke-dashoffset="97.4" stroke-linecap="round"/>
+          </svg>
+          <div id="levelScore" class="level-score"></div>
+        </div>
+        <div class="level-info">
+          <div id="levelName" class="level-name"></div>
+          <div id="levelDesc" class="level-desc">Moyenne de tes 3 scores</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="aiLoading" class="ai-loading">
+      <div class="ai-loading-spinner"></div>
+      <div class="ai-loading-text">Le Coach IA analyse ta performance...</div>
+      <div class="ai-loading-sub">Chargement de tes recommandations personnalisées</div>
+    </div>
+
+    <!-- Tabs (hidden until loaded) -->
+    <div id="aiTabsWrap" style="display:none;">
+      <div class="ai-tabs">
+        <button class="ai-tab active" data-tab="analysis" onclick="switchTab('analysis', this)">
+          <span class="ai-tab-icon">📊</span> Analyse
+        </button>
+        <button class="ai-tab" data-tab="exercises" onclick="switchTab('exercises', this)">
+          <span class="ai-tab-icon">🏋️</span> Exercices
+        </button>
+        <button class="ai-tab" data-tab="nutrition" onclick="switchTab('nutrition', this)">
+          <span class="ai-tab-icon">🥗</span> Nutrition
+        </button>
+        <button class="ai-tab" data-tab="tips" onclick="switchTab('tips', this)">
+          <span class="ai-tab-icon">💡</span> Conseils
+        </button>
+      </div>
+
+      <!-- Analysis Tab -->
+      <div id="tab-analysis" class="ai-tab-content active">
+        <div class="radar-container">
+          <div class="radar-title">Profil de Performance</div>
+          <canvas id="aiRadarChart"></canvas>
+        </div>
+        <div id="scoreCards" class="score-cards"></div>
+      </div>
+
+      <!-- Exercises Tab -->
+      <div id="tab-exercises" class="ai-tab-content">
+        <div id="exercisesGrid" class="exercises-grid"></div>
+      </div>
+
+      <!-- Nutrition Tab -->
+      <div id="tab-nutrition" class="ai-tab-content">
+        <div id="nutritionLoading" class="nutri-loading">
+          <div class="nutri-loading-spinner"></div>
+          <div style="font-size:14px; font-weight:600; color:#b45309;">Préparation de ton plan nutrition...</div>
+        </div>
+        <div id="nutritionContent" style="display:none;">
+          <!-- Food Calculator -->
+          <div class="food-calculator">
+            <div class="food-calc-title">🧪 Calculateur d'Aliments</div>
+            <div class="food-calc-form">
+              <input type="text" id="foodSearchInput" class="food-calc-input" placeholder="Ex: 3 oeufs, 100g de poulet, une banane...">
+              <button type="button" class="food-calc-btn" onclick="searchSpecificFood()">Calculer</button>
+            </div>
+            <small class="food-calc-hint">Astuce: Entrez les quantités pour plus de précision (ex: "200g riz").</small>
+            
+            <div id="foodSearchResults" class="food-results-area"></div>
+          </div>
+          
+          <div id="nutritionMainBody"></div>
+        </div>
+      </div>
+
+      <!-- Tips Tab -->
+      <div id="tab-tips" class="ai-tab-content">
+        <div id="tipsContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let myChart = null;
+
+const exerciseImages = {
+  'cardio': '/images/exercises/cardio.png',
+  'strength': '/images/exercises/strength.png',
+  'flexibility': '/images/exercises/flexibility.png',
+  'technique': '/images/exercises/technique.png',
+  'tactics': '/images/exercises/tactics.png',
+  'hiit': '/images/exercises/hiit.png',
+};
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.ai-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ai-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+// Track current scores for nutrition tab lazy loading
+let currentScores = { p: 0, t: 0, ta: 0, type: '' };
+let nutritionLoaded = false;
+
+function getAiAdvice(p, t, ta, type) {
+  // Store scores for nutrition
+  currentScores = { p, t, ta, type };
+  nutritionLoaded = false;
+
+  // Show modal with loading
+  document.getElementById('aiModal').classList.add('show');
+  document.getElementById('aiLoading').style.display = '';
+  document.getElementById('aiTabsWrap').style.display = 'none';
+  document.getElementById('aiLevelBadge').style.display = 'none';
+
+  // Reset nutrition tab
+  document.getElementById('nutritionLoading').style.display = '';
+  document.getElementById('nutritionContent').style.display = 'none';
+
+  // Fetch structured data
+  fetch(`/front/coach/api/advice?p=${p}&t=${t}&ta=${ta}&type=${encodeURIComponent(type)}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('aiLoading').style.display = 'none';
+      document.getElementById('aiTabsWrap').style.display = '';
+
+      switchTab('analysis', document.querySelector('.ai-tab[data-tab="analysis"]'));
+      renderLevelBadge(data);
+      renderRadar(data.scores);
+      renderScoreCards(data);
+      renderExercises(data.exercises);
+      renderTips(data);
+    })
+    .catch(err => {
+      document.getElementById('aiLoading').innerHTML =
+        `<div style="color:#ef4444; font-size:14px;">❌ Erreur de connexion au Coach IA</div>
+         <div style="color:#888; font-size:12px; margin-top:8px;">Veuillez réessayer dans quelques instants.</div>`;
+    });
+}
+
+function renderLevelBadge(data) {
+  const badge = document.getElementById('aiLevelBadge');
+  badge.style.display = 'flex';
+
+  const level = data.level;
+  document.getElementById('levelScore').textContent = data.scores.moyenne + '/20';
+  document.getElementById('levelName').innerHTML = `${level.icon} ${level.name}`;
+
+  // Animate progress ring
+  const circumference = 97.4;
+  const offset = circumference - (level.progress / 100 * circumference);
+  setTimeout(() => {
+    document.getElementById('levelProgress').style.strokeDashoffset = offset;
+  }, 300);
+}
+
+function renderRadar(scores) {
+  const ctx = document.getElementById('aiRadarChart').getContext('2d');
+  if (myChart) myChart.destroy();
+  myChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Physique', 'Technique', 'Tactique'],
+      datasets: [{
+        label: 'Tes notes',
+        data: [scores.physique, scores.technique, scores.tactique],
+        backgroundColor: 'rgba(22, 163, 74, 0.15)',
+        borderColor: '#16a34a',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#16a34a',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+      }]
+    },
+    options: {
+      scales: { r: { min: 0, max: 20, ticks: { display: false, stepSize: 5 }, grid: { color: '#e5e7eb' }, pointLabels: { font: { size: 13, weight: '600', family: 'DM Sans' }, color: '#374151' } } },
+      plugins: { legend: { display: false } },
+      animation: { duration: 1000 }
+    }
+  });
+}
+
+function renderScoreCards(data) {
+  const analyses = [
+    { label: 'Physique', emoji: '💪', score: data.scores.physique, analysis: data.physique_analysis },
+    { label: 'Technique', emoji: '🎯', score: data.scores.technique, analysis: data.technique_analysis },
+    { label: 'Tactique', emoji: '🧠', score: data.scores.tactique, analysis: data.tactique_analysis },
+  ];
+
+  let html = '';
+  analyses.forEach(a => {
+    const pct = (a.score / 20 * 100);
+    html += `
+      <div class="score-card">
+        <div class="score-card-header">
+          <div class="score-card-label">
+            <span class="emoji">${a.emoji}</span> ${a.label}
+            <span style="font-size:11px; padding:2px 8px; border-radius:99px; background:${a.analysis.color}15; color:${a.analysis.color}; font-weight:600;">${a.analysis.status}</span>
+          </div>
+          <div class="score-card-value" style="color:${a.analysis.color}">${a.score}/20</div>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="background:${a.analysis.color};" data-width="${pct}%"></div>
+        </div>
+        <div class="score-card-message">
+          ${a.analysis.emoji} ${a.analysis.message}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('scoreCards').innerHTML = html;
+
+  // Animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 100);
+}
+
+function renderExercises(exercises) {
+  let html = '';
+  exercises.forEach(ex => {
+    const img = exerciseImages[ex.image] || exerciseImages['technique'];
+    html += `
+      <div class="exercise-card">
+        <div class="exercise-card-img" style="background-image:url('${img}')">
+          <div class="exercise-card-img-overlay"></div>
+          <span class="exercise-category-badge" style="background:${ex.categoryColor}">${ex.category}</span>
+          <span class="exercise-intensity-badge">⚡ ${ex.intensity}</span>
+        </div>
+        <div class="exercise-card-body">
+          <div class="exercise-card-name">${ex.name}</div>
+          <div class="exercise-card-desc" style="margin-bottom:12px;">${ex.description}</div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #f1f5f9;">
+            <div style="font-size:11px; color:#64748b;">
+               <div style="font-weight:700; color:var(--text); font-size:12px;">${ex.sets || 'N/A'}</div>
+               <div style="text-transform:uppercase; letter-spacing:0.5px; font-size:9px;">Séries</div>
+            </div>
+            <div style="font-size:11px; color:#64748b; border-left:1px solid #e2e8f0; padding-left:8px;">
+               <div style="font-weight:700; color:var(--text); font-size:12px;">${ex.reps || 'N/A'}</div>
+               <div style="text-transform:uppercase; letter-spacing:0.5px; font-size:9px;">Répétitions</div>
+            </div>
+          </div>
+
+          <div class="exercise-card-meta">
+            <span class="exercise-meta-item">⏱️ ${ex.duration}</span>
+            <span class="exercise-meta-item">⚡ ${ex.intensity}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('exercisesGrid').innerHTML = html;
+}
+
+function renderTips(data) {
+  let html = '';
+
+  // Training tip
+  html += `
+    <div class="tip-card">
+      <div class="tip-card-title">💡 Conseil d'entraînement</div>
+      <div class="tip-card-text">${data.training_tip}</div>
+    </div>
+  `;
+
+  // AI advice if available
+  if (data.ai_advice) {
+    html += `
+      <div class="tip-card" style="background: linear-gradient(135deg, #eff6ff, #eef2ff); border-color: #c7d2fe;">
+        <div class="tip-card-title" style="color: #3730a3;">🤖 Analyse Gemini AI</div>
+        <div class="tip-card-text">${data.ai_advice.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+  }
+
+  // Motivation
+  html += `
+    <div class="motivation-card">
+      <span class="motivation-icon">🔥</span>
+      <div class="motivation-quote">${data.motivation}</div>
+    </div>
+  `;
+
+  // AI powered badge
+  html += `
+    <div style="text-align:center; margin-top:16px;">
+      <span class="ai-powered-badge">
+        <span class="dot"></span>
+        Analyse générée par Sport Insight AI Coach
+      </span>
+    </div>
+  `;
+
+  document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ─── NUTRITION TAB ─────────────────────────────────────────
+// Load nutrition data when tab is clicked (lazy load)
+const origSwitchTab = switchTab;
+window.switchTab = function(tabId, btn) {
+  origSwitchTab(tabId, btn);
+  if (tabId === 'nutrition' && !nutritionLoaded) {
+    loadNutritionData();
+  }
+};
+// Reassign to keep reference
+switchTab = window.switchTab;
+
+function loadNutritionData() {
+  const {p, t, ta, type} = currentScores;
+  fetch(`/front/coach/api/nutrition?p=${p}&t=${t}&ta=${ta}&type=${encodeURIComponent(type)}`)
+    .then(r => r.json())
+    .then(data => {
+      nutritionLoaded = true;
+      document.getElementById('nutritionLoading').style.display = 'none';
+      document.getElementById('nutritionContent').style.display = '';
+      renderNutrition(data);
+    })
+    .catch(err => {
+      document.getElementById('nutritionLoading').innerHTML =
+        `<div style="color:#ef4444;">❌ Erreur de chargement des données nutrition</div>`;
+    });
+}
+
+function searchSpecificFood() {
+  const input = document.getElementById('foodSearchInput');
+  const resultsArea = document.getElementById('foodSearchResults');
+  const query = input.value.trim();
+  
+  if (!query) return;
+  
+  const btn = document.querySelector('.food-calc-btn');
+  const originalText = btn.textContent;
+  btn.textContent = '...';
+  btn.disabled = true;
+  resultsArea.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.6);">Recherche en cours...</div>';
+
+  fetch(`/front/coach/api/food-search?q=${encodeURIComponent(query)}`)
+    .then(r => r.json())
+    .then(data => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      
+      // Handle both array and {items: []} formats just in case
+      const items = Array.isArray(data) ? data : (data.items || []);
+      
+      if (!items || items.length === 0) {
+        resultsArea.innerHTML = '<div style="font-size:12px; color:#94a3b8;">Aucun résultat trouvé pour cet aliment. Essayez un terme plus simple ou en anglais (ex: "100g steak").</div>';
+        return;
+      }
+      
+      let html = '';
+      items.forEach(food => {
+        html += renderApiFoodCard(food);
+      });
+      resultsArea.innerHTML = html;
+    })
+    .catch(() => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      resultsArea.innerHTML = '<div style="color:#f87171; font-size:12px;">Erreur lors de la recherche.</div>';
+    });
+}
+
+function renderNutrition(data) {
+  let html = '';
+
+  // ── Calories & Hydration overview ──
+  html += `<div class="nutri-overview">`;
+  html += `
+    <div class="calorie-card">
+      <div style="font-size:24px; margin-bottom:6px;">🔥</div>
+      <div class="calorie-value">${data.calories_estimate.min} - ${data.calories_estimate.max}</div>
+      <div class="calorie-label">Calories / jour</div>
+      <div class="calorie-sub">Intensité : ${data.calories_estimate.intensity === 'light' ? '🟢 Légère' : data.calories_estimate.intensity === 'moderate' ? '🟡 Modérée' : '🔴 Intense'}</div>
+    </div>
+  `;
+  html += `
+    <div class="hydration-card">
+      <div style="font-size:24px; margin-bottom:6px;">💧</div>
+      <div class="hydration-value">${data.hydration.litres_min}L - ${data.hydration.litres_max}L</div>
+      <div class="hydration-label">Hydratation / jour</div>
+      <div class="hydration-tips">
+        ${data.hydration.tips.map(t => `<div>${t}</div>`).join('')}
+        ${data.hydration.electrolytes ? '<div style="margin-top:4px; font-weight:700;">⚡ Électrolytes recommandés</div>' : ''}
+      </div>
+    </div>
+  `;
+  html += `</div>`;
+
+  // ── Macros ──
+  html += `<div class="nutrition-section">`;
+  html += `<div class="nutrition-section-title">📊 Répartition des Macronutriments</div>`;
+  html += `<div class="macro-bars">`;
+  ['protein', 'carbs', 'fat'].forEach(key => {
+    const m = data.macros[key];
+    html += `
+      <div class="macro-bar-item">
+        <div class="macro-icon" style="background:${m.color}15;">${m.icon}</div>
+        <div class="macro-info">
+          <div class="macro-name">${m.label}</div>
+          <div class="macro-desc">${m.description}</div>
+          <div class="macro-bar-track">
+            <div class="macro-bar-fill" style="background:${m.color};" data-width="${m.percent}%"></div>
+          </div>
+        </div>
+        <div class="macro-percent" style="color:${m.color};">${m.percent}%</div>
+      </div>
+    `;
+  });
+  html += `</div></div>`;
+
+  // ── Pre/Post workout ──
+  html += `<div class="nutrition-section">`;
+  html += `<div class="nutrition-section-title">⚡ Nutrition Pré & Post Entraînement</div>`;
+  html += `<div class="workout-nutrition">`;
+
+  // Pre-workout
+  html += `<div class="workout-card">`;
+  html += `<div class="workout-card-header pre">🔜 Avant l'effort</div>`;
+  html += `<div class="workout-card-body">`;
+  html += `<div class="workout-timing">⏰ ${data.pre_workout.timing}</div>`;
+  data.pre_workout.foods.forEach(f => {
+    html += `
+      <div class="workout-food-item">
+        <span class="workout-food-emoji">${f.emoji}</span>
+        <div class="workout-food-info">
+          <div class="workout-food-name">${f.name}</div>
+          <div class="workout-food-benefit">${f.benefit}</div>
+        </div>
+      </div>
+    `;
+  });
+  if (data.pre_workout.avoid && data.pre_workout.avoid.length) {
+    html += `<div style="margin-top:10px; padding:8px 12px; background:#fef2f2; border-radius:8px; font-size:11px; color:#991b1b;"><b>❌ Éviter :</b> ${data.pre_workout.avoid.join(', ')}</div>`;
+  }
+  html += `</div></div>`;
+
+  // Post-workout
+  html += `<div class="workout-card">`;
+  html += `<div class="workout-card-header post">🔙 Après l'effort</div>`;
+  html += `<div class="workout-card-body">`;
+  html += `<div class="workout-timing">⏰ ${data.post_workout.timing}</div>`;
+  data.post_workout.foods.forEach(f => {
+    html += `
+      <div class="workout-food-item">
+        <span class="workout-food-emoji">${f.emoji}</span>
+        <div class="workout-food-info">
+          <div class="workout-food-name">${f.name}</div>
+          <div class="workout-food-benefit">${f.benefit}</div>
+        </div>
+      </div>
+    `;
+  });
+  if (data.post_workout.window) {
+    html += `<div class="workout-window">⚠️ ${data.post_workout.window}</div>`;
+  }
+  html += `</div></div>`;
+  html += `</div></div>`;
+
+  // ── Meal plan ──
+  html += `<div class="nutrition-section">`;
+  html += `<div class="nutrition-section-title">🍽️ Plan Repas Recommandé</div>`;
+  html += `<div class="meals-grid">`;
+  data.meals.forEach(meal => {
+    html += `
+      <div class="meal-card">
+        <div class="meal-card-img" style="background-image:url('${meal.image}')">
+          <div class="meal-card-img-overlay"></div>
+          <span class="meal-time-badge">⏰ ${meal.time}</span>
+          <span class="meal-cal-badge">${meal.calories}</span>
+        </div>
+        <div class="meal-card-body">
+          <div class="meal-card-name">${meal.icon} ${meal.name}</div>
+          <ul class="meal-food-list">
+            ${meal.foods.map(f => `<li>${f}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div></div>`;
+
+  // ── Supplements ──
+  html += `<div class="nutrition-section">`;
+  html += `<div class="nutrition-section-title">💊 Compléments Recommandés</div>`;
+  html += `<div class="supplements-grid">`;
+  data.supplements.forEach(s => {
+    html += `
+      <div class="supplement-card ${s.recommended ? 'recommended' : ''}">
+        <div class="supplement-header">
+          <span class="supplement-emoji">${s.emoji}</span>
+          <span class="supplement-name">${s.name}</span>
+          ${s.recommended ? '<span class="supplement-rec-badge">Recommandé</span>' : ''}
+        </div>
+        <div class="supplement-benefit">${s.benefit}</div>
+        <div class="supplement-when">📅 ${s.when}</div>
+      </div>
+    `;
+  });
+  html += `</div></div>`;
+
+  // ── API Foods (real data from API Ninjas) ──
+  if (data.api_foods && data.api_foods.length > 0) {
+    html += `<div class="nutrition-section">`;
+    html += `<div class="nutrition-section-title">🔬 Données Nutritionnelles Réelles</div>`;
+    html += `<p style="font-size:13px; color:#6b7280; margin-bottom:14px;">Valeurs nutritionnelles réelles pour les aliments recommandés, fournies par l'API Ninjas</p>`;
+    html += `<div class="api-foods-grid">`;
+    data.api_foods.forEach((food, i) => {
+      html += renderApiFoodCard(food, i);
+    });
+    html += `</div>`;
+    html += `<div style="text-align:center;"><span class="api-badge"><span class="api-dot"></span> Données en temps réel — API Ninjas</span></div>`;
+    html += `</div>`;
+  }
+
+  // ── Nutrition tip ──
+  html += `
+    <div class="nutri-tip-card">
+      <div class="nutri-tip-title">🌿 Le Saviez-vous ?</div>
+      <div class="nutri-tip-text">${data.nutrition_tip}</div>
+    </div>
+  `;
+
+  document.getElementById('nutritionMainBody').innerHTML = html;
+
+  // Animate macro bars
+  setTimeout(() => {
+    document.querySelectorAll('#nutritionContent .macro-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 100);
+}
+
+// Extracted for reuse
+function renderApiFoodCard(food, index = 0) {
+  const maxProtein = 50, maxCarbs = 80, maxFat = 40;
+  
+  // Extremely robust key lookup for API Ninjas
+  const getVal = (keys) => {
+    for (const k of keys) {
+      if (food[k] !== undefined && food[k] !== null) return parseFloat(food[k]);
+    }
+    return 0;
+  };
+
+  const protein  = getVal(['protein_g', 'protein', 'protein_mg']);
+  const carbs    = getVal(['carbohydrates_total_g', 'carbohydrates', 'carbs_g', 'total_carbohydrates_g']);
+  const fat      = getVal(['fat_total_g', 'fat', 'lipids_g', 'total_fat_g']);
+  const calories = getVal(['calories', 'kcal', 'energy']);
+  const serving  = getVal(['serving_size_g', 'serving_size', 'weight_g']) || 100;
+  
+  // Extra specific for steak/chicken check
+  console.log('Food Item Data:', food.name, { protein, carbs, fat, calories });
+
+  return `
+    <div class="api-food-card" style="border: 1px solid #e2e8f0; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); animation-delay: ${index * 0.05}s;">
+      <div class="api-food-name" style="color: #1e293b; font-size: 16px; margin-bottom: 2px;">${food.name}</div>
+      <div class="api-food-serving" style="margin-bottom: 10px;">Portion : ${serving}g</div>
+      
+      <div class="api-food-calories" style="margin-bottom: 15px;">
+        <span style="font-size:18px;">🔥</span>
+        <span class="cal-val" style="font-size: 32px; color: #b45309;">${Math.round(calories)}</span>
+        <span class="cal-label">kcal</span>
+      </div>
+
+      <div class="api-nutrient-row">
+        <span class="api-nutrient-name">🥩 <strong>Protéines</strong></span>
+        <span class="api-nutrient-value" style="color:#ef4444; font-weight: 800; font-size: 14px;">${protein.toFixed(1)}g</span>
+      </div>
+      <div class="api-nutrient-bar" style="background: #fee2e2; height: 6px;">
+        <div class="api-nutrient-bar-fill" style="background:#ef4444; width:${Math.min((protein / maxProtein) * 100, 100)}%"></div>
+      </div>
+
+      <div class="api-nutrient-row" style="margin-top: 8px;">
+        <span class="api-nutrient-name">🌾 Glucides</span>
+        <span class="api-nutrient-value" style="color:#1e293b; font-weight: 600;">${carbs.toFixed(1)}g</span>
+      </div>
+      <div class="api-nutrient-bar" style="height: 4px;">
+        <div class="api-nutrient-bar-fill" style="background:#f59e0b; width:${Math.min((carbs / maxCarbs) * 100, 100)}%"></div>
+      </div>
+
+      <div class="api-nutrient-row" style="margin-top: 8px;">
+        <span class="api-nutrient-name">🥑 Lipides</span>
+        <span class="api-nutrient-value" style="color:#1e293b; font-weight: 600;">${fat.toFixed(1)}g</span>
+      </div>
+      <div class="api-nutrient-bar" style="height: 4px;">
+        <div class="api-nutrient-bar-fill" style="background:#22c55e; width:${Math.min((fat / maxFat) * 100, 100)}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+function closeAiModal() {
+  document.getElementById('aiModal').classList.remove('show');
+}
+</script>
 {% endblock %}

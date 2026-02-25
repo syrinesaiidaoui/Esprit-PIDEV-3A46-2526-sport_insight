@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\ORM\Mapping\OneToMany;
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
 class Equipe
@@ -16,6 +15,10 @@ class Equipe
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[Assert\NotBlank(message: 'L\'identifiant de l\'équipe est obligatoire.')]
+    #[ORM\Column(length: 100)]
+    private ?string $id_equipe = null;
 
     #[Assert\NotBlank(message: 'Le nom de l\'équipe est obligatoire.')]
     #[Assert\Length(
@@ -32,9 +35,6 @@ class Equipe
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $coach = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image = null;
-
     /**
      * @var Collection<int, Matchs>
      */
@@ -47,22 +47,27 @@ class Equipe
     #[ORM\OneToMany(targetEntity: ContratSponsor::class, mappedBy: 'equipe')]
     private Collection $contratSponsors;
 
-    /**
-     * @var Collection<int, Joueur>
-     */
-    #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe', cascade: ['remove'])]
-    private Collection $joueurs;
-
     public function __construct()
     {
         $this->matchs = new ArrayCollection();
         $this->contratSponsors = new ArrayCollection();
-        $this->joueurs = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getIdEquipe(): ?string
+    {
+        return $this->id_equipe;
+    }
+
+    public function setIdEquipe(string $id_equipe): static
+    {
+        $this->id_equipe = $id_equipe;
+
+        return $this;
     }
 
     public function getNom(): ?string
@@ -85,18 +90,6 @@ class Equipe
     public function setCoach(?string $coach): static
     {
         $this->coach = $coach;
-
-        return $this;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(?string $image): static
-    {
-        $this->image = $image;
 
         return $this;
     }
@@ -155,36 +148,6 @@ class Equipe
             // set the owning side to null (unless already changed)
             if ($contratSponsor->getEquipe() === $this) {
                 $contratSponsor->setEquipe(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Joueur>
-     */
-    public function getJoueurs(): Collection
-    {
-        return $this->joueurs;
-    }
-
-    public function addJoueur(Joueur $joueur): static
-    {
-        if (!$this->joueurs->contains($joueur)) {
-            $this->joueurs->add($joueur);
-            $joueur->setEquipe($this);
-        }
-
-        return $this;
-    }
-
-    public function removeJoueur(Joueur $joueur): static
-    {
-        if ($this->joueurs->removeElement($joueur)) {
-            // set the owning side to null (unless already changed)
-            if ($joueur->getEquipe() === $this) {
-                $joueur->setEquipe(null);
             }
         }
 
