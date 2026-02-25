@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Exercices personnalisés 💪{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">🔥 Exercices pour toi</h1>
+
+    <div class="row">
+        {% for ex in exercises %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100">
+                    {% if ex.images is defined and ex.images|length > 0 %}
+                        <img src="{{ ex.images[0].image }}" class="card-img-top" alt="{{ ex.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ ex.name ?? 'Exercice' }}</h5>
+                        <p class="card-text">
+                            {{ ex.description|striptags|slice(0, 120) }}...
+                        </p>
+                        <span class="badge bg-success">🏋️ Entraînement</span>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p>Aucun exercice trouvé 😢</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
