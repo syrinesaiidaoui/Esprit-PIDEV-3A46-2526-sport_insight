@@ -1,0 +1,35 @@
+{# templates/front_office/entrainement/coach_dashboard.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto p-10 space-y-8">
+
+  <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-8 rounded-3xl shadow-xl">
+    <h1 class="text-3xl font-bold">🔥 Ton Coach Intelligent</h1>
+    <p class="mt-2 text-lg">{{ message|default('') }}</p>
+<div class="mt-4 text-2xl font-extrabold">Score: {{ score|default(0) }}/10</div>
+<div class="mt-2 opacity-90">Niveau: {{ niveau|default('Inconnu')|upper }}</div>
+  </div>
+
+  <h2 class="text-2xl font-bold mt-10">🏋️ Exercices recommandés</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {% for ex in exercises %}
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+        {% if ex.image %}
+          <img src="{{ ex.image }}" class="w-full h-48 object-cover">
+        {% else %}
+          <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+            🏋️
+          </div>
+        {% endif %}
+        <div class="p-4">
+          <h3 class="font-bold text-lg">{{ ex.name }}</h3>
+          <p class="text-sm text-gray-600 mt-2 line-clamp-3">{{ ex.description }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

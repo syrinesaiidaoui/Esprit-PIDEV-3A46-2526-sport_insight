@@ -10,10 +10,7 @@
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "*",
-        "dompdf/dompdf": "^3.1",
-        "endroid/qr-code": "^6.1",
-        "knplabs/knp-paginator-bundle": "^6.10",
-        "phpdocumentor/reflection-docblock": "^5.2",
+        "phpdocumentor/reflection-docblock": "5.2",
         "phpstan/phpdoc-parser": "^2.3",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
@@ -44,12 +41,10 @@
         "symfony/ux-turbo": "^2.32",
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
+        "symfony/workflow": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/intl-extra": "^3.23",
-        "twig/twig": "^2.12|^3.0",
-        "twilio/sdk": "^8.11",
-        "vich/uploader-bundle": "^2.9"
+        "twig/twig": "^2.12|^3.0"
     },
     "config": {
         "allow-plugins": {

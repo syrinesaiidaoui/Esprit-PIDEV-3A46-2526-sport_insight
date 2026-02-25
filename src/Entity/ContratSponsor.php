@@ -48,11 +48,6 @@ class ContratSponsor
     )]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
-    private ?string $statut = 'Actif';
-
-    #[ORM\Column(type: Types::BOOLEAN)]
-    private bool $notified = false;
     public function getId(): ?int
     {
         return $this->id;
@@ -128,34 +123,5 @@ class ContratSponsor
         $this->description = $description;
 
         return $this;
-    }
-
-    public function getStatut(): ?string
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(?string $statut): static
-    {
-        $this->statut = $statut;
-
-        return $this;
-    }
-
-    public function isNotified(): bool
-    {
-        return $this->notified;
-    }
-
-    public function setNotified(bool $notified): static
-    {
-        $this->notified = $notified;
-
-        return $this;
-    }
-
-    public function isExpired(): bool
-    {
-        return $this->dateFin < new \DateTime();
     }
 }

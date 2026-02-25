@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\Sponsor;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -40,18 +39,13 @@ class SponsorType extends AbstractType
                 ],
             ])
             ->add('budget', NumberType::class, [
-                'label' => 'Budget annuel (DT)',
+                'label' => 'Budget annuel (€)',
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Entrez le budget',
                     'step' => '0.01',
                     'min' => '0',
                 ],
-            ])
-            ->add('logoFile', FileType::class, [
-                'label' => 'Logo du sponsor',
-                'required' => false,
-                'mapped' => true,
             ])
         ;
     }

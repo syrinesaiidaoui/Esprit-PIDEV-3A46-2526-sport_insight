@@ -7,7 +7,6 @@ use App\Entity\Equipe;
 use App\Entity\Sponsor;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -43,7 +42,7 @@ class ContratSponsorType extends AbstractType
                 'required' => true,
             ])
             ->add('montant', null, [
-                'label' => 'Montant du contrat (DT)',
+                'label' => 'Montant du contrat (€)',
                 'required' => true,
             ])
             ->add('description', TextareaType::class, [
@@ -54,12 +53,6 @@ class ContratSponsorType extends AbstractType
                     'class' => 'form-control',
                     'placeholder' => 'Entrez les termes et conditions du contrat...',
                 ],
-            ])
-            ->add('sponsorLogoFile', FileType::class, [
-                'label' => 'Logo du sponsor (optionnel)',
-                'required' => false,
-                'mapped' => false,
-                'attr' => ['accept' => 'image/*']
             ])
         ;
     }
