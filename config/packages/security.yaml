@@ -1,8 +1,10 @@
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: native
+            cost: 13
+         # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
@@ -13,12 +15,22 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        registration:
+            pattern: ^/register-admin
+            security: false
         main:
             lazy: true
             provider: app_user_provider
-
             # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+                default_target_path: app_user_index
+
+            logout:
+                path: app_logout
+                target: app_login
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
@@ -26,8 +38,27 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/register-admin$, roles: PUBLIC_ACCESS }
+        # Public routes (no authentication required)
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/front, roles: PUBLIC_ACCESS }
+        
+        # Admin routes requiring ROLE_ADMIN
+        - { path: ^/admin/evaluation, roles: [ROLE_ADMIN, ROLE_ENTRAINEUR] }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/back, roles: [ROLE_ADMIN, ROLE_ENTRAINEUR] }
+        - { path: ^/product, roles: ROLE_ADMIN }
+        - { path: ^/order, roles: ROLE_ADMIN }
+        - { path: ^/sponsor, roles: ROLE_ADMIN }
+        - { path: ^/contrat/sponsor, roles: ROLE_ADMIN }
+        - { path: ^/matchs, roles: ROLE_ADMIN }
+        - { path: ^/equipe, roles: ROLE_ADMIN }
+        
+        # Routes requiring authentication (any logged-in user)
+        - { path: ^/user, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/annonce, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/commentaire, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

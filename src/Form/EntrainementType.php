@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Entrainement;
 use App\Entity\User;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -21,13 +22,26 @@ class EntrainementType extends AbstractType
             ->add('objectif')
             ->add('lieu')
             ->add('entraineur', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'id',
+                'class'        => User::class,
+                'choice_label' => 'nomComplet',
+                'placeholder'  => '-- Choisir un entraîneur --',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.roles LIKE :role')
+                        ->setParameter('role', '%ROLE_ENTRAINEUR%')
+                        ->orderBy('u.nom', 'ASC');
+                },
             ])
             ->add('joueurs', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'id',
-                'multiple' => true,
+                'class'        => User::class,
+                'choice_label' => 'nomComplet',
+                'multiple'     => true,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.roles LIKE :role')
+                        ->setParameter('role', '%ROLE_JOUEUR%')
+                        ->orderBy('u.nom', 'ASC');
+                },
             ])
         ;
     }
@@ -39,3 +53,4 @@ class EntrainementType extends AbstractType
         ]);
     }
 }
+

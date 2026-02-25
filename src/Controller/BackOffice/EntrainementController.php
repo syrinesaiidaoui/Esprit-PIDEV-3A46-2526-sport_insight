@@ -3,8 +3,10 @@
 namespace App\Controller\BackOffice;
 
 use App\Entity\Entrainement;
+use App\Entity\User; // Ajouté pour trouver les joueurs
 use App\Form\EntrainementType;
 use App\Repository\EntrainementRepository;
+use App\Service\NotificationService; // Ajouté pour le mail/notif
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,11 +28,13 @@ final class EntrainementController extends AbstractController
             $qb->andWhere('LOWER(e.type) LIKE :searchType')
                 ->setParameter('searchType', '%' . strtolower($searchType) . '%');
         }
+        
         if ($sortBy === 'dateEntrainement') {
             $qb->orderBy('e.dateEntrainement', $sortDir === 'desc' ? 'DESC' : 'ASC');
         } else {
             $qb->orderBy('e.id', 'DESC');
         }
+        
         $entrainements = $qb->getQuery()->getResult();
 
         return $this->render('back_office/entrainement/index.html.twig', [
@@ -41,8 +45,9 @@ final class EntrainementController extends AbstractController
         ]);
     }
 
+    // UNE SEULE MÉTHODE NEW ICI
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notifier): Response
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -52,11 +57,19 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
+            // 1. Récupérer les joueurs associés à cet entraînement
+            $joueurs = $entrainement->getJoueurs();
+            
+            foreach ($joueurs as $joueur) {
+                $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+            }
+
+            $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
             return $this->redirectToRoute('back_entrainement_index');
         }
 
         return $this->render('back_office/entrainement/new.html.twig', [
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -76,7 +89,7 @@ final class EntrainementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'Entraînement mis à jour.');
             return $this->redirectToRoute('back_entrainement_index');
         }
 
@@ -95,6 +108,7 @@ final class EntrainementController extends AbstractController
         )) {
             $entityManager->remove($entrainement);
             $entityManager->flush();
+            $this->addFlash('danger', 'Entraînement supprimé.');
         }
 
         return $this->redirectToRoute('back_entrainement_index');
