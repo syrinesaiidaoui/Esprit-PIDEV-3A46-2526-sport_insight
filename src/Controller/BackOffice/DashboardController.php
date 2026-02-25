@@ -14,7 +14,8 @@ use Symfony\UX\Chartjs\Model\Chart;
 #[IsGranted('ROLE_ADMIN')]
 class DashboardController extends AbstractController
 {
-    #[Route('/', name: 'admin_dashboard', methods: ['GET'])]
+    #[Route('', name: 'admin_dashboard', methods: ['GET'])]
+    #[Route('/', name: 'admin_dashboard_slash', methods: ['GET'])]
     public function index(AdminDashboardService $dashboardService, ChartBuilderInterface $chartBuilder): Response
     {
         $data = $dashboardService->buildDashboardData();
@@ -58,3 +59,4 @@ class DashboardController extends AbstractController
         ]));
     }
 }
+
