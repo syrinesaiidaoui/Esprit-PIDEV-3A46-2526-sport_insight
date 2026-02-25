@@ -50,13 +50,23 @@ class ProductRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('p');
 
         if ($q) {
-            $qb->andWhere('LOWER(p.name) LIKE :q')
+            $qb->andWhere('LOWER(p.name) LIKE :q OR LOWER(p.category) LIKE :q OR LOWER(p.brand) LIKE :q')
                 ->setParameter('q', '%' . strtolower($q) . '%');
         }
 
         if ($category) {
-            $qb->andWhere('p.category = :cat')
-                ->setParameter('cat', $category);
+            $aliases = $this->expandCategoryAliases(strtolower(trim($category)));
+            $orX = $qb->expr()->orX();
+
+            foreach ($aliases as $index => $alias) {
+                $parameter = 'cat_' . $index;
+                $orX->add('LOWER(p.category) LIKE :' . $parameter);
+                $qb->setParameter($parameter, '%' . $alias . '%');
+            }
+
+            if (count($orX->getParts()) > 0) {
+                $qb->andWhere($orX);
+            }
         }
 
         switch ($sort) {
@@ -71,6 +81,37 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         return $qb;
+    }
+
+    /**
+     * Expand user-facing category names (e.g. Shoes, Pulls) to DB-compatible aliases.
+     * @return string[]
+     */
+    private function expandCategoryAliases(string $category): array
+    {
+        $normalized = strtolower(trim($category));
+        if ($normalized === '') {
+            return [];
+        }
+
+        $groups = [
+            ['boots', 'boot', 'shoes', 'shoe', 'cleats', 'chaussure', 'chaussures'],
+            ['jersey', 'jerseys', 'maillot', 'maillots', 'shirt', 'shirts'],
+            ['pull', 'pulls', 'hoodie', 'hoodies', 'sweat', 'sweats', 'training wear', 'training'],
+            ['ball', 'balls', 'ballon', 'ballons'],
+            ['glove', 'gloves', 'gant', 'gants'],
+            ['accessory', 'accessories', 'accessoire', 'accessoires'],
+            ['protection', 'protections'],
+        ];
+
+        $aliases = [$normalized];
+        foreach ($groups as $group) {
+            if (in_array($normalized, $group, true)) {
+                $aliases = array_merge($aliases, $group);
+            }
+        }
+
+        return array_values(array_unique(array_filter(array_map('trim', $aliases))));
     }
 
     /**

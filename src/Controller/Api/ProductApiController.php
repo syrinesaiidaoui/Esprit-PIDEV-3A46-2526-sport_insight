@@ -42,7 +42,7 @@ class ProductApiController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            $requiredFields = ['name', 'price', 'stock', 'category'];
+            $requiredFields = ['name', 'price', 'stock'];
             $missingFields = [];
             foreach ($requiredFields as $field) {
                 if (empty($data[$field])) {
@@ -62,7 +62,7 @@ class ProductApiController extends AbstractController
             $product->setName($data['name']);
             $product->setPrice((string)(float)$data['price']);
             $product->setStock((int)$data['stock']);
-            $product->setCategory($data['category']);
+            $product->setCategory($data['category'] ?? null);
             $product->setBrand($data['brand'] ?? '');
             $product->setSize($data['size'] ?? '');
             $product->setImage($data['image'] ?? '');
@@ -124,7 +124,7 @@ class ProductApiController extends AbstractController
                 $product->setStock((int)$data['stock']);
             }
             if (isset($data['category'])) {
-                $product->setCategory($data['category']);
+                $product->setCategory($data['category'] ?? null);
             }
             if (isset($data['brand'])) {
                 $product->setBrand($data['brand']);
@@ -204,9 +204,19 @@ class ProductApiController extends AbstractController
             $page = max(1, (int) $request->query->get('page', 1));
             $perPage = (int) $request->query->get('perPage', 10);
             $perPage = max(1, min(100, $perPage));
+            $q = trim((string) $request->query->get('q', ''));
+            $category = trim((string) $request->query->get('category', ''));
+            $sort = trim((string) $request->query->get('sort', 'name'));
 
-            $qb = $this->productRepository->createQueryBuilder('p')
-                ->orderBy('p.id', 'ASC');
+            if (!in_array($sort, ['name', 'price', 'stock'], true)) {
+                $sort = 'name';
+            }
+
+            $qb = $this->productRepository->createSearchQueryBuilder(
+                $q !== '' ? $q : null,
+                $category !== '' ? $category : null,
+                $sort
+            );
 
             $pagination = $this->paginator->paginate($qb, $page, $perPage);
             $data = [];
@@ -221,7 +231,11 @@ class ProductApiController extends AbstractController
                     $data[] = $this->normalizeProductEntity($product, $absoluteIndex);
                 }
             } else {
-                $jsonProducts = $this->loadProductsFromJson();
+                $jsonProducts = $this->loadProductsFromJson(
+                    $q !== '' ? $q : null,
+                    $category !== '' ? $category : null,
+                    $sort
+                );
                 $jsonPagination = $this->paginator->paginate($jsonProducts, $page, $perPage);
 
                 foreach ($jsonPagination->getItems() as $item) {
@@ -256,7 +270,7 @@ class ProductApiController extends AbstractController
         }
     }
 
-    private function loadProductsFromJson(): array
+    private function loadProductsFromJson(?string $q = null, ?string $category = null, ?string $sort = null): array
     {
         $filePath = $this->getParameter('kernel.project_dir') . '/public/api/products.json';
         if (!is_file($filePath)) {
@@ -305,7 +319,92 @@ class ProductApiController extends AbstractController
             ];
         }
 
+        $data = $this->applyJsonCatalogFilters($data, $q, $category);
+        $this->applyJsonCatalogSort($data, $sort);
+
         return $data;
+    }
+
+    private function applyJsonCatalogFilters(array $products, ?string $q = null, ?string $category = null): array
+    {
+        $search = strtolower(trim((string) $q));
+        $categoryAliases = $this->expandCategoryAliases((string) $category);
+
+        return array_values(array_filter($products, static function (array $product) use ($search, $categoryAliases): bool {
+            if ($search !== '') {
+                $haystack = strtolower(
+                    (string)($product['name'] ?? '') . ' '
+                    . (string)($product['category'] ?? '') . ' '
+                    . (string)($product['brand'] ?? '')
+                );
+                if (!str_contains($haystack, $search)) {
+                    return false;
+                }
+            }
+
+            if (!empty($categoryAliases)) {
+                $productCategory = strtolower((string)($product['category'] ?? ''));
+                $matches = false;
+                foreach ($categoryAliases as $alias) {
+                    if ($alias !== '' && str_contains($productCategory, $alias)) {
+                        $matches = true;
+                        break;
+                    }
+                }
+
+                if (!$matches) {
+                    return false;
+                }
+            }
+
+            return true;
+        }));
+    }
+
+    private function applyJsonCatalogSort(array &$products, ?string $sort = null): void
+    {
+        switch ($sort) {
+            case 'price':
+                usort($products, static fn (array $a, array $b): int => ((float)($a['price'] ?? 0)) <=> ((float)($b['price'] ?? 0)));
+                break;
+            case 'stock':
+                usort($products, static fn (array $a, array $b): int => ((int)($b['stock'] ?? 0)) <=> ((int)($a['stock'] ?? 0)));
+                break;
+            default:
+                usort($products, static fn (array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
+                break;
+        }
+    }
+
+    /**
+     * Expand user-facing category names (e.g. Shoes, Pulls) to known aliases.
+     * @return string[]
+     */
+    private function expandCategoryAliases(string $category): array
+    {
+        $normalized = strtolower(trim($category));
+        if ($normalized === '') {
+            return [];
+        }
+
+        $groups = [
+            ['boots', 'boot', 'shoes', 'shoe', 'cleats', 'chaussure', 'chaussures'],
+            ['jersey', 'jerseys', 'maillot', 'maillots', 'shirt', 'shirts'],
+            ['pull', 'pulls', 'hoodie', 'hoodies', 'sweat', 'sweats', 'training wear', 'training'],
+            ['ball', 'balls', 'ballon', 'ballons'],
+            ['glove', 'gloves', 'gant', 'gants'],
+            ['accessory', 'accessories', 'accessoire', 'accessoires'],
+            ['protection', 'protections'],
+        ];
+
+        $aliases = [$normalized];
+        foreach ($groups as $group) {
+            if (in_array($normalized, $group, true)) {
+                $aliases = array_merge($aliases, $group);
+            }
+        }
+
+        return array_values(array_unique(array_filter(array_map('trim', $aliases))));
     }
 
     private function normalizeProductEntity(Product $product, int $index): array
@@ -337,3 +436,5 @@ class ProductApiController extends AbstractController
         ];
     }
 }
+
+

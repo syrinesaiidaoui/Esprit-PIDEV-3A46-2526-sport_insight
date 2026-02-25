@@ -370,6 +370,29 @@ class EquipementController extends AbstractController
             $this->addFlash('warning', "Commande validee, mais certains emails n'ont pas pu etre envoyes.");
         }
 
+        if (!empty($orders)) {
+            $existingOrderIds = $session->get('customer_order_ids', []);
+            if (!is_array($existingOrderIds)) {
+                $existingOrderIds = [];
+            }
+
+            $newOrderIds = array_map(
+                static fn (Order $order): int => (int) $order->getId(),
+                $orders
+            );
+
+            $customerOrderIds = array_values(
+                array_unique(
+                    array_filter(
+                        array_merge($existingOrderIds, $newOrderIds),
+                        static fn (mixed $id): bool => (int) $id > 0
+                    )
+                )
+            );
+
+            $session->set('customer_order_ids', $customerOrderIds);
+        }
+
         $session->remove('cart');
         return $this->redirectToRoute('front_equipement_checkout_success');
     }
@@ -404,7 +427,20 @@ class EquipementController extends AbstractController
     public function orders(Request $request, OrderRepository $orderRepo): Response
     {
         $user = $this->getUser();
-        $orders = $user ? $user->getOrders() : $orderRepo->findBy([], ['orderDate' => 'DESC'], 50);
+        if ($user) {
+            $orders = $orderRepo->findBy(['entraineur' => $user], ['orderDate' => 'DESC']);
+        } else {
+            $sessionOrderIds = $request->getSession()->get('customer_order_ids', []);
+            if (!is_array($sessionOrderIds) || empty($sessionOrderIds)) {
+                $orders = [];
+            } else {
+                $orders = $orderRepo->findBy(['id' => array_values(array_unique($sessionOrderIds))]);
+                usort(
+                    $orders,
+                    static fn (Order $a, Order $b): int => $b->getOrderDate() <=> $a->getOrderDate()
+                );
+            }
+        }
 
         return $this->render('front_office/equipement/orders.html.twig', [
             'orders' => $orders,
@@ -570,11 +606,11 @@ class EquipementController extends AbstractController
             $orderNumber = $this->extractOrderNumber($message);
             if ($orderNumber === null) {
                 return "Please share your order number so I can help track it.\n\n"
-                    . "My Orders: /account/orders";
+                    . "My Orders: /equipement/orders";
             }
 
             return "Thanks. I noted order number {$orderNumber}. You can track status and updates here:\n"
-                . "My Orders: /account/orders";
+                . "My Orders: /equipement/orders";
         }
 
         if ($this->isReturnQuestion($normalized)) {

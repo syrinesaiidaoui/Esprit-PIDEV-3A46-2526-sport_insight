@@ -1,4 +1,4 @@
-﻿{% if errors is defined and errors %}
+{% if errors is defined and errors %}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h4 class="alert-heading"><i class="fa fa-exclamation-circle"></i> Erreurs de validation</h4>
         <ul class="mb-0">
@@ -14,15 +14,15 @@
 
 <style>
     .form-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 32px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
     .form-card h4 {
-        color: #111827;
+        color: var(--text-dark);
         font-weight: 700;
         margin-bottom: 24px;
         font-size: 18px;
@@ -66,7 +66,7 @@
     <div class="form-row full">
         <div class="form-group">
             {{ form_label(form.name) }}
-            {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Maillot Ã‰quipe', 'required': 'required', 'minlength': '2'}}) }}
+            {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Maillot Equipe', 'required': 'required', 'minlength': '2'}}) }}
             {% if form.name.vars.errors %}
                 <div class="text-danger small mt-2">
                     <i class="fa fa-times-circle"></i>
@@ -81,7 +81,7 @@
     <div class="form-row">
         <div class="form-group">
             {{ form_label(form.category) }}
-            {{ form_widget(form.category, {'attr': {'class': 'form-control', 'placeholder': 'Ex: VÃªtements', 'required': 'required'}}) }}
+            {{ form_widget(form.category, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Vetements'}}) }}
             {% if form.category.vars.errors %}
                 <div class="text-danger small mt-2">
                     <i class="fa fa-times-circle"></i>
@@ -122,7 +122,8 @@
 
         <div class="form-group">
             {{ form_label(form.stock) }}
-            {{ form_widget(form.stock, {'attr': {'class': 'form-control', 'placeholder': '0', 'required': 'required', 'min': '0', 'type': 'number'}}) }}`r`n{% if form.stock.vars.errors %}
+            {{ form_widget(form.stock, {'attr': {'class': 'form-control', 'placeholder': '0', 'required': 'required', 'min': '0', 'type': 'number'}}) }}
+            {% if form.stock.vars.errors %}
                 <div class="text-danger small mt-2">
                     <i class="fa fa-times-circle"></i>
                     {% for error in form.stock.vars.errors %}
@@ -172,5 +173,3 @@
 
     {{ form_end(form) }}
 </div>
-
-
