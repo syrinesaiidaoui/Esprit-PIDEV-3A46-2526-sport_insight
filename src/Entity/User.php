@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'Un compte existe déjà avec cet email.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -100,6 +101,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'entraineur')]
     private Collection $orders;
 
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
+    
     public function __construct()
     {
         $this->dateInscription = new \DateTime();
@@ -111,6 +119,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->participations = new ArrayCollection();
         $this->evaluations = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     #[Assert\Callback]
@@ -331,4 +340,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+ 
+
+   
 }

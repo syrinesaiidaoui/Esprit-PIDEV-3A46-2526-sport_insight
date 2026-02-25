@@ -43,7 +43,7 @@ class Product
     private ?string $brand = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image = null;
+    public ?string $image = null;
 
     /**
      * @var Collection<int, Order>
