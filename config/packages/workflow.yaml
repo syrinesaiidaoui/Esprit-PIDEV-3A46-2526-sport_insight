@@ -1,0 +1,29 @@
+framework:
+    workflows:
+        order_status:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\ProductOrder\Order
+            initial_marking: pending
+            places:
+                - pending
+                - confirmed
+                - shipped
+                - delivered
+                - rejected
+            transitions:
+                pay:
+                    from: pending
+                    to: confirmed
+                ship:
+                    from: confirmed
+                    to: shipped
+                deliver:
+                    from: shipped
+                    to: delivered
+                reject:
+                    from: [pending, confirmed]
+                    to: rejected
