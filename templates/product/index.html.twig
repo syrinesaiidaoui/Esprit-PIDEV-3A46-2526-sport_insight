@@ -1,161 +1,105 @@
 {% extends 'back_office/base.html.twig' %}
 
-{% block title %}Produits - Admin{% endblock %}
-{% block page_title %}Gestion des produits{% endblock %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Manage Products{% endblock %}
 
 {% block header_actions %}
-    <a href="{{ path('app_product_new') }}" class="btn btn-primary btn-add-product">Ajouter un produit</a>
+    <a href="{{ path('app_product_new') }}" class="btn btn-primary btn-sm">
+        <svg class="icon" aria-hidden="true"><use href="#icon-cart"/></svg> Add Product
+    </a>
 {% endblock %}
 
 {% block body %}
-{% set dashboard = dashboard|default({
-    totalProducts: products|length,
-    totalOrders: 0,
-    pendingOrders: 0,
-    revenue: 0,
-    lowStockCount: 0,
-    outOfStockCount: 0,
-    deliveryRate: 0
-}) %}
-
-<div class="admin-kpis">
-    <div class="stat-card">
-        <div class="stat-card-label">Produits</div>
-        <div class="stat-card-value">{{ dashboard.totalProducts }}</div>
-        <div class="stat-card-sub">Catalogue actif</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card-label">Commandes</div>
-        <div class="stat-card-value">{{ dashboard.totalOrders }}</div>
-        <div class="stat-card-sub">Activite totale</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card-label">CA valide</div>
-        <div class="stat-card-value">{{ dashboard.revenue|number_format(0, ',', ' ') }} USD</div>
-        <div class="stat-card-sub">Confirmee/expediee/livree</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card-label">Taux livraison</div>
-        <div class="stat-card-value">{{ dashboard.deliveryRate }}%</div>
-        <div class="stat-card-sub">Progression commandes</div>
-    </div>
-</div>
-
-<div class="admin-kpis" style="grid-template-columns:repeat(3,minmax(0,1fr));">
-    <div class="stat-card">
-        <div class="stat-card-label">En attente</div>
-        <div class="stat-card-value">{{ dashboard.pendingOrders }}</div>
-        <div class="stat-card-sub">Commandes a traiter</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card-label">Stock faible</div>
-        <div class="stat-card-value">{{ dashboard.lowStockCount }}</div>
-        <div class="stat-card-sub">Produits <= 5</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card-label">Rupture</div>
-        <div class="stat-card-value">{{ dashboard.outOfStockCount }}</div>
-        <div class="stat-card-sub">Produits a reapprovisionner</div>
-    </div>
-</div>
-
-<div class="data-table">
-    <div class="data-table-header">
-        <div class="toolbar">
-            <div>
-                <h3>Produits</h3>
-                <p class="muted">Ajouter, modifier, supprimer et suivre le stock</p>
-            </div>
-            <form method="GET">
-                <input type="text" name="search" class="form-control" style="min-width:220px;" placeholder="Nom, categorie, marque..." value="{{ searchTerm|default('') }}">
-                <select name="sort" class="form-select">
-                    <option value="id" {% if sortBy == 'id' %}selected{% endif %}>ID</option>
-                    <option value="name" {% if sortBy == 'name' %}selected{% endif %}>Nom</option>
-                    <option value="price" {% if sortBy == 'price' %}selected{% endif %}>Prix</option>
-                    <option value="stock" {% if sortBy == 'stock' %}selected{% endif %}>Stock</option>
-                    <option value="category" {% if sortBy == 'category' %}selected{% endif %}>Categorie</option>
-                </select>
-                <select name="order" class="form-select" style="max-width:96px;">
-                    <option value="ASC" {% if sortOrder == 'ASC' %}selected{% endif %}>ASC</option>
-                    <option value="DESC" {% if sortOrder == 'DESC' %}selected{% endif %}>DESC</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Filtrer</button>
-                <a href="{{ path('app_product_index') }}" class="btn btn-outline-secondary">Reinit.</a>
+    <div style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+        <!-- Search & Filter Section -->
+        <div style="padding: 20px; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <form method="GET" style="display: grid; grid-template-columns: 1fr auto auto auto auto auto; gap: 12px; align-items: end;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #6b7280;">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name, category, or brand..." value="{{ searchTerm }}" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #6b7280;">Sort By</label>
+                    <select name="sort" class="form-select" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        <option value="id" {% if sortBy == 'id' %}selected{% endif %}>ID</option>
+                        <option value="name" {% if sortBy == 'name' %}selected{% endif %}>Name</option>
+                        <option value="price" {% if sortBy == 'price' %}selected{% endif %}>Price</option>
+                        <option value="stock" {% if sortBy == 'stock' %}selected{% endif %}>Stock</option>
+                        <option value="category" {% if sortBy == 'category' %}selected{% endif %}>Category</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #6b7280;">Order</label>
+                    <select name="order" class="form-select" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        <option value="ASC" {% if sortOrder == 'ASC' %}selected{% endif %}>↑ ASC</option>
+                        <option value="DESC" {% if sortOrder == 'DESC' %}selected{% endif %}>↓ DESC</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;">Search</button>
+                <a href="{{ path('app_product_index') }}" class="btn btn-outline-secondary" style="padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;">Reset</a>
             </form>
         </div>
-    </div>
 
-    <div style="overflow-x:auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Nom</th>
-                    <th>Categorie</th>
-                    <th>Prix</th>
-                    <th>Stock</th>
-                    <th>Marque</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
+        <!-- Table -->
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
                     <tr>
-                        <td>
-                            {% if product.image %}
-                                {% set imageSrc = product.image starts with 'http://' or product.image starts with 'https://' ? product.image : (product.image starts with 'api/' ? asset(product.image) : (product.image starts with '/api/' ? product.image : asset('uploads/' ~ product.image))) %}
-                                <img src="{{ imageSrc }}" alt="{{ product.name }}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
-                            {% else %}
-                                <div style="width:52px;height:52px;border-radius:10px;background:var(--table-head-bg);display:flex;align-items:center;justify-content:center;" class="muted-soft">IMG</div>
-                            {% endif %}
-                        </td>
-                        <td style="font-weight:600;">{{ product.name }}</td>
-                        <td>{{ product.category ?? '-' }}</td>
-                        <td style="font-weight:700;color:var(--primary);">{{ product.price|number_format(2, ',', ' ') }} USD</td>
-                        <td>
-                            {% if product.stock > 10 %}
-                                <span class="badge-success">{{ product.stock }}</span>
-                            {% elseif product.stock > 0 %}
-                                <span class="badge-warning">{{ product.stock }}</span>
-                            {% else %}
-                                <span class="badge-danger">0</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ product.brand ?? '-' }}</td>
-                        <td>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                <a href="{{ path('app_product_show', { id: product.id }) }}" class="btn btn-sm btn-info">Voir</a>
-                                <a href="{{ path('app_product_edit', { id: product.id }) }}" class="btn btn-sm btn-warning">Modifier</a>
-                                <form method="POST" action="{{ path('app_product_delete', { id: product.id }) }}" data-confirm="Supprimer ce produit ?">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
-                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                                </form>
-                            </div>
-                        </td>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Image</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Name</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Category</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Price</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Stock</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Brand</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280;">Actions</th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="7" style="padding:40px;text-align:center;" class="muted-soft">Aucun produit trouve</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr style="border-bottom: 1px solid #e5e7eb; transition: background 0.15s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+                            <td style="padding: 16px;">
+                                {% if product.image %}
+                                    <img src="{{ asset('uploads/' ~ product.image) }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                {% else %}
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 18px;">📦</div>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 16px; font-weight: 500;">{{ product.name }}</td>
+                            <td style="padding: 16px; color: #6b7280;">{{ product.category ?? '-' }}</td>
+                            <td style="padding: 16px; font-weight: 600; color: #10b981;">${{ product.price }}</td>
+                            <td style="padding: 16px;">
+                                {% if product.stock > 10 %}
+                                    <span style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">{{ product.stock }}</span>
+                                {% elseif product.stock > 0 %}
+                                    <span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">{{ product.stock }}</span>
+                                {% else %}
+                                    <span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">0</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 16px; color: #6b7280;">{{ product.brand ?? '-' }}</td>
+                            <td style="padding: 16px;">
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="{{ path('app_product_show', { id: product.id }) }}" class="btn btn-sm btn-info" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background: #3b82f6; color: white; text-decoration: none; border: none; cursor: pointer;">View</a>
+                                    <a href="{{ path('app_product_edit', { id: product.id }) }}" class="btn btn-sm btn-warning" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background: #f59e0b; color: white; text-decoration: none; border: none; cursor: pointer;">Edit</a>
+                                    <form method="POST" action="{{ path('app_product_delete', { id: product.id }) }}" style="display:inline;" onsubmit="return confirm('Delete this product?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background: #ef4444; color: white; border: none; cursor: pointer;">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="padding: 40px; text-align: center; color: #9ca3af;">
+                                <svg style="width: 64px; height: 64px; margin: 0 auto 12px; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m0 0l8 4 8-4m0 0v10l-8 4-8-4V7m8 4v10m-8-6l8 4 8-4"/>
+                                </svg>
+                                <p style="font-size: 14px; margin: 0;">No products found</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    {% if totalPages is defined and page is defined and totalPages > 1 %}
-        <nav aria-label="Product pagination" class="mt-3">
-            <ul class="pagination justify-content-center">
-                <li class="page-item{% if page == 1 %} disabled{% endif %}">
-                    <a class="page-link" href="?search={{ searchTerm|default('') }}&sort={{ sortBy|default('id') }}&order={{ sortOrder|default('ASC') }}&page={{ page-1 }}">Precedent</a>
-                </li>
-                {% for p in 1..totalPages %}
-                    <li class="page-item{% if p == page %} active{% endif %}"><a class="page-link" href="?search={{ searchTerm|default('') }}&sort={{ sortBy|default('id') }}&order={{ sortOrder|default('ASC') }}&page={{ p }}">{{ p }}</a></li>
-                {% endfor %}
-                <li class="page-item{% if page == totalPages %} disabled{% endif %}">
-                    <a class="page-link" href="?search={{ searchTerm|default('') }}&sort={{ sortBy|default('id') }}&order={{ sortOrder|default('ASC') }}&page={{ page+1 }}">Suivant</a>
-                </li>
-            </ul>
-        </nav>
-    {% endif %}
-</div>
 {% endblock %}
