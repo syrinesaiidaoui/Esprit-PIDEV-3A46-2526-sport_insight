@@ -12,7 +12,8 @@ class AiCoachService
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->apiKey = 'AIzaSyBT31YcxJOY8PWZadw_oaNWXX-p8DF3958';
+        // Load key from environment so secrets are not hard-coded
+        $this->apiKey = $_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? 'your_gemini_api_key_here';
     }
 
     private function matchSport(string $type): string
