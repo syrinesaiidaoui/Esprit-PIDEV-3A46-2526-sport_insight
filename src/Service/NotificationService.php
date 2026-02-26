@@ -14,7 +14,8 @@ class NotificationService
     public function __construct(
         private MailerInterface $mailer,
         private EntityManagerInterface $em,
-        private \Psr\Log\LoggerInterface $logger
+        private \Psr\Log\LoggerInterface $logger,
+        private string $trainingRecipient = ''
     ) {}
 
     public function notifyPlayerNewTraining(User $player, Entrainement $training): void
@@ -215,9 +216,17 @@ class NotificationService
 </html>
 HTML;
 
+        $recipientEmail = trim($this->trainingRecipient) !== ''
+            ? trim($this->trainingRecipient)
+            : trim((string) $player->getEmail());
+
+        if ($recipientEmail === '') {
+            return;
+        }
+
         $email = (new Email())
             ->from('sportinsight.contact@gmail.com')
-            ->to($player->getEmail())
+            ->to($recipientEmail)
             ->subject("🏋️ Nouvel entraînement {$type} — {$dateFR}")
             ->html($html);
 

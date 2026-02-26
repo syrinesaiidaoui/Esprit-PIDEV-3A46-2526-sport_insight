@@ -281,11 +281,56 @@ class NutritionService
      */
     public function findNutrition(string $query): ?array
     {
-        if (empty($this->apiKey) || empty($query)) {
+        if (empty($query)) {
             return [];
         }
 
-        // Basic translation for French users
+        $localFallback = $this->findLocalNutrition($query);
+
+        // Prevent external call when key is missing or still using the template placeholder.
+        if (empty($this->apiKey) || $this->apiKey === 'your_api_ninjas_key_here') {
+            return $localFallback;
+        }
+
+        foreach ($this->buildSearchQueries($query) as $searchQuery) {
+            try {
+                $response = $this->client->request('GET', 'https://api.api-ninjas.com/v1/nutrition', [
+                    'headers' => ['X-Api-Key' => $this->apiKey],
+                    'query' => ['query' => $searchQuery],
+                    'timeout' => 8,
+                ]);
+
+                if ($response->getStatusCode() !== 200) {
+                    continue;
+                }
+
+                // API Ninjas v1/nutrition returns a flat JSON array directly.
+                // Use toArray(false) to avoid throwing on edge responses and keep retries simple.
+                $result = $response->toArray(false);
+                if (is_array($result) && !empty($result)) {
+                    return $result;
+                }
+            } catch (\Exception $e) {
+                // Try next query variant.
+            }
+        }
+
+        return $localFallback;
+    }
+
+    /**
+     * Build progressively more tolerant search queries for API Ninjas.
+     * Recent API behavior often requires a quantity (e.g. "100g chicken").
+     *
+     * @return array<int, string>
+     */
+    private function buildSearchQueries(string $query): array
+    {
+        $searchQuery = strtolower(trim($query));
+        $searchQuery = preg_replace('/\b(de|du|des)\b/u', ' ', $searchQuery) ?? $searchQuery;
+        $searchQuery = str_replace(["d'", "d’", ',', ';'], ' ', $searchQuery);
+
+        // Basic translation for common French food terms.
         $translations = [
             'poulet' => 'chicken',
             'oeuf' => 'egg',
@@ -302,26 +347,192 @@ class NutritionService
             'fromage' => 'cheese',
         ];
 
-        $searchQuery = strtolower(trim($query));
         foreach ($translations as $fr => $en) {
-            $searchQuery = str_replace($fr, $en, $searchQuery);
+            $pattern = '/\b' . preg_quote($fr, '/') . '\b/u';
+            $searchQuery = preg_replace($pattern, $en, $searchQuery) ?? $searchQuery;
         }
 
-        try {
-            $response = $this->client->request('GET', 'https://api.api-ninjas.com/v1/nutrition', [
-                'headers' => ['X-Api-Key' => $this->apiKey],
-                'query' => ['query' => $searchQuery],
-                'timeout' => 8,
-            ]);
+        $searchQuery = trim(preg_replace('/\s+/', ' ', $searchQuery) ?? $searchQuery);
+        if ($searchQuery === '') {
+            return [];
+        }
 
-            if ($response->getStatusCode() === 200) {
-                // API Ninjas v1/nutrition returns a flat JSON array directly
-                return $response->toArray();
+        $queries = [$searchQuery];
+        if (!preg_match('/\d/', $searchQuery)) {
+            $queries[] = "100g $searchQuery";
+            $queries[] = "1 serving $searchQuery";
+        }
+
+        return array_values(array_unique($queries));
+    }
+
+    /**
+     * Fallback nutrition estimator for common foods when API is unavailable.
+     *
+     * @return array<int, array<string, float|string>>
+     */
+    private function findLocalNutrition(string $query): array
+    {
+        $normalizedQueries = $this->buildSearchQueries($query);
+        if (empty($normalizedQueries)) {
+            return [];
+        }
+
+        $normalized = $normalizedQueries[0];
+
+        $foods = [
+            [
+                'name' => 'Chicken breast',
+                'aliases' => ['chicken breast', 'chicken', 'poulet'],
+                'serving_size_g' => 100.0,
+                'calories' => 165.0,
+                'protein_g' => 31.0,
+                'carbohydrates_total_g' => 0.0,
+                'fat_total_g' => 3.6,
+            ],
+            [
+                'name' => 'Egg',
+                'aliases' => ['eggs', 'egg', 'oeufs', 'oeuf'],
+                'serving_size_g' => 50.0,
+                'calories' => 155.0,
+                'protein_g' => 13.0,
+                'carbohydrates_total_g' => 1.1,
+                'fat_total_g' => 11.0,
+            ],
+            [
+                'name' => 'Rice (cooked)',
+                'aliases' => ['brown rice', 'rice', 'riz'],
+                'serving_size_g' => 100.0,
+                'calories' => 130.0,
+                'protein_g' => 2.7,
+                'carbohydrates_total_g' => 28.0,
+                'fat_total_g' => 0.3,
+            ],
+            [
+                'name' => 'Pasta (cooked)',
+                'aliases' => ['pasta', 'pates'],
+                'serving_size_g' => 100.0,
+                'calories' => 131.0,
+                'protein_g' => 5.0,
+                'carbohydrates_total_g' => 25.0,
+                'fat_total_g' => 1.1,
+            ],
+            [
+                'name' => 'Banana',
+                'aliases' => ['banana', 'banane'],
+                'serving_size_g' => 118.0,
+                'calories' => 89.0,
+                'protein_g' => 1.1,
+                'carbohydrates_total_g' => 22.8,
+                'fat_total_g' => 0.3,
+            ],
+            [
+                'name' => 'Apple',
+                'aliases' => ['apple', 'pomme'],
+                'serving_size_g' => 182.0,
+                'calories' => 52.0,
+                'protein_g' => 0.3,
+                'carbohydrates_total_g' => 13.8,
+                'fat_total_g' => 0.2,
+            ],
+            [
+                'name' => 'Milk',
+                'aliases' => ['milk', 'lait'],
+                'serving_size_g' => 100.0,
+                'calories' => 42.0,
+                'protein_g' => 3.4,
+                'carbohydrates_total_g' => 5.0,
+                'fat_total_g' => 1.0,
+            ],
+            [
+                'name' => 'Bread',
+                'aliases' => ['bread', 'pain'],
+                'serving_size_g' => 40.0,
+                'calories' => 265.0,
+                'protein_g' => 9.0,
+                'carbohydrates_total_g' => 49.0,
+                'fat_total_g' => 3.2,
+            ],
+            [
+                'name' => 'Cheese',
+                'aliases' => ['cheese', 'fromage'],
+                'serving_size_g' => 30.0,
+                'calories' => 402.0,
+                'protein_g' => 25.0,
+                'carbohydrates_total_g' => 1.3,
+                'fat_total_g' => 33.0,
+            ],
+            [
+                'name' => 'Butter',
+                'aliases' => ['butter', 'beurre'],
+                'serving_size_g' => 10.0,
+                'calories' => 717.0,
+                'protein_g' => 0.9,
+                'carbohydrates_total_g' => 0.1,
+                'fat_total_g' => 81.0,
+            ],
+            [
+                'name' => 'Beef',
+                'aliases' => ['beef', 'viande'],
+                'serving_size_g' => 100.0,
+                'calories' => 250.0,
+                'protein_g' => 26.0,
+                'carbohydrates_total_g' => 0.0,
+                'fat_total_g' => 15.0,
+            ],
+            [
+                'name' => 'Fish',
+                'aliases' => ['fish', 'poisson'],
+                'serving_size_g' => 100.0,
+                'calories' => 206.0,
+                'protein_g' => 22.0,
+                'carbohydrates_total_g' => 0.0,
+                'fat_total_g' => 12.0,
+            ],
+        ];
+
+        $matchedFood = null;
+        foreach ($foods as $food) {
+            foreach ($food['aliases'] as $alias) {
+                if (str_contains($normalized, $alias)) {
+                    $matchedFood = $food;
+                    break 2;
+                }
             }
-            return [];
-        } catch (\Exception $e) {
+        }
+
+        if ($matchedFood === null) {
             return [];
         }
+
+        $grams = (float)$matchedFood['serving_size_g'];
+        if (preg_match('/(\d+(?:[.,]\d+)?)\s*(kg|g|ml|l)\b/i', $normalized, $matches)) {
+            $value = (float)str_replace(',', '.', $matches[1]);
+            $unit = strtolower($matches[2]);
+
+            if ($unit === 'kg' || $unit === 'l') {
+                $grams = $value * 1000;
+            } else {
+                $grams = $value;
+            }
+        } elseif (preg_match('/\b(\d+(?:[.,]\d+)?)\b/', $normalized, $matches)) {
+            // If user entered only a count (e.g. "3 eggs"), convert using default serving size.
+            $count = (float)str_replace(',', '.', $matches[1]);
+            if ($count > 0) {
+                $grams = $count * (float)$matchedFood['serving_size_g'];
+            }
+        }
+
+        $factor = $grams / 100;
+
+        return [[
+            'name' => $matchedFood['name'],
+            'serving_size_g' => round($grams, 1),
+            'calories' => round((float)$matchedFood['calories'] * $factor, 1),
+            'protein_g' => round((float)$matchedFood['protein_g'] * $factor, 1),
+            'carbohydrates_total_g' => round((float)$matchedFood['carbohydrates_total_g'] * $factor, 1),
+            'fat_total_g' => round((float)$matchedFood['fat_total_g'] * $factor, 1),
+        ]];
     }
 
     /**

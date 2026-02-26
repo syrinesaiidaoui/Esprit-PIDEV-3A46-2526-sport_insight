@@ -58,10 +58,20 @@ final class EntrainementController extends AbstractController
             $entityManager->flush();
 
             // 1. Récupérer les joueurs associés à cet entraînement
-            $joueurs = $entrainement->getJoueurs();
-            
-            foreach ($joueurs as $joueur) {
+            $recipients = $entrainement->getJoueurs()->toArray();
+            if ($entrainement->getEntraineur()) {
+                $recipients[] = $entrainement->getEntraineur();
+            }
+
+            $notified = [];
+            foreach ($recipients as $joueur) {
+                $key = $joueur->getId() ?? spl_object_id($joueur);
+                if (isset($notified[$key])) {
+                    continue;
+                }
+
                 $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+                $notified[$key] = true;
             }
 
             $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
