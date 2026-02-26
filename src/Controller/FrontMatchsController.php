@@ -7,8 +7,10 @@ use App\Entity\MatchLineup;
 use App\Form\MatchsType;
 use App\Repository\MatchsRepository;
 use App\Repository\JoueurRepository;
+use App\Service\MatchDetailAiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -131,6 +133,24 @@ final class FrontMatchsController extends AbstractController
             'delete_form' => $deleteForm->createView(),
             'weatherApiKey' => $weatherApiKey,
             'stadiumGeo' => $stadiumGeo,
+        ]);
+    }
+
+    #[Route('/{id}/ai-chat', name: 'app_front_matchs_ai_chat', methods: ['POST'])]
+    public function aiChat(Request $request, Matchs $match, MatchDetailAiService $matchDetailAiService): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        if (!is_array($payload)) {
+            return new JsonResponse(['reply' => 'Requete invalide.'], 400);
+        }
+
+        $message = trim((string)($payload['message'] ?? ''));
+        if ($message === '') {
+            return new JsonResponse(['reply' => 'Veuillez saisir un message.'], 400);
+        }
+
+        return new JsonResponse([
+            'reply' => $matchDetailAiService->replyToMatchQuestion($match, $message),
         ]);
     }
 

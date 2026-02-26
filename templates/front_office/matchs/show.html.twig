@@ -581,96 +581,255 @@
         /* Chatbot floating button and window */
         #aiChatBubbleBtn {
             position: fixed;
-            right: 32px;
-            bottom: 32px;
-            width: 60px;
-            height: 60px;
-            background: #10b981;
-            color: white;
+            right: 28px;
+            bottom: 28px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            box-shadow: 0 4px 16px rgba(16,185,129,0.18);
+            box-shadow: 0 12px 26px rgba(16, 185, 129, 0.3), 0 6px 12px rgba(2, 6, 23, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
             cursor: pointer;
             z-index: 1001;
             border: none;
-            transition: background 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         #aiChatBubbleBtn:hover {
-            background: #059669;
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 16px 30px rgba(16, 185, 129, 0.35), 0 8px 16px rgba(2, 6, 23, 0.35);
+        }
+        #aiChatOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.48);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+        }
+        #aiChatOverlay.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: opacity 0.22s ease, visibility 0s linear 0s;
         }
         #aiChatPopup {
             position: fixed;
-            right: 32px;
-            bottom: 100px;
-            width: 340px;
-            max-width: 95vw;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(16,185,129,0.18);
+            right: 28px;
+            bottom: 102px;
+            width: 420px;
+            max-width: calc(100vw - 22px);
+            height: 560px;
+            max-height: calc(100vh - 130px);
+            border-radius: 22px;
+            border: 1px solid rgba(16, 185, 129, 0.22);
+            background: linear-gradient(180deg, #f8fffc 0%, #eefaf4 100%);
+            box-shadow: 0 22px 46px rgba(2, 6, 23, 0.28), 0 6px 18px rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(7px);
             z-index: 1002;
-            display: none;
+            display: flex;
             flex-direction: column;
             overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translate3d(0, 16px, 0) scale(0.96);
+            transform-origin: right bottom;
+            transition: opacity 0.24s ease, transform 0.26s ease, visibility 0s linear 0.26s;
         }
         #aiChatPopup.open {
-            display: flex;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translate3d(0, 0, 0) scale(1);
+            transition: opacity 0.24s ease, transform 0.26s ease, visibility 0s linear 0s;
         }
         #aiChatPopupHeader {
-            background: #10b981;
+            background: linear-gradient(120deg, #10b981 0%, #22c55e 55%, #34d399 100%);
             color: white;
-            padding: 14px 18px;
-            font-weight: 700;
-            font-size: 16px;
+            padding: 18px 20px;
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: 0.2px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         #aiChatPopupClose {
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.34);
             color: white;
-            font-size: 22px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 26px;
+            line-height: 1;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        #aiChatPopupClose:hover {
+            background: rgba(255, 255, 255, 0.28);
+            transform: scale(1.05);
         }
         #aiChatHistory {
-            background: #f9fafb;
+            background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 55%), #f6fbf8;
             flex: 1;
-            min-height: 60px;
-            max-height: 220px;
-            padding: 12px 14px;
+            min-height: 140px;
+            padding: 16px 14px 14px;
             overflow-y: auto;
-            font-size: 14px;
+            font-size: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #aiChatHistory::-webkit-scrollbar {
+            width: 9px;
+        }
+        #aiChatHistory::-webkit-scrollbar-thumb {
+            background: #9ee9ca;
+            border-radius: 999px;
+            border: 2px solid #f6fbf8;
         }
         #aiChatForm {
             display: flex;
-            gap: 8px;
-            padding: 10px 12px 12px 12px;
-            background: #f3f4f6;
+            gap: 10px;
+            padding: 14px;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
         }
         #aiChatInput {
-            flex:1;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #e5e7eb;
-            font-size: 14px;
+            flex: 1;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid #9de3c6;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #aiChatInput:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
         }
         #aiChatSendBtn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            background: #10b981;
+            padding: 11px 20px;
+            border-radius: 14px;
+            background: linear-gradient(120deg, #10b981 0%, #22c55e 100%);
             color: white;
             border: none;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 15px;
             cursor: pointer;
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
         }
         #aiChatSendBtn:hover {
-            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
         }
-        .ai-msg-user { margin-bottom:4px; text-align:right; }
-        .ai-msg-bot { margin-bottom:8px; color:#059669; text-align:left; }
+        #aiChatSendBtn img {
+            width: 22px;
+            height: 22px;
+            display: block;
+            object-fit: contain;
+        }
+        @keyframes chat-message-in-user {
+            0% {
+                opacity: 0;
+                transform: translate3d(12px, 10px, 0) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+        }
+        @keyframes chat-message-in-bot {
+            0% {
+                opacity: 0;
+                transform: translate3d(-12px, 10px, 0) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+        }
+        .ai-msg-user {
+            display: flex;
+            justify-content: flex-end;
+            animation: chat-message-in-user 0.22s ease-out;
+            transform-origin: right bottom;
+        }
+        .ai-msg-bot {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            animation: chat-message-in-bot 0.24s ease-out;
+            transform-origin: left bottom;
+        }
+        .ai-bot-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(16, 185, 129, 0.38);
+            background: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.22);
+        }
+        .ai-bubble {
+            display: inline-block;
+            max-width: 82%;
+            border-radius: 16px;
+            padding: 10px 13px;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+        .ai-bubble-user {
+            background: linear-gradient(120deg, #10b981 0%, #22c55e 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 6px 14px rgba(16, 185, 129, 0.24);
+        }
+        .ai-bubble-bot {
+            background: #e9f8f0;
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.24);
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+        }
+        @media (max-width: 700px) {
+            #aiChatPopup {
+                right: 10px;
+                bottom: 86px;
+                width: calc(100vw - 20px);
+                height: 70vh;
+                border-radius: 16px;
+            }
+            #aiChatBubbleBtn {
+                right: 14px;
+                bottom: 16px;
+                width: 58px;
+                height: 58px;
+            }
+            #aiChatForm {
+                gap: 8px;
+                padding: 10px;
+            }
+            #aiChatSendBtn {
+                padding: 10px 14px;
+            }
+        }
         
         /* Container pour cartes côte à côte */
         .modern-cards-container {
@@ -788,19 +947,23 @@
         }
 
         [data-theme="dark"] #aiChatPopup {
-            background: #0f172a !important;
-            box-shadow: 0 10px 36px rgba(2, 6, 23, 0.6) !important;
-            border: 1px solid #334155;
+            background: linear-gradient(180deg, #0b1626 0%, #0f172a 100%) !important;
+            box-shadow: 0 16px 40px rgba(2, 6, 23, 0.62) !important;
+            border: 1px solid #1f2937;
+        }
+        [data-theme="dark"] #aiChatOverlay {
+            background: rgba(2, 6, 23, 0.64);
+            backdrop-filter: blur(3px);
         }
 
         [data-theme="dark"] #aiChatHistory {
-            background: #111827 !important;
+            background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 55%), #111827 !important;
             color: #e2e8f0 !important;
         }
 
         [data-theme="dark"] #aiChatForm {
-            background: #0b1220 !important;
-            border-top: 1px solid #334155;
+            background: rgba(11, 18, 32, 0.88) !important;
+            border-top: 1px solid #1f2937;
         }
 
         [data-theme="dark"] #aiChatInput {
@@ -813,8 +976,19 @@
             color: #94a3b8;
         }
 
-        [data-theme="dark"] .ai-msg-bot {
-            color: #99f6e4;
+        [data-theme="dark"] .ai-bubble-bot {
+            background: #0f2130;
+            color: #bff7e2;
+            border-color: #1f5f53;
+        }
+
+        [data-theme="dark"] .ai-bubble-user {
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.32);
+        }
+
+        [data-theme="dark"] .ai-bot-avatar {
+            border-color: #1f5f53;
+            background: #0f172a;
         }
     </style>
 
@@ -1125,37 +1299,50 @@
     <button id="aiChatBubbleBtn" title="Chat IA" style="padding:0; background:none; border:none;">
         <img src="{{ asset('images/logo chatbot.png') }}" alt="Chatbot" style="width:60px; height:60px; border-radius:50%; box-shadow:0 4px 16px rgba(16,185,129,0.18); object-fit:cover; display:block;">
     </button>
+    <div id="aiChatOverlay" aria-hidden="true"></div>
     <!-- Chatbot Popup -->
-    <div id="aiChatPopup" style="border-radius: 18px; box-shadow: 0 8px 40px #10b98133; overflow: hidden; position: fixed; right: 32px; bottom: 100px; width: 420px; max-width: 98vw; height: 540px; max-height: 90vh; background: white; display: none; flex-direction: column; z-index: 1002;">
-        <div id="aiChatPopupHeader" style="background: linear-gradient(90deg, #10b981 60%, #34d399 100%); border-radius: 18px 18px 0 0; box-shadow: 0 2px 8px #10b98133; display: flex; align-items: center; justify-content: space-between; padding: 18px 22px;">
+    <div id="aiChatPopup">
+        <div id="aiChatPopupHeader">
             <span style="font-size: 20px; display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.5px;">
                 <span>Sport Insight AI</span>
             </span>
-            <button id="aiChatPopupClose" title="Fermer" style="background: none; border: none; color: white; font-size: 30px; cursor: pointer;">&times;</button>
+            <button id="aiChatPopupClose" title="Fermer">&times;</button>
         </div>
-        <div id="aiChatHistory" style="background: #f3f4f6; padding: 22px; min-height: 120px; max-height: 340px; overflow-y: auto; font-size: 16px; box-shadow: 0 1px 4px #10b98122; flex: 1;"></div>
-        <form id="aiChatForm" style="display: flex; gap: 10px; padding: 18px; background: #e0f7ef; border-radius: 0 0 18px 18px;">
-            <input type="text" id="aiChatInput" placeholder="Posez une question sur ce match" autocomplete="off" style="flex:1; padding: 14px 18px; border-radius: 10px; border: 1.5px solid #10b981; font-size: 16px; background: #fff;">
-            <button type="submit" id="aiChatSendBtn" style="padding: 12px 28px; border-radius: 10px; background: linear-gradient(90deg, #10b981 60%, #34d399 100%); color: white; border: none; font-weight: 700; font-size: 16px; box-shadow: 0 2px 8px #10b98133; transition: background 0.2s;">Envoyer</button>
+        <div id="aiChatHistory"></div>
+        <form id="aiChatForm">
+            <input type="text" id="aiChatInput" placeholder="Posez une question sur ce match" autocomplete="off">
+            <button type="submit" id="aiChatSendBtn" aria-label="Envoyer">
+                <img src="{{ asset('chatbot/msg.png') }}" alt="Envoyer">
+            </button>
         </form>
     </div>
 
     <script>
         // Chatbot floating logic
         const chatBtn = document.getElementById('aiChatBubbleBtn');
+        const chatOverlay = document.getElementById('aiChatOverlay');
         const chatPopup = document.getElementById('aiChatPopup');
         const chatClose = document.getElementById('aiChatPopupClose');
+        function openChatPopup() {
+            chatOverlay.classList.add('open');
+            chatPopup.classList.add('open');
+        }
+        function closeChatPopup() {
+            chatOverlay.classList.remove('open');
+            chatPopup.classList.remove('open');
+        }
         // Toggle on click (ouvre/ferme)
         chatBtn.onclick = () => {
-            if (chatPopup.style.display === 'flex') {
-                chatPopup.style.display = 'none';
+            if (chatPopup.classList.contains('open')) {
+                closeChatPopup();
             } else {
-                chatPopup.style.display = 'flex';
+                openChatPopup();
             }
         };
-        chatClose.onclick = () => chatPopup.style.display = 'none';
+        chatOverlay.onclick = () => closeChatPopup();
+        chatClose.onclick = () => closeChatPopup();
         // Fermer avec Echap
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') chatPopup.style.display = 'none'; });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeChatPopup(); });
 
         // Chatbot logic (floating only, improved detection)
         const matchContext = `Match: {{ match.equipeDomicile.nom }} vs {{ match.equipeExterieur.nom }}\nDate: {{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'N/A' }}\nHeure: {{ match.heureDebut ? match.heureDebut|date('H:i') : 'N/A' }}\nLieu: {{ match.lieu }}\nType: {{ match.type }}\nStatut: {{ match.statut }}\nScore: {{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}`;
@@ -1174,7 +1361,39 @@
             if (/\b(\d{1,2}[-: ]\d{1,2})\b/.test(q)) return true;
             return false;
         }
+        const chatEndpoint = '{{ path('app_front_matchs_ai_chat', {'id': match.id}) }}';
+        const botAvatar = '{{ asset('images/logo chatbot.png') }}';
+        const outOfScopeMessage = 'Desole, je reponds uniquement au detail du match {{ match.equipeDomicile.nom|e('js') }} vs {{ match.equipeExterieur.nom|e('js') }}.';
         async function fakeAIResponse(question) {
+            if (!isMatchRelated(question)) {
+                return outOfScopeMessage;
+            }
+
+            try {
+                const response = await fetch(chatEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: question }),
+                });
+
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    data = null;
+                }
+
+                if (!response.ok) {
+                    return (data && data.reply) ? data.reply : 'Erreur serveur.';
+                }
+
+                return (data && data.reply) ? data.reply : 'Information non disponible dans le detail du match.';
+            } catch (error) {
+                return 'Erreur de connexion. Veuillez reessayer.';
+            }
+
             const q = question.toLowerCase();
             // Réponses sur les équipes
             if (q.includes('équipe') || q.includes('equipes') || q.includes('team')) {
@@ -1222,17 +1441,25 @@
             // Ajout d'une réponse générique améliorée
             return "C'est une bonne question sur ce match ! (Démo IA locale)";
         }
+        function escapeChatHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
         document.getElementById('aiChatForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const input = document.getElementById('aiChatInput');
             const history = document.getElementById('aiChatHistory');
             const question = input.value.trim();
             if (!question) return;
-            history.innerHTML += `<div class='ai-msg-user'><span style='display:inline-block;background:linear-gradient(90deg,#10b981 60%,#34d399 100%);color:white;padding:8px 14px;border-radius:16px 16px 4px 16px;font-size:15px;max-width:80%;box-shadow:0 1px 4px #10b98122;'><b>Vous:</b> ${question}</span></div>`;
+            history.innerHTML += `<div class='ai-msg-user'><div class='ai-bubble ai-bubble-user'>${escapeChatHtml(question)}</div></div>`;
             input.value = '';
             history.scrollTop = history.scrollHeight;
             const response = await fakeAIResponse(question);
-            history.innerHTML += `<div class='ai-msg-bot'><span style='display:inline-block;background:#e0f7ef;color:#059669;padding:8px 14px;border-radius:16px 16px 16px 4px;font-size:15px;max-width:80%;box-shadow:0 1px 4px #10b98122;'><b>Bot:</b> ${response}</span></div>`;
+            history.innerHTML += `<div class='ai-msg-bot'><img class='ai-bot-avatar' src='${botAvatar}' alt='AI'><div class='ai-bubble ai-bubble-bot'>${escapeChatHtml(response).replace(/\r?\n/g, '<br>')}</div></div>`;
             history.scrollTop = history.scrollHeight;
         });
     </script>
