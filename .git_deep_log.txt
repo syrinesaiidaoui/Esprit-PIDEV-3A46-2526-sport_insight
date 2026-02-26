@@ -1,0 +1,60 @@
+﻿1434d54 Merge pull request #7 from syrinesaiidaoui/integration-v1.1
+56bebce Merge remote-tracking branch 'origin/rym-sponsoring' into sayda-annonces
+84ab5d8 Update dependencies and controllers
+2e50835 Merge remote-tracking branch 'origin/main' into rym-sponsoring :wq
+fc1c377 Merge pull request #6 from syrinesaiidaoui/integration-v1.1
+c33e327 Merge tasnim-branch into integration-v1.1
+e525676 Merge pull request #5 from syrinesaiidaoui/tasnim-integration
+a5a383d Remove hard-coded API keys
+4a3de45 Load Gemini API key from env
+ebc1907 Tasnim integration update
+b405391 aaa
+f8935d9 Merge remote-tracking branch 'origin/tasnim-branch'
+aebfb91 Fix admin assets and routing
+c25f8fd final2
+3c801ea Merge pull request #1 from syrinesaiidaoui/gestion-produit-orders
+563dd3e chore: connect main history for PR comparability
+d4ef528 chore: save current project changes
+0838380 Ajout module gestion sponsor
+0d988f9 Sauvegarde avant checkout main
+c9c94b7 integration AI
+9563312 mes modifications
+b1d5096 improoving UI
+d9be84b nutrition
+d791b6f integration AI
+461fa8c merge and keep local gestion match module
+6b6cbe1 API + AI + metier avanc├®
+21256ba Add persistent dark mode controls for front and admin
+e5cf4a7 Ajout gestion sponsoring + relations equipe sponsor
+73f4661 Integrate mailer notifications, order workflow, UX charts, and stronger validation
+d36db52 Fusion de mon travail avec la branche distante rym-sponsoring
+129df0b Ajout de mon travail sur la gestion sponsoring
+8fdfb8e the end
+8062af6 the last one
+d05bb83 Implement admin dashboard, order/payment workflow, global form UX, and product image pipeline
+c028445 saydouda project
+b8f7bb6 hello this is my project
+f742d4b added APi Product.json
+9543fa2 Ajout gestion sponsoring + corrections CRUD
+04c2e84 Full gestion produit & orders implementation
+17e9f09 jawwww
+01ec5f5 VOILA
+4279022 nouv
+49c2687 modif de design
+3edd5fa UI front-office + annonce (tasnim)
+8ad10a8 update gestion match
+5b07178 Ajout de ma partie
+c102f1c am├®lioration de l'interface graphique et ajout de pdf
+1784af6 Mes derni├¿res modifications
+718980f updated work
+5ab23a7 CRUD + metier simple pour la gestion match
+28b0d15 updated work
+e055f85 update
+df57128 voila
+ae1963b updated work
+ab19ea1 Ajout gestion sponsoring
+7fdfecd Mon 2eme commit sur ma branche
+a64190b m├®tiers avanc├®s
+6409250 Crud User
+d3753b4 Integration template
+a3fffa8 first commit

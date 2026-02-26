@@ -1,0 +1,17 @@
+  master
+* rym-sponsoring
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/ekher-integration-wsalemoualaykom
+  remotes/origin/ekher-version
+  remotes/origin/ekher-wehed
+  remotes/origin/gestion-match
+  remotes/origin/gestion-produit-orders
+  remotes/origin/gestion_utilisateurs
+  remotes/origin/integration-v1.1
+  remotes/origin/lekher
+  remotes/origin/main
+  remotes/origin/master
+  remotes/origin/rym-sponsoring
+  remotes/origin/sayda-annonces
+  remotes/origin/tasnim-branch
+  remotes/origin/tasnim-integration

@@ -1,0 +1,117 @@
+﻿diff --git a/src/Entity/Sponsor.php b/src/Entity/Sponsor.php
+index 0c35ffd..e5c6568 100644
+--- a/src/Entity/Sponsor.php
++++ b/src/Entity/Sponsor.php
+@@ -8,8 +8,6 @@ use Doctrine\Common\Collections\Collection;
+ use Doctrine\ORM\Mapping as ORM;
+ use Symfony\Component\Validator\Constraints as Assert;
+ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+-use Vich\UploaderBundle\Mapping\Annotation as Vich;
+-use Symfony\Component\HttpFoundation\File\File;
+ 
+ #[ORM\Entity(repositoryClass: SponsorRepository::class)]
+ #[ORM\UniqueConstraint(name: 'UNIQUE_sponsor_nom', columns: ['nom'])]
+@@ -17,7 +15,6 @@ use Symfony\Component\HttpFoundation\File\File;
+     fields: ['nom'],
+     message: 'Ce sponsor existe d├®j├á dans la base de donn├®es'
+ )]
+-#[Vich\Uploadable]
+ class Sponsor
+ {
+     #[ORM\Id]
+@@ -55,22 +52,6 @@ class Sponsor
+     #[Assert\Type(type: 'float', message: 'Le budget doit ├¬tre un nombre')]
+     private ?float $budget = null;
+ 
+-    #[ORM\Column(length: 255, nullable: true)]
+-    private ?string $logoName = null;
+-
+-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+-    private ?\DateTimeImmutable $updatedAt = null;
+-
+-    #[ORM\Column(length: 255, nullable: true)]
+-    private ?string $adresse = null;
+-    #[Vich\UploadableField(mapping: 'sponsor_logo', fileNameProperty: 'logoName')]
+-    #[Assert\File(
+-        maxSize: '5M',
+-        mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+-        mimeTypesMessage: 'Le fichier doit ├¬tre une image (JPEG, PNG, GIF, WebP)'
+-    )]
+-    private ?File $logoFile = null;
+-
+     /**
+      * @var Collection<int, ContratSponsor>
+      */
+@@ -135,55 +116,6 @@ class Sponsor
+         return $this;
+     }
+ 
+-    public function getLogoName(): ?string
+-    {
+-        return $this->logoName;
+-    }
+-
+-    public function setLogoName(?string $logoName): static
+-    {
+-        $this->logoName = $logoName;
+-
+-        return $this;
+-    }
+-
+-    public function setLogoFile(?File $file = null): void
+-    {
+-        $this->logoFile = $file;
+-        if (null !== $file) {
+-            $this->updatedAt = new \DateTimeImmutable();
+-        }
+-    }
+-
+-    public function getLogoFile(): ?File
+-    {
+-        return $this->logoFile;
+-    }
+-
+-    public function getUpdatedAt(): ?\DateTimeImmutable
+-    {
+-        return $this->updatedAt;
+-    }
+-
+-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+-    {
+-        $this->updatedAt = $updatedAt;
+-
+-        return $this;
+-    }
+-
+-    public function getLogo(): ?string
+-    {
+-        return $this->logoName;
+-    }
+-
+-    public function setLogo(?string $logo): static
+-    {
+-        $this->logoName = $logo;
+-
+-        return $this;
+-    }
+-
+     /**
+      * @return Collection<int, ContratSponsor>
+      */
+@@ -213,16 +145,4 @@ class Sponsor
+ 
+         return $this;
+     }
+-
+-    public function getAdresse(): ?string
+-    {
+-        return $this->adresse;
+-    }
+-
+-    public function setAdresse(?string $adresse): static
+-    {
+-        $this->adresse = $adresse;
+-
+-        return $this;
+-    }
+ }

@@ -1,0 +1,8 @@
+﻿commit 8bc23e9480e36fa4b0362c7afaf071869f393223
+Author: sayda180 <guenichisayda30@gmail.com>
+Date:   Wed Feb 25 23:35:06 2026 +0100
+
+    Fix broken equipement route in back office
+
+ templates/back_office/base.html.twig | 5 -----
+ 1 file changed, 5 deletions(-)

@@ -1,0 +1,9 @@
+0838380 Ajout module gestion sponsor
+e5cf4a7 Ajout gestion sponsoring + relations equipe sponsor
+d36db52 Fusion de mon travail avec la branche distante rym-sponsoring
+129df0b Ajout de mon travail sur la gestion sponsoring
+9543fa2 Ajout gestion sponsoring + corrections CRUD
+e055f85 update
+ab19ea1 Ajout gestion sponsoring
+d3753b4 Integration template
+a3fffa8 first commit

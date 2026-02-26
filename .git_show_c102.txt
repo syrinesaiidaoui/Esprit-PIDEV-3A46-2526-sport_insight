@@ -1,0 +1,14 @@
+﻿commit c102f1c8d99d614a829071798a5830d6e6ebfdf8
+Author: syrinesaiidaoui <syrine.saidaoui@esprit.tn>
+Date:   Wed Feb 11 10:46:14 2026 +0100
+
+    am├®lioration de l'interface graphique et ajout de pdf
+
+ composer.json                                      |   1 +
+ composer.lock                                      | 127 ++++++-
+ ...V5kLi5nCEWI0BNLLiFaBPEkUbv5Fv-698b91add2a49.jpg | Bin 0 -> 9148 bytes
+ src/Controller/UserController.php                  | 132 ++++++-
+ symfony.lock                                       |   9 +
+ templates/user/export_pdf.html.twig                | 209 +++++++++++
+ templates/user/index.html.twig                     | 408 ++++++++++++++++++---
+ 7 files changed, 837 insertions(+), 49 deletions(-)

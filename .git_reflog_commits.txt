@@ -1,0 +1,19 @@
+﻿
+0838380 refs/heads/rym-
+sponsoring@{4}: 
+commit: Ajout module 
+gestion sponsor
+0838380 HEAD@{7}: 
+commit: Ajout module 
+gestion sponsor
+e5cf4a7 refs/heads/rym-
+sponsoring@{5}: 
+commit: Ajout gestion 
+sponsoring + relations 
+equipe sponsor
+e5cf4a7 HEAD@{9}: 
+commit: Ajout gestion 
+sponsoring + relations 
+equipe sponsor
+
+

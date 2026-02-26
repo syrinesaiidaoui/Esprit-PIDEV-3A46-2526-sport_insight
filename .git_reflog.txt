@@ -1,0 +1,13 @@
+0838380 HEAD@{0}: reset: moving to 0838380
+0838380 HEAD@{1}: checkout: moving from rym-sponsoring to rym-sponsoring
+0838380 HEAD@{2}: checkout: moving from rym-sponsoring to rym-sponsoring
+0838380 HEAD@{3}: reset: moving to 0838380
+129df0b HEAD@{4}: reset: moving to 129df0b
+0838380 HEAD@{5}: reset: moving to 0838380
+2e50835 HEAD@{6}: commit (merge): Merge remote-tracking branch 'origin/main' into rym-sponsoring
+0838380 HEAD@{7}: commit: Ajout module gestion sponsor
+e5cf4a7 HEAD@{8}: checkout: moving from rym-sponsoring to rym-sponsoring
+e5cf4a7 HEAD@{9}: commit: Ajout gestion sponsoring + relations equipe sponsor
+d36db52 HEAD@{10}: commit (merge): Fusion de mon travail avec la branche distante rym-sponsoring
+129df0b HEAD@{11}: checkout: moving from master to rym-sponsoring
+129df0b HEAD@{12}: commit (initial): Ajout de mon travail sur la gestion sponsoring

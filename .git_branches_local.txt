@@ -1,0 +1,2 @@
+﻿  master         129df0b Ajout de mon travail sur la gestion sponsoring
+* rym-sponsoring 0838380 [origin/rym-sponsoring] Ajout module gestion sponsor
