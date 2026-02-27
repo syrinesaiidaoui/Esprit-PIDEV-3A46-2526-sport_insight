@@ -1,3 +1,0 @@
-﻿  remotes/origin/HEAD -> origin/main
-  remotes/origin/integration-v1.1
-  remotes/origin/main

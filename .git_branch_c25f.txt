@@ -1,9 +1,0 @@
-﻿  remotes/origin/HEAD -> origin/main
-  remotes/origin/ekher-integration-wsalemoualaykom
-  remotes/origin/ekher-version
-  remotes/origin/ekher-wehed
-  remotes/origin/integration-v1.1
-  remotes/origin/lekher
-  remotes/origin/main
-  remotes/origin/sayda-annonces
-  remotes/origin/tasnim-branch

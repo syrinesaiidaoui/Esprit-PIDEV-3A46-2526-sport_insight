@@ -1,5 +1,0 @@
-﻿Rym <hamoudarym92@gmail.com> Wed Feb 25 00:46:30 2026 +0100 Ajout module gestion sponsor
-sayda180 <guenichisayda30@gmail.com> Tue Feb 24 21:02:42 2026 +0100 Sauvegarde avant checkout main
-syrinesaiidaoui <syrine.saidaoui@esprit.tn> Tue Feb 24 20:35:45 2026 +0100 mes modifications
-Sport Admin <admin@sport.com> Wed Feb 25 11:02:37 2026 +0100 chore: save current project changes
-Rym <hamoudarym92@gmail.com> Wed Feb 25 20:44:48 2026 +0100 Merge remote-tracking branch 'origin/main' into rym-sponsoring :wq

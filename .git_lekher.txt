@@ -1,5 +1,0 @@
-﻿fc1c377 Merge pull request #6 from syrinesaiidaoui/integration-v1.1
-c33e327 Merge tasnim-branch into integration-v1.1
-e525676 Merge pull request #5 from syrinesaiidaoui/tasnim-integration
-a5a383d Remove hard-coded API keys
-4a3de45 Load Gemini API key from env

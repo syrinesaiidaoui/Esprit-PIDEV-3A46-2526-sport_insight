@@ -1,9 +1,0 @@
-﻿commit 8fdfb8e1d92073816ff24322bc332c961ba7152f
-Author: sayda180 <guenichisayda30@gmail.com>
-Date:   Sat Feb 21 23:57:42 2026 +0100
-
-    the end
-
- src/Controller/StatisticsController.php |  50 +++++----
- templates/statistics/index.html.twig    | 188 +++++++++++++++++++++++++++++---
- 2 files changed, 202 insertions(+), 36 deletions(-)

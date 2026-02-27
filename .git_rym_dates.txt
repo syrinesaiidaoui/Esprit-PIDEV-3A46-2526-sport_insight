@@ -1,9 +1,0 @@
-﻿2026-02-25 00:46:30 +0100 0838380 Ajout module gestion sponsor
-2026-02-23 00:47:31 +0100 e5cf4a7 Ajout gestion sponsoring + relations equipe sponsor
-2026-02-22 05:27:03 +0100 d36db52 Fusion de mon travail avec la branche distante rym-sponsoring
-2026-02-22 05:21:27 +0100 129df0b Ajout de mon travail sur la gestion sponsoring
-2026-02-20 22:05:57 +0100 9543fa2 Ajout gestion sponsoring + corrections CRUD
-2026-02-10 19:16:42 +0100 e055f85 update
-2026-02-10 17:04:01 +0100 ab19ea1 Ajout gestion sponsoring
-2026-02-07 16:00:24 +0100 d3753b4 Integration template
-2026-02-07 15:52:43 +0100 a3fffa8 first commit

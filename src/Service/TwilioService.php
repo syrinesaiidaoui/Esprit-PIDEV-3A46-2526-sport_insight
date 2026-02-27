@@ -18,13 +18,13 @@ class TwilioService
         string $sid,
         string $authToken,
         string $fromPhone,
-        string $defaultCountry = '',
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        string $defaultCountry = '+216'
     ) {
         $this->sid = $sid;
         $this->authToken = $authToken;
         $this->fromPhone = $fromPhone;
-        $this->defaultCountry = $defaultCountry ?: '+216';
+        $this->defaultCountry = $defaultCountry;
         $this->logger = $logger;
     }
 
@@ -39,7 +39,14 @@ class TwilioService
                 ini_set('openssl.cafile', 'C:\php\cacert.pem');
             }
             
-            $this->client = new Client($this->sid, $this->authToken);
+            // Fix for SSL certificate issues (like hostname mismatch from corporate proxies)
+            $curlOptions = [
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+            ];
+            
+            $httpClient = new \Twilio\Http\CurlClient($curlOptions);
+            $this->client = new Client($this->sid, $this->authToken, null, null, $httpClient);
         }
         return $this->client;
     }

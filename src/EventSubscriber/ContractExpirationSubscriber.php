@@ -36,6 +36,8 @@ class ContractExpirationSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $this->logger->info("ContractExpirationSubscriber: Checking for expired contracts...");
+
         $qb = $this->contratRepo->createQueryBuilder('c')
             ->where('c.dateFin < :today')
             ->andWhere('c.notified = false')

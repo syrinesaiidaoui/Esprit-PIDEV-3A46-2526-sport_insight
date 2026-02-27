@@ -1,8 +1,0 @@
-﻿commit 84ab5d81db63ad2ed74f3cbff8c6b0f931762137
-Author: Sport Admin <admin@sport.com>
-Date:   Wed Feb 25 21:33:03 2026 +0100
-
-    Update dependencies and controllers
-
- composer.lock | 493 +++++++---------------------------------------------------
- 1 file changed, 58 insertions(+), 435 deletions(-)
