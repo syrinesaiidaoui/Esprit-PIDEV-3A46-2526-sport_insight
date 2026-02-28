@@ -53,6 +53,7 @@ class ContratSponsor
 
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $notified = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,8 +155,23 @@ class ContratSponsor
         return $this;
     }
 
+    #[ORM\Column(type: Types::STRING, length: 50)]
+    private ?string $statutPaiement = 'Non payé';
+
     public function isExpired(): bool
     {
         return $this->dateFin < new \DateTime();
+    }
+
+    public function getStatutPaiement(): ?string
+    {
+        return $this->statutPaiement;
+    }
+
+    public function setStatutPaiement(string $statutPaiement): static
+    {
+        $this->statutPaiement = $statutPaiement;
+
+        return $this;
     }
 }

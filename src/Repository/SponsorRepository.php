@@ -36,17 +36,4 @@ class SponsorRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
-
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Sponsor
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

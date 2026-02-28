@@ -14,18 +14,16 @@ final class Version20260219000000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add logo field to sponsor table';
+        return 'Add position fields to match_lineup';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE sponsor ADD logo VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE match_lineup ADD position_x DOUBLE PRECISION DEFAULT NULL, ADD position_y DOUBLE PRECISION DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE sponsor DROP logo');
+        $this->addSql('ALTER TABLE match_lineup DROP position_x, DROP position_y');
     }
 }

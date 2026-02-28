@@ -1,0 +1,73 @@
+{% extends 'back_office/base.html.twig' %}
+
+{% block title %}Admin - Joueur{% endblock %}
+{% block page_title %}Détails du joueur{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                {% if joueur.image %}
+                                    <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="img-fluid rounded" style="max-width: 100%;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px; border-radius: 8px;">
+                                        <i class="fas fa-user fa-3x text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <h5 class="card-title">{{ joueur.prenom }} {{ joueur.nom }}</h5>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Nom :</strong></p>
+                                        <p>{{ joueur.nom }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Prénom :</strong></p>
+                                        <p>{{ joueur.prenom }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Date de naissance :</strong></p>
+                                        <p>{{ joueur.dateNaissance|date('d/m/Y') }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Numéro de maillot :</strong></p>
+                                        <p>
+                                            <span class="badge bg-primary" style="font-size: 16px;">{{ joueur.numero }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Équipe :</strong></p>
+                                        <p>{{ joueur.equipe.nom }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('back_joueur_edit', {'id': joueur.id}) }}" class="btn btn-secondary">Modifier</a>
+                            <a href="{{ path('back_joueur_index') }}" class="btn btn-primary">Retour à la liste</a>
+                            <form method="post" action="{{ path('back_joueur_delete', {'id': joueur.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ joueur.id) }}">
+                                <button class="btn btn-danger">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

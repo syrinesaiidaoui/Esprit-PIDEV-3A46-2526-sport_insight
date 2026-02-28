@@ -63,6 +63,7 @@ class Sponsor
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $adresse = null;
+
     #[Vich\UploadableField(mapping: 'sponsor_logo', fileNameProperty: 'logoName')]
     #[Assert\File(
         maxSize: '5M',

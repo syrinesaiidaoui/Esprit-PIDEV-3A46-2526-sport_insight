@@ -48,6 +48,14 @@ class SponsorType extends AbstractType
                     'min' => '0',
                 ],
             ])
+            ->add('adresse', TextType::class, [
+                'label' => 'Adresse / Siège social',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Ex: Tunis, Les Berges du Lac',
+                ],
+            ])
             ->add('logoFile', FileType::class, [
                 'label' => 'Logo du sponsor',
                 'required' => false,
