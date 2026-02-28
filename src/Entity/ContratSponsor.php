@@ -48,6 +48,10 @@ class ContratSponsor
     )]
     private ?string $description = null;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ["default" => false])]
+    private bool $notified = false;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +125,18 @@ class ContratSponsor
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function isNotified(): bool
+    {
+        return $this->notified;
+    }
+
+    public function setNotified(bool $notified): self
+    {
+        $this->notified = $notified;
 
         return $this;
     }
