@@ -5,6 +5,10 @@ namespace App\Entity;
 use App\Repository\ContratSponsorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+<<<<<<< HEAD
+=======
+use Symfony\Component\Validator\Constraints as Assert;
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 
 #[ORM\Entity(repositoryClass: ContratSponsorRepository::class)]
 class ContratSponsor
@@ -15,22 +19,61 @@ class ContratSponsor
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+<<<<<<< HEAD
     private ?\DateTime $dateDebut = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $dateFin = null;
 
     #[ORM\Column]
+=======
+    #[Assert\NotBlank(message: 'La date de début est obligatoire')]
+    #[Assert\Type(\DateTimeInterface::class, message: 'La date de début doit être une date valide')]
+    private ?\DateTime $dateDebut = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: 'La date de fin est obligatoire')]
+    #[Assert\Type(\DateTimeInterface::class, message: 'La date de fin doit être une date valide')]
+    private ?\DateTime $dateFin = null;
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le montant du contrat est obligatoire')]
+    #[Assert\Positive(message: 'Le montant doit être un nombre positif')]
+    #[Assert\Type(type: 'float', message: 'Le montant doit être un nombre')]
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     private ?float $montant = null;
 
     #[ORM\ManyToOne(inversedBy: 'contratSponsors')]
     #[ORM\JoinColumn(nullable: false)]
+<<<<<<< HEAD
+=======
+    #[Assert\NotNull(message: 'Le sponsor est obligatoire')]
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     private ?Sponsor $sponsor = null;
 
     #[ORM\ManyToOne(inversedBy: 'contratSponsors')]
     #[ORM\JoinColumn(nullable: false)]
+<<<<<<< HEAD
     private ?Equipe $equipe = null;
 
+=======
+    #[Assert\NotNull(message: 'L\'équipe est obligatoire')]
+    private ?Equipe $equipe = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+        max: 500,
+        maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères'
+    )]
+    private ?string $description = null;
+
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    private ?string $statut = 'Actif';
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $notified = false;
+
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     public function getId(): ?int
     {
         return $this->id;
@@ -95,4 +138,63 @@ class ContratSponsor
 
         return $this;
     }
+<<<<<<< HEAD
+=======
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?string $statut): static
+    {
+        $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function isNotified(): bool
+    {
+        return $this->notified;
+    }
+
+    public function setNotified(bool $notified): static
+    {
+        $this->notified = $notified;
+
+        return $this;
+    }
+
+    #[ORM\Column(type: Types::STRING, length: 50)]
+    private ?string $statutPaiement = 'Non payé';
+
+    public function isExpired(): bool
+    {
+        return $this->dateFin < new \DateTime();
+    }
+
+    public function getStatutPaiement(): ?string
+    {
+        return $this->statutPaiement;
+    }
+
+    public function setStatutPaiement(string $statutPaiement): static
+    {
+        $this->statutPaiement = $statutPaiement;
+
+        return $this;
+    }
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

@@ -3,8 +3,15 @@
 namespace App\Controller\BackOffice;
 
 use App\Entity\Entrainement;
+<<<<<<< HEAD
 use App\Form\EntrainementType;
 use App\Repository\EntrainementRepository;
+=======
+use App\Entity\User; // Ajouté pour trouver les joueurs
+use App\Form\EntrainementType;
+use App\Repository\EntrainementRepository;
+use App\Service\NotificationService; // Ajouté pour le mail/notif
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,11 +33,19 @@ final class EntrainementController extends AbstractController
             $qb->andWhere('LOWER(e.type) LIKE :searchType')
                 ->setParameter('searchType', '%' . strtolower($searchType) . '%');
         }
+<<<<<<< HEAD
+=======
+        
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         if ($sortBy === 'dateEntrainement') {
             $qb->orderBy('e.dateEntrainement', $sortDir === 'desc' ? 'DESC' : 'ASC');
         } else {
             $qb->orderBy('e.id', 'DESC');
         }
+<<<<<<< HEAD
+=======
+        
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         $entrainements = $qb->getQuery()->getResult();
 
         return $this->render('back_office/entrainement/index.html.twig', [
@@ -41,8 +56,14 @@ final class EntrainementController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
+=======
+    // UNE SEULE MÉTHODE NEW ICI
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notifier): Response
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -52,11 +73,36 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
+<<<<<<< HEAD
+=======
+            // 1. Récupérer les joueurs associés à cet entraînement
+            $recipients = $entrainement->getJoueurs()->toArray();
+            if ($entrainement->getEntraineur()) {
+                $recipients[] = $entrainement->getEntraineur();
+            }
+
+            $notified = [];
+            foreach ($recipients as $joueur) {
+                $key = $joueur->getId() ?? spl_object_id($joueur);
+                if (isset($notified[$key])) {
+                    continue;
+                }
+
+                $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+                $notified[$key] = true;
+            }
+
+            $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             return $this->redirectToRoute('back_entrainement_index');
         }
 
         return $this->render('back_office/entrainement/new.html.twig', [
+<<<<<<< HEAD
             'form' => $form,
+=======
+            'form' => $form->createView(),
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         ]);
     }
 
@@ -76,7 +122,11 @@ final class EntrainementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+<<<<<<< HEAD
 
+=======
+            $this->addFlash('success', 'Entraînement mis à jour.');
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             return $this->redirectToRoute('back_entrainement_index');
         }
 
@@ -95,6 +145,10 @@ final class EntrainementController extends AbstractController
         )) {
             $entityManager->remove($entrainement);
             $entityManager->flush();
+<<<<<<< HEAD
+=======
+            $this->addFlash('danger', 'Entraînement supprimé.');
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         }
 
         return $this->redirectToRoute('back_entrainement_index');

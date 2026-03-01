@@ -9,14 +9,23 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+<<<<<<< HEAD
+=======
+
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+<<<<<<< HEAD
+=======
+
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         main:
             lazy: true
             provider: app_user_provider
 
+<<<<<<< HEAD
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -28,6 +37,28 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+=======
+            form_login:
+                login_path: app_login
+                check_path: app_login
+
+            logout:
+                path: app_logout
+                target: /
+
+    access_control:
+        # Allow anonymous access to login and register
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/sign-up, roles: PUBLIC_ACCESS }
+        - { path: ^/_trending, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+
+        # Everything else requires authentication
+        - { path: ^/, roles: ROLE_USER }
+
+    enable_authenticator_manager: true
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 
 when@test:
     security:

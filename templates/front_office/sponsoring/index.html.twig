@@ -1,5 +1,6 @@
 {% extends 'front_office/base.html.twig' %}
 
+<<<<<<< HEAD
 {% block title %}Sponsoring - FC Club{% endblock %}
 
 {% block body %}
@@ -32,3 +33,200 @@
         </div>
     </div>
 {% endblock %}
+=======
+{% block title %}Sponsoring - Sport Insight{% endblock %}
+
+{% block hero %}
+    <div class="hero" style="margin-bottom: 24px; padding: 40px 34px;">
+        <h1 style="font-size:42px;">Nos Partenaires</h1>
+        <p>Découvrez les entreprises et marques qui soutiennent notre club et nous accompagnent vers le succès.</p>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+{% endblock %}
+
+{% block body %}
+    <form method="GET" class="front-card" style="margin-bottom: 32px; padding: 24px;">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label" style="font-weight: 600;">Nom Sponsor</label>
+                <input type="text" name="sponsor_nom" placeholder="Rechercher par nom..." value="{{ sponsor_nom ?? '' }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600;">Date Début</label>
+                <input type="date" name="date_debut" value="{{ date_debut ?? '' }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="lucide-search" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px;"></i> Rechercher
+                    </button>
+                    <a href="{{ path('front_sponsoring_index') }}" class="btn btn-secondary w-100 text-center text-decoration-none">
+                        Réinitialiser
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if contrats|length > 0 %}
+        <div class="row g-4">
+            {% for contrat in contrats %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="front-card h-100 d-flex flex-column" style="padding: 0; overflow: hidden;">
+                        <div style="background: var(--surface); padding: 30px 20px; display: flex; justify-content: center; align-items: center; min-height: 160px; border-bottom: 1px solid var(--border-color);">
+                            {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
+                            {% if logo %}
+                                <img src="{{ asset('uploads/logos/' ~ logo) }}" 
+                                     alt="{{ contrat.sponsor.nom }}" 
+                                     style="max-width: 100%; max-height: 120px; object-fit: contain;"
+                                     onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                            {% else %}
+                                <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); color: var(--pitch-500); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold;">
+                                    {{ contrat.sponsor.nom[0] ?? 'S' }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-4 flex-grow-1">
+                            <h3 style="margin: 0 0 12px; font-size: 24px;">{{ contrat.sponsor.nom }}</h3>
+                            
+                            <div class="d-flex align-items-center mb-3 text-muted" style="font-size: 14px; color: var(--muted);">
+                                <i class="lucide-calendar" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+                                {{ contrat.dateDebut | format_date('short') }} &rarr; {{ contrat.dateFin | format_date('short') }}
+                            </div>
+                            
+                            <p style="margin-bottom: 12px; font-size: 15px;">
+                                <strong style="color: var(--ink);">Équipe:</strong> {{ contrat.equipe.nom ?? '-' }}
+                            </p>
+                            
+                            {% if contrat.description %}
+                                <p style="font-size: 14px; color: var(--muted); margin-bottom: 0;">{{ contrat.description }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div style="padding: 16px 24px; border-top: 1px solid var(--border-color); background: var(--surface); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 13px; color: var(--muted); font-weight: 500;">Montant</span>
+                                <div style="font-weight: 800; color: #10b981; font-size: 18px;">{{ contrat.montant }} DT</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_contrat_sponsor_show', {'id': contrat.id}) }}" class="btn btn-secondary" style="padding: 6px 14px; font-size: 13px;">Détails</a>
+                                <a href="{{ path('app_contrat_sponsor_pdf', {'id': contrat.id}) }}" class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;" target="_blank">PDF</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="d-flex justify-content-center mt-5">
+            {{ knp_pagination_render(contrats) }}
+        </div>
+    {% else %}
+        <div class="front-card text-center" style="padding: 60px 20px;">
+            <div style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px;">
+                <i class="lucide-search"></i>
+            </div>
+            <h4 style="font-size: 24px; margin-bottom: 12px;">Aucun sponsor trouvé</h4>
+            <p style="color: var(--muted); margin-bottom: 0;">Aucun contrat de sponsoring ne correspond à vos critères de recherche.</p>
+        </div>
+    {% endif %}
+
+    <!-- MAP CONTAINER -->
+    <div style="margin-top: 60px; padding-bottom: 60px;">
+        <h3 style="font-size: 28px; margin-bottom: 16px; font-family: 'Barlow Condensed', sans-serif;">🌍 Nos partenaires sur la carte</h3>
+        <p style="color: var(--muted); margin-bottom: 24px;">Retrouvez le siège social de nos entreprises partenaires à travers la Tunisie.</p>
+        <div id="sponsorsMap" style="height: 450px; width: 100%; border-radius: 16px; border: 1px solid var(--border-color); z-index: 1;"></div>
+    </div>
+    
+    {% set sponsors_array = [] %}
+    {% for sponsor in sponsors %}
+        {% set sponsors_array = sponsors_array|merge([{
+            'nom': sponsor.nom,
+            'adresse': sponsor.adresse|default(''),
+            'logo': sponsor.logoName ? asset('uploads/logos/' ~ sponsor.logoName) : ''
+        }]) %}
+    {% endfor %}
+    <script id="sponsors-data" type="application/json">
+        {{ sponsors_array|json_encode|raw }}
+    </script>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if map container exists
+            var mapElement = document.getElementById('sponsorsMap');
+            if (!mapElement) return;
+
+            // Initialize map centered on Tunisia
+            var map = L.map('sponsorsMap').setView([33.8869, 9.5375], 6);
+            
+            // Add OpenStreetMap tiles (free)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            var sponsors = [];
+            try {
+                sponsors = JSON.parse(document.getElementById('sponsors-data').textContent);
+            } catch(e) {
+                console.error("Erreur de parsing JSON", e);
+            }
+            
+            // Custom marker icon
+            var customIcon = L.divIcon({
+                className: 'custom-map-marker',
+                html: '<div style="background:#10b981; color:white; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid white; box-shadow:0 4px 6px rgba(0,0,0,0.3); font-weight:bold;">S</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -15]
+            });
+
+            // Geocode function carefully respecting Nominatim 1 request/sec limit
+            async function geocodeSponsors() {
+                for (let i = 0; i < sponsors.length; i++) {
+                    let sponsor = sponsors[i];
+                    if (sponsor.adresse && sponsor.adresse.trim() !== '') {
+                        try {
+                            // Search Nominatim API
+                            let response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(sponsor.adresse + ', Tunisia'));
+                            let data = await response.json();
+                            
+                            if (data && data.length > 0) {
+                                let lat = data[0].lat;
+                                let lon = data[0].lon;
+                                
+                                // Popup content
+                                let popupHtml = `
+                                    <div style="text-align:center; min-width:120px;">
+                                        ${sponsor.logo ? `<img src="${sponsor.logo}" style="max-height:40px; object-fit:contain; margin-bottom:8px;">` : ''}
+                                        <h4 style="margin:0 0 5px; font-size:14px; font-weight:bold;">${sponsor.nom}</h4>
+                                        <p style="margin:0; font-size:12px; color:#666;">${sponsor.adresse}</p>
+                                    </div>
+                                `;
+                                
+                                L.marker([lat, lon], {icon: customIcon})
+                                 .addTo(map)
+                                 .bindPopup(popupHtml);
+                            }
+                            
+                            // Wait 1 second before next request to respect Nominatim limits
+                            await new Promise(r => setTimeout(r, 1100));
+                        } catch (e) {
+                            console.error("Geocoding failed for " + sponsor.nom, e);
+                        }
+                    }
+                }
+            }
+            
+            geocodeSponsors();
+        });
+    </script>
+{% endblock %}
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d

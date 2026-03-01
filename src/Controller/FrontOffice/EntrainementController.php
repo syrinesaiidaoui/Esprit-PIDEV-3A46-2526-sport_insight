@@ -5,17 +5,29 @@ namespace App\Controller\FrontOffice;
 use App\Entity\Entrainement;
 use App\Form\EntrainementType;
 use App\Repository\EntrainementRepository;
+<<<<<<< HEAD
+=======
+use App\Repository\ParticipationRepository;
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+<<<<<<< HEAD
+=======
+use Symfony\Component\HttpFoundation\JsonResponse;
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/front/entrainement', name: 'front_entrainement_')]
 final class EntrainementController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
+<<<<<<< HEAD
     public function index(Request $request, EntrainementRepository $entrainementRepository): Response
+=======
+    public function index(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, \App\Repository\EvaluationRepository $evaluationRepository): Response
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     {
         $searchType = $request->query->get('search_type', '');
         $sortBy = $request->query->get('sort_by', '');
@@ -33,16 +45,117 @@ final class EntrainementController extends AbstractController
         }
         $entrainements = $qb->getQuery()->getResult();
 
+<<<<<<< HEAD
+=======
+        // build participation map for current user
+        $participationMap = [];
+        $evaluationMap = [];
+        $user = $this->getUser();
+        if ($user && count($entrainements) > 0) {
+            $ids = array_map(fn($e) => $e->getId(), $entrainements);
+            $parts = $participationRepository->createQueryBuilder('p')
+                ->andWhere('p.joueur = :user')
+                ->andWhere('p.entrainement IN (:ids)')
+                ->setParameter('user', $user)
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->getResult();
+            foreach ($parts as $p) {
+                $participationMap[$p->getEntrainement()->getId()] = $p->getPresence();
+            }
+
+            // fetch user's evaluations for these entrainements
+            $evals = $evaluationRepository->createQueryBuilder('e')
+                ->andWhere('e.joueur = :user')
+                ->andWhere('e.entrainement IN (:ids)')
+                ->setParameter('user', $user)
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->getResult();
+            foreach ($evals as $ev) {
+                $evaluationMap[$ev->getEntrainement()->getId()] = $ev;
+            }
+        }
+
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         return $this->render('front_office/entrainement/index.html.twig', [
             'entrainements' => $entrainements,
             'search_type' => $searchType,
             'sort_by' => $sortBy,
             'sort_dir' => $sortDir,
+<<<<<<< HEAD
         ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
+=======
+            'participation_map' => $participationMap,
+            'evaluation_map' => $evaluationMap,
+        ]);
+    }
+
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function search(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, \App\Repository\EvaluationRepository $evaluationRepository): JsonResponse
+    {
+        $q = (string) $request->query->get('q', '');
+        $sortBy = (string) $request->query->get('sort_by', '');
+        $sortDir = (string) $request->query->get('sort_dir', 'asc');
+
+        $qb = $entrainementRepository->createQueryBuilder('e');
+        if ($q !== '') {
+            $qb->andWhere('LOWER(e.type) LIKE :q OR LOWER(e.lieu) LIKE :q')
+               ->setParameter('q', '%' . strtolower($q) . '%');
+        }
+
+        if ($sortBy === 'dateEntrainement') {
+            $qb->orderBy('e.dateEntrainement', $sortDir === 'desc' ? 'DESC' : 'ASC');
+        } else {
+            $qb->orderBy('e.id', 'DESC');
+        }
+
+        $entrainements = $qb->getQuery()->getResult();
+
+        $participationMap = [];
+        $evaluationMap = [];
+        $user = $this->getUser();
+        if ($user && count($entrainements) > 0) {
+            $ids = array_map(fn($e) => $e->getId(), $entrainements);
+            $parts = $participationRepository->createQueryBuilder('p')
+                ->andWhere('p.joueur = :user')
+                ->andWhere('p.entrainement IN (:ids)')
+                ->setParameter('user', $user)
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->getResult();
+            foreach ($parts as $p) {
+                $participationMap[$p->getEntrainement()->getId()] = $p->getPresence();
+            }
+
+            $evals = $evaluationRepository->createQueryBuilder('e')
+                ->andWhere('e.joueur = :user')
+                ->andWhere('e.entrainement IN (:ids)')
+                ->setParameter('user', $user)
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->getResult();
+            foreach ($evals as $ev) {
+                $evaluationMap[$ev->getEntrainement()->getId()] = $ev;
+            }
+        }
+
+        $html = $this->renderView('front_office/entrainement/_cards.html.twig', [
+            'entrainements' => $entrainements,
+            'participation_map' => $participationMap,
+            'evaluation_map' => $evaluationMap,
+        ]);
+
+        return new JsonResponse(['html' => $html]);
+    }
+
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, \App\Service\NotificationService $notifier): Response
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -52,6 +165,26 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
+<<<<<<< HEAD
+=======
+            $recipients = $entrainement->getJoueurs()->toArray();
+            if ($entrainement->getEntraineur()) {
+                $recipients[] = $entrainement->getEntraineur();
+            }
+
+            $notified = [];
+            foreach ($recipients as $joueur) {
+                $key = $joueur->getId() ?? spl_object_id($joueur);
+                if (isset($notified[$key])) {
+                    continue;
+                }
+
+                $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+                $notified[$key] = true;
+            }
+
+            $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             return $this->redirectToRoute('front_entrainement_index');
         }
 
@@ -61,10 +194,24 @@ final class EntrainementController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
+<<<<<<< HEAD
     public function show(Entrainement $entrainement): Response
     {
         return $this->render('front_office/entrainement/show.html.twig', [
             'entrainement' => $entrainement,
+=======
+    public function show(Entrainement $entrainement, ParticipationRepository $participationRepository): Response
+    {
+        $user = $this->getUser();
+        $userParticipation = null;
+        if ($user) {
+            $userParticipation = $participationRepository->findOneBy(['entrainement' => $entrainement, 'joueur' => $user]);
+        }
+
+        return $this->render('front_office/entrainement/show.html.twig', [
+            'entrainement' => $entrainement,
+            'user_participation' => $userParticipation,
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         ]);
     }
 

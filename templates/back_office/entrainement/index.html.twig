@@ -24,7 +24,11 @@
   <div class="data-table-header d-flex justify-content-between mb-4">
     <div>
       <h3>Liste des entrainements</h3>
+<<<<<<< HEAD
       <span class="text-muted" style="font-size:13px">
+=======
+      <span class="muted-soft" style="font-size:13px">
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         {{ entrainements|length }} entrainement(s)
       </span>
     </div>
@@ -41,7 +45,11 @@
         <option value="asc" {% if sort_dir == 'asc' %}selected{% endif %}>Ascendant</option>
         <option value="desc" {% if sort_dir == 'desc' %}selected{% endif %}>Descendant</option>
       </select>
+<<<<<<< HEAD
       <button type="submit" class="btn btn-sm btn-secondary">Rechercher</button>
+=======
+      <button type="submit" class="btn btn-sm btn-outline-secondary">Rechercher</button>
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     </form>
   </div>
 
@@ -78,6 +86,14 @@
                 Éditer
               </a>
 
+<<<<<<< HEAD
+=======
+              <a href="{{ path('back_evaluation_new', {entrainement: entrainement.id}) }}"
+                 class="btn btn-sm btn-outline-success">
+                Évaluer
+              </a>
+
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
               <button
                 type="button"
                 class="btn btn-sm btn-outline-danger"
@@ -96,7 +112,11 @@
     </table>
   {% else %}
     <div class="text-center p-5">
+<<<<<<< HEAD
       <p class="text-muted">Aucun entrainement pour le moment.</p>
+=======
+      <p class="muted-soft">Aucun entrainement pour le moment.</p>
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     </div>
   {% endif %}
 </div>

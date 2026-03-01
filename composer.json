@@ -4,16 +4,30 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
+<<<<<<< HEAD
         "php": ">=8.1",
+=======
+        "php": ">=8.2",
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "*",
+<<<<<<< HEAD
         "knpuniversity/oauth2-client-bundle": "^2.20",
         "league/oauth2-google": "^4.1",
         "phpdocumentor/reflection-docblock": "5.2",
         "phpstan/phpdoc-parser": "^2.3",
+=======
+        "dompdf/dompdf": "^3.1",
+        "endroid/qr-code": "~6.0.0",
+        "knplabs/knp-paginator-bundle": "^6.10",
+        "knplabs/knp-snappy-bundle": "^1.10",
+        "phpdocumentor/reflection-docblock": "^5.2",
+        "phpstan/phpdoc-parser": "^2.3",
+        "stripe/stripe-php": "^19.4",
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
         "symfony/console": "6.4.*",
@@ -39,12 +53,26 @@
         "symfony/string": "6.4.*",
         "symfony/translation": "6.4.*",
         "symfony/twig-bundle": "6.4.*",
+<<<<<<< HEAD
         "symfony/ux-turbo": "^2.32",
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0"
+=======
+        "symfony/ux-chartjs": "^2.32",
+        "symfony/ux-turbo": "^2.32",
+        "symfony/validator": "6.4.*",
+        "symfony/web-link": "6.4.*",
+        "symfony/workflow": "6.4.*",
+        "symfony/yaml": "6.4.*",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/intl-extra": "^3.23",
+        "twig/twig": "^2.12|^3.0",
+        "twilio/sdk": "^8.11",
+        "vich/uploader-bundle": "^2.9"
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     },
     "config": {
         "allow-plugins": {

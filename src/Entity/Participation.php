@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\ParticipationRepository;
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,24 +19,36 @@ class Participation
     #[ORM\Column]
     private ?int $id = null;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'La présence est obligatoire.')]
     #[Assert\Choice(choices: ['present', 'absent'], message: 'La présence doit être "present" ou "absent".')]
     private ?string $presence = null;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 500, maxMessage: 'Le justificatif ne doit pas dépasser 500 caractères.')]
     private ?string $justificationAbsence = null;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     #[ORM\ManyToOne(inversedBy: 'participations')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'L\'entrainement est obligatoire.')]
     private ?Entrainement $entrainement = null;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     #[ORM\ManyToOne(inversedBy: 'participations')]
     #[Assert\NotNull(message: 'Le joueur est obligatoire.')]
     private ?User $joueur = null;

@@ -1,0 +1,1466 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}Détails du Match{% endblock %}
+
+{% block body %}
+    <style>
+                /* Modern Weather & Location Card */
+                .modern-glass-card {
+                    background: rgba(16,185,129,0.12);
+                    border-radius: 16px;
+                    box-shadow: 0 6px 24px #10b98128, 0 1.5px 6px #0001;
+                    backdrop-filter: blur(8px);
+                    border: 1.5px solid #10b98133;
+                    padding: 20px 22px;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .modern-glass-card .weather-emoji {
+                    font-size: 24px;
+                    margin-right: 8px;
+                    vertical-align: middle;
+                    animation: weather-bounce 1.5s infinite alternate;
+                }
+                @keyframes weather-bounce {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(-8px); }
+                }
+                .modern-glass-card .weather-title {
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: #059669;
+                    margin-bottom: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    letter-spacing: 0.5px;
+                }
+                .modern-glass-card .weather-main {
+                    font-size: 26px;
+                    font-weight: 700;
+                    color: #111827;
+                    margin-bottom: 6px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .modern-glass-card .weather-badges {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 6px;
+                    flex-wrap: wrap;
+                }
+                .modern-glass-card .weather-badge {
+                    background: #e0f7ef;
+                    color: #059669;
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    box-shadow: 0 1px 3px #10b98122;
+                }
+                .modern-glass-card .weather-desc {
+                    font-size: 14px;
+                    color: #374151;
+                    margin-bottom: 0;
+                }
+                .modern-glass-card .location-title {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #0e1726;
+                    margin-bottom: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .modern-glass-card .location-badge {
+                    background: #f3f4f6;
+                    color: #059669;
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-right: 6px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    margin-bottom: 4px;
+                }
+                .modern-glass-card .location-distance {
+                    font-size: 13px;
+                    color: #374151;
+                    margin-bottom: 6px;
+                }
+                .modern-glass-card .location-map-btn {
+                    background: linear-gradient(90deg, #10b981 60%, #34d399 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    padding: 6px 16px;
+                    font-size: 13px;
+                    font-weight: 700;
+                    box-shadow: 0 2px 6px #10b98133;
+                    cursor: pointer;
+                    margin-top: 6px;
+                    transition: background 0.2s;
+                }
+                .modern-glass-card .location-map-btn:hover {
+                    background: #059669;
+                }
+        .team-heading {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .match-details {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .details-header {
+            margin-bottom: 40px;
+        }
+
+        .details-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 24px;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 32px;
+        }
+
+        .match-header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .match-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .match-id-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 32px;
+        }
+
+        .detail-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f9fafb;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .teams-section {
+            padding: 32px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .teams-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .team-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .team-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .team-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .team-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .lineup-section {
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+            margin-top: 12px;
+            border-left: 4px solid #10b981;
+        }
+
+        .lineup-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .football-field {
+            background: url('{{ asset('images/field/stade.jpg') }}') center/cover no-repeat;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid #e5e7eb;
+            border-radius: 8px;
+            min-height: 600px;
+            position: relative;
+            margin: 0 auto;
+            max-width: 800px;
+            aspect-ratio: 5 / 8;
+            overflow: hidden;
+        }
+
+        .field-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .field-line {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .field-center-line {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            top: 0;
+            transform: translateX(-1px);
+        }
+
+        .field-center-circle {
+            width: 20%;
+            height: 20%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            top: 40%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+        }
+
+        .field-center-dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .field-goal-box {
+            width: 30%;
+            height: 35%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .field-goal-box-domicile {
+            top: 32.5%;
+            left: 0;
+        }
+
+        .field-goal-box-exterieur {
+            top: 32.5%;
+            right: 0;
+        }
+
+        .field-penalty-area {
+            width: 20%;
+            height: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .field-penalty-area-domicile {
+            top: 25%;
+            left: 0;
+        }
+
+        .field-penalty-area-exterieur {
+            top: 25%;
+            right: 0;
+        }
+
+        .joueurs-field {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .joueur-position {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translate(-50%, -50%);
+        }
+
+        .joueur-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 4px;
+        }
+
+        .joueur-numero-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            border: 2px solid white;
+        }
+
+        .joueur-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 3px solid white;
+            margin-bottom: 4px;
+        }
+
+        .joueur-nom {
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 60px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .joueurs-lineup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .joueur-lineup-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .joueur-lineup-card:hover {
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .joueur-lineup-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 8px;
+            display: block;
+            border: 2px solid #e5e7eb;
+        }
+
+        .joueur-lineup-numero {
+            font-size: 18px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 4px;
+        }
+
+        .joueur-lineup-nom {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .joueur-lineup-prenom {
+            font-size: 11px;
+            color: #6b7280;
+            word-break: break-word;
+        }
+
+        .lineup-text {
+            font-size: 14px;
+            color: #1f2937;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            padding: 24px 32px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-edit {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn-edit:hover {
+            background: #bfdbfe;
+        }
+
+        .btn-back {
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-back:hover {
+            background: #e5e7eb;
+        }
+
+        .weather-card {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .weather-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .weather-content {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .weather-icon {
+            font-size: 32px;
+        }
+
+        .weather-details {
+            margin-top: 12px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .weather-loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Chatbot floating button and window */
+        #aiChatBubbleBtn {
+            position: fixed;
+            right: 28px;
+            bottom: 28px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            box-shadow: 0 12px 26px rgba(16, 185, 129, 0.3), 0 6px 12px rgba(2, 6, 23, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #aiChatBubbleBtn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 16px 30px rgba(16, 185, 129, 0.35), 0 8px 16px rgba(2, 6, 23, 0.35);
+        }
+        #aiChatOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.48);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+        }
+        #aiChatOverlay.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: opacity 0.22s ease, visibility 0s linear 0s;
+        }
+        #aiChatPopup {
+            position: fixed;
+            right: 28px;
+            bottom: 102px;
+            width: 420px;
+            max-width: calc(100vw - 22px);
+            height: 560px;
+            max-height: calc(100vh - 130px);
+            border-radius: 22px;
+            border: 1px solid rgba(16, 185, 129, 0.22);
+            background: linear-gradient(180deg, #f8fffc 0%, #eefaf4 100%);
+            box-shadow: 0 22px 46px rgba(2, 6, 23, 0.28), 0 6px 18px rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(7px);
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translate3d(0, 16px, 0) scale(0.96);
+            transform-origin: right bottom;
+            transition: opacity 0.24s ease, transform 0.26s ease, visibility 0s linear 0.26s;
+        }
+        #aiChatPopup.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translate3d(0, 0, 0) scale(1);
+            transition: opacity 0.24s ease, transform 0.26s ease, visibility 0s linear 0s;
+        }
+        #aiChatPopupHeader {
+            background: linear-gradient(120deg, #10b981 0%, #22c55e 55%, #34d399 100%);
+            color: white;
+            padding: 18px 20px;
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #aiChatPopupClose {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 26px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        #aiChatPopupClose:hover {
+            background: rgba(255, 255, 255, 0.28);
+            transform: scale(1.05);
+        }
+        #aiChatHistory {
+            background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 55%), #f6fbf8;
+            flex: 1;
+            min-height: 140px;
+            padding: 16px 14px 14px;
+            overflow-y: auto;
+            font-size: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #aiChatHistory::-webkit-scrollbar {
+            width: 9px;
+        }
+        #aiChatHistory::-webkit-scrollbar-thumb {
+            background: #9ee9ca;
+            border-radius: 999px;
+            border: 2px solid #f6fbf8;
+        }
+        #aiChatForm {
+            display: flex;
+            gap: 10px;
+            padding: 14px;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        #aiChatInput {
+            flex: 1;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid #9de3c6;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #aiChatInput:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+        }
+        #aiChatSendBtn {
+            padding: 11px 20px;
+            border-radius: 14px;
+            background: linear-gradient(120deg, #10b981 0%, #22c55e 100%);
+            color: white;
+            border: none;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
+        }
+        #aiChatSendBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        #aiChatSendBtn img {
+            width: 22px;
+            height: 22px;
+            display: block;
+            object-fit: contain;
+        }
+        @keyframes chat-message-in-user {
+            0% {
+                opacity: 0;
+                transform: translate3d(12px, 10px, 0) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+        }
+        @keyframes chat-message-in-bot {
+            0% {
+                opacity: 0;
+                transform: translate3d(-12px, 10px, 0) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+        }
+        .ai-msg-user {
+            display: flex;
+            justify-content: flex-end;
+            animation: chat-message-in-user 0.22s ease-out;
+            transform-origin: right bottom;
+        }
+        .ai-msg-bot {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            animation: chat-message-in-bot 0.24s ease-out;
+            transform-origin: left bottom;
+        }
+        .ai-bot-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(16, 185, 129, 0.38);
+            background: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.22);
+        }
+        .ai-bubble {
+            display: inline-block;
+            max-width: 82%;
+            border-radius: 16px;
+            padding: 10px 13px;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+        .ai-bubble-user {
+            background: linear-gradient(120deg, #10b981 0%, #22c55e 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 6px 14px rgba(16, 185, 129, 0.24);
+        }
+        .ai-bubble-bot {
+            background: #e9f8f0;
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.24);
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+        }
+        @media (max-width: 700px) {
+            #aiChatPopup {
+                right: 10px;
+                bottom: 86px;
+                width: calc(100vw - 20px);
+                height: 70vh;
+                border-radius: 16px;
+            }
+            #aiChatBubbleBtn {
+                right: 14px;
+                bottom: 16px;
+                width: 58px;
+                height: 58px;
+            }
+            #aiChatForm {
+                gap: 8px;
+                padding: 10px;
+            }
+            #aiChatSendBtn {
+                padding: 10px 14px;
+            }
+        }
+        
+        /* Container pour cartes côte à côte */
+        .modern-cards-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (max-width: 768px) {
+            .modern-cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        [data-theme="dark"] .details-header h1 {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .modern-glass-card {
+            background: rgba(15, 118, 110, 0.24);
+            border-color: rgba(45, 212, 191, 0.36);
+            box-shadow: 0 6px 24px rgba(20, 184, 166, 0.2), 0 1.5px 6px rgba(0, 0, 0, 0.25);
+        }
+
+        [data-theme="dark"] .modern-glass-card .weather-title,
+        [data-theme="dark"] .modern-glass-card .location-title {
+            color: #99f6e4;
+        }
+
+        [data-theme="dark"] .modern-glass-card .weather-main {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .modern-glass-card .weather-badge,
+        [data-theme="dark"] .modern-glass-card .location-badge {
+            background: rgba(15, 23, 42, 0.78);
+            color: #99f6e4;
+            border: 1px solid rgba(45, 212, 191, 0.25);
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] .modern-glass-card .weather-desc,
+        [data-theme="dark"] .modern-glass-card .location-distance {
+            color: #cbd5e1;
+        }
+
+        [data-theme="dark"] .match-card {
+            background: #0f172a;
+            border-color: #334155;
+            box-shadow: 0 10px 28px rgba(2, 6, 23, 0.45);
+        }
+
+        [data-theme="dark"] .match-header {
+            background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+            border-bottom: 1px solid #334155;
+        }
+
+        [data-theme="dark"] .match-id-badge {
+            background: rgba(148, 163, 184, 0.22);
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .detail-item {
+            background: #111827;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .detail-label {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .detail-value,
+        [data-theme="dark"] .teams-section h3,
+        [data-theme="dark"] .team-heading,
+        [data-theme="dark"] .lineup-label,
+        [data-theme="dark"] .lineup-text,
+        [data-theme="dark"] .joueur-lineup-nom {
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .joueur-lineup-prenom {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .teams-section,
+        [data-theme="dark"] .action-buttons {
+            border-top-color: #334155;
+        }
+
+        [data-theme="dark"] .lineup-section {
+            background: #0b1220;
+            border-left-color: #34d399;
+        }
+
+        [data-theme="dark"] .btn-back {
+            background: #111827;
+            color: #e2e8f0;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .btn-back:hover {
+            background: #1f2937;
+        }
+
+        [data-theme="dark"] .btn-edit {
+            background: #0b3b66;
+            color: #bfdbfe;
+        }
+
+        [data-theme="dark"] .btn-edit:hover {
+            background: #0c4a6e;
+        }
+
+        [data-theme="dark"] #aiChatPopup {
+            background: linear-gradient(180deg, #0b1626 0%, #0f172a 100%) !important;
+            box-shadow: 0 16px 40px rgba(2, 6, 23, 0.62) !important;
+            border: 1px solid #1f2937;
+        }
+        [data-theme="dark"] #aiChatOverlay {
+            background: rgba(2, 6, 23, 0.64);
+            backdrop-filter: blur(3px);
+        }
+
+        [data-theme="dark"] #aiChatHistory {
+            background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 55%), #111827 !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] #aiChatForm {
+            background: rgba(11, 18, 32, 0.88) !important;
+            border-top: 1px solid #1f2937;
+        }
+
+        [data-theme="dark"] #aiChatInput {
+            background: #0f172a !important;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
+        }
+
+        [data-theme="dark"] #aiChatInput::placeholder {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .ai-bubble-bot {
+            background: #0f2130;
+            color: #bff7e2;
+            border-color: #1f5f53;
+        }
+
+        [data-theme="dark"] .ai-bubble-user {
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.32);
+        }
+
+        [data-theme="dark"] .ai-bot-avatar {
+            border-color: #1f5f53;
+            background: #0f172a;
+        }
+    </style>
+
+    <div class="match-details">
+        <div class="details-header">
+            <h1>⚽ Détails du Match</h1>
+        </div>
+
+        <!-- WEATHER SECTION -->
+
+        <!-- MODERN WEATHER & LOCATION CARDS -->
+        <div class="modern-cards-container">
+            <div class="modern-glass-card" id="weatherCard">
+                <div class="weather-title"><span class="weather-emoji">🌤️</span>Conditions Météo</div>
+                <div class="weather-main" id="weatherMain">
+                    18°C <span class="weather-badge"><svg width="16" height="16" style="vertical-align:middle;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fbbf24"/></svg> Brouillard</span>
+                </div>
+                <div class="weather-badges">
+                    <span class="weather-badge">💧 Humidité: 31%</span>
+                    <span class="weather-badge">💨 Vent: 5 km/h</span>
+                </div>
+                <div class="weather-desc">Ressenti agréable pour jouer au football.</div>
+            </div>
+
+            <div class="modern-glass-card" id="stadiumGeoCard">
+                <div class="location-title"><span style="font-size:18px;">🏟️</span>Stade le plus proche</div>
+                <div class="location-badge"><svg width="16" height="16" style="vertical-align:middle;" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#10b981"/></svg> {{ stadiumGeo.nom ?? 'Santiago Bernabéu' }}</div>
+                <div class="location-distance">Distance : 4.2 km</div>
+                <div class="location-badge">📍 {{ match.lieu ?? 'Lieu inconnu' }}</div>
+                <button class="location-map-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query={{ (stadiumGeo.nom ?? 'Santiago Bernabéu')|url_encode }}','_blank')">Voir sur la carte</button>
+            </div>
+        </div>
+
+
+        <div class="match-card">
+            <div class="match-header">
+                <div class="match-title">
+                    {{ match.equipeDomicile.nom }} vs {{ match.equipeExterieur.nom }}
+                </div>
+                <div class="match-id-badge">#{{ match.id }}</div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">📅 Date</span>
+                    <span class="detail-value">{{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">🕐 Heure</span>
+                    <span class="detail-value">{{ match.heureDebut ? match.heureDebut|date('H:i') : 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">📍 Lieu</span>
+                    <span class="detail-value">{{ match.lieu ?? 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">🎯 Type</span>
+                    <span class="detail-value">{{ match.type ?? 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">🔔 Statut</span>
+                    <span class="detail-value">{{ match.statut ?? 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">⚽ Score</span>
+                    <span class="detail-value">{{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}</span>
+                </div>
+            </div>
+
+          <div style="display: flex; justify-content: center; margin-bottom: 32px;">
+          <a href="{{ path('app_front_matchs_export_pdf', {'id': match.id}) }}"
+          class="btn"
+          style="padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+          📄 Exporter en PDf
+          </a>
+          </div>
+
+
+            <div class="teams-section">
+                <h3>Équipes et Compositions</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                    <!-- ÉQUIPE DOMICILE -->
+                    <div style="text-align: center;">
+                        <div class="team-heading">
+                            {% if match.equipeDomicile.image %}
+                                <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}" style="width: 40px; height: 40px; object-fit: contain;">
+                            {% endif %}
+                            {{ match.equipeDomicile.nom }}
+                        </div>
+
+                        {% set joueursDomicile = match.matchLineups|filter(lineup => lineup.type == 'domicile')|sort((a, b) => a.joueur.numero <=> b.joueur.numero) %}
+                        {% if joueursDomicile|length > 0 %}
+                            <div class="football-field">
+                                <div class="field-lines">
+                                    <div class="field-line field-center-line"></div>
+                                    <div class="field-line field-center-circle"></div>
+                                    <div class="field-line field-center-dot"></div>
+                                    <div class="field-line field-penalty-area field-penalty-area-domicile"></div>
+                                    <div class="field-line field-goal-box field-goal-box-domicile"></div>
+                                    <div class="field-line field-penalty-area field-penalty-area-exterieur"></div>
+                                    <div class="field-line field-goal-box field-goal-box-exterieur"></div>
+                                </div>
+                                <div class="joueurs-field" data-equipe="domicile">
+                                    {% for lineup in joueursDomicile %}
+                                        <div class="joueur-position" data-numero="{{ lineup.joueur.numero }}" style="left: {% if lineup.positionX %}{{ lineup.positionX }}%{% else %}50%{% endif %}; top: {% if lineup.positionY %}{{ lineup.positionY }}%{% else %}50%{% endif %};">
+                                            <div style="position: relative;">
+                                                {% if lineup.joueur.image %}
+                                                    <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
+                                                {% else %}
+                                                    <div class="joueur-placeholder">👤</div>
+                                                {% endif %}
+                                                <div class="joueur-numero-badge">{{ lineup.joueur.numero }}</div>
+                                            </div>
+                                            <div class="joueur-nom">{{ lineup.joueur.nom }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="lineup-section">
+                                <div class="lineup-label">Composition</div>
+                                <div class="lineup-text">Aucun joueur sélectionné</div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- ÉQUIPE EXTÉRIEURE -->
+                    <div style="text-align: center;">
+                        <div class="team-heading">
+                            {% if match.equipeExterieur.image %}
+                                <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}" style="width: 40px; height: 40px; object-fit: contain;">
+                            {% endif %}
+                            {{ match.equipeExterieur.nom }}
+                        </div>
+
+                        {% set joueursExterieur = match.matchLineups|filter(lineup => lineup.type == 'exterieur')|sort((a, b) => a.joueur.numero <=> b.joueur.numero) %}
+                        {% if joueursExterieur|length > 0 %}
+                            <div class="football-field">                                <div class="field-lines">
+                                    <div class="field-line field-center-line"></div>
+                                    <div class="field-line field-center-circle"></div>
+                                    <div class="field-line field-center-dot"></div>
+                                    <div class="field-line field-penalty-area field-penalty-area-domicile"></div>
+                                    <div class="field-line field-goal-box field-goal-box-domicile"></div>
+                                    <div class="field-line field-penalty-area field-penalty-area-exterieur"></div>
+                                    <div class="field-line field-goal-box field-goal-box-exterieur"></div>
+                                </div>
+                                <div class="joueurs-field" data-equipe="exterieur">
+                                    {% for lineup in joueursExterieur %}
+                                        <div class="joueur-position" data-numero="{{ lineup.joueur.numero }}" style="left: {% if lineup.positionX %}{{ lineup.positionX }}%{% else %}50%{% endif %}; top: {% if lineup.positionY %}{{ lineup.positionY }}%{% else %}50%{% endif %};">
+                                            <div style="position: relative;">
+                                                {% if lineup.joueur.image %}
+                                                    <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
+                                                {% else %}
+                                                    <div class="joueur-placeholder">👤</div>
+                                                {% endif %}
+                                                <div class="joueur-numero-badge" style="background: #3b82f6;">{{ lineup.joueur.numero }}</div>
+                                            </div>
+                                            <div class="joueur-nom">{{ lineup.joueur.nom }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="lineup-section">
+                                <div class="lineup-label">Composition</div>
+                                <div class="lineup-text">Aucun joueur sélectionné</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{{ path('app_front_matchs_index') }}" class="action-btn btn-back">← Retour aux matchs</a>
+                <a href="{{ path('app_match_edit_formation', {'id': match.id}) }}" class="action-btn btn-edit">⚽ Éditer la formation</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch weather data from OpenWeatherMap API
+        function loadWeather() {
+            const lieu = '{{ match.lieu|e("js") }}';
+            const apiKey = '{{ weatherApiKey|default('')|e('js') }}';
+
+            if (!apiKey) {
+                document.getElementById('weatherContent').innerHTML = '🔑 API key OpenWeather manquante — ajoutez OPENWEATHER_API_KEY dans .env';
+                document.getElementById('weatherCard').classList.remove('weather-loading');
+                return;
+            }
+
+            if (!lieu) {
+                document.getElementById('weatherContent').innerHTML = '📍 Lieu du match non spécifié';
+                document.getElementById('weatherCard').classList.remove('weather-loading');
+                return;
+            }
+
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(lieu)}&units=metric&lang=fr&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cod === 200 && data.main && data.weather) {
+                        const temp = Math.round(data.main.temp);
+                        const description = data.weather[0].description;
+                        const humidity = data.main.humidity;
+                        const windSpeed = Math.round(data.wind.speed * 3.6); // m/s to km/h
+                        
+                        // Map weather conditions to emojis
+                        let weatherEmoji = '🌤️';
+                        if (description.includes('nuageux')) weatherEmoji = '☁️';
+                        if (description.includes('pluie')) weatherEmoji = '🌧️';
+                        if (description.includes('orage')) weatherEmoji = '⛈️';
+                        if (description.includes('neige')) weatherEmoji = '❄️';
+                        if (description.includes('clair') || description.includes('ensoleillé')) weatherEmoji = '☀️';
+
+                        document.getElementById('weatherContent').innerHTML = `
+                            <span class="weather-icon">${weatherEmoji}</span>
+                            <div>
+                                <div><strong>${temp}°C</strong> - ${description}</div>
+                                <div class="weather-details">Humidité: ${humidity}% | Vent: ${windSpeed} km/h</div>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('weatherContent').innerHTML = '❌ Météo non disponible pour ce lieu';
+                    }
+                    document.getElementById('weatherCard').classList.remove('weather-loading');
+                })
+                .catch(error => {
+                    console.error('Erreur météo:', error);
+                    document.getElementById('weatherContent').innerHTML = '⚠️ Erreur lors du chargement de la météo';
+                    document.getElementById('weatherCard').classList.remove('weather-loading');
+                });
+        }
+
+        // Load weather when page loads
+        document.addEventListener('DOMContentLoaded', loadWeather);
+
+        // Liste fictive de stades (à personnaliser)
+        const stadiums = [
+            { name: 'Santiago Bernabéu', lat: 40.4531, lng: -3.6883 },
+            { name: 'Camp Nou', lat: 41.3809, lng: 2.1228 },
+            { name: 'Parc des Princes', lat: 48.8414, lng: 2.2530 },
+            { name: 'Allianz Arena', lat: 48.2188, lng: 11.6247 },
+            { name: 'Stade de France', lat: 48.9244, lng: 2.3601 }
+        ];
+
+        function haversine(lat1, lng1, lat2, lng2) {
+            // Distance en km
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function findClosestStadium(lat, lng) {
+            let minDist = Infinity;
+            let best = null;
+            for (const s of stadiums) {
+                const dist = haversine(lat, lng, s.lat, s.lng);
+                if (dist < minDist) {
+                    minDist = dist;
+                    best = { ...s, dist };
+                }
+            }
+            return best;
+        }
+
+        function showStadiumNearMatch() {
+            const lieu = '{{ match.lieu|e('js') }}';
+            if (!lieu) {
+                document.getElementById('stadiumGeoContent').textContent = 'Lieu du match non renseigné.';
+                return;
+            }
+            // Géocoder le lieu du match (OpenStreetMap Nominatim)
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(lieu)}`)
+                .then(r => r.json())
+                .then(results => {
+                    if (!results || results.length === 0) {
+                        document.getElementById('stadiumGeoContent').textContent = 'Lieu du match introuvable sur la carte.';
+                        return;
+                    }
+                    const lat = parseFloat(results[0].lat);
+                    const lng = parseFloat(results[0].lon);
+                    const best = findClosestStadium(lat, lng);
+                    if (best) {
+                        document.getElementById('stadiumGeoContent').innerHTML =
+                            `🏟️ <b>${best.name}</b><br>Distance : ${best.dist.toFixed(1)} km du lieu du match`;
+                    } else {
+                        document.getElementById('stadiumGeoContent').textContent = 'Aucun stade trouvé.';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('stadiumGeoContent').textContent = 'Erreur lors de la recherche du lieu.';
+                });
+        }
+        document.addEventListener('DOMContentLoaded', showStadiumNearMatch);
+    </script>
+
+    <!-- Floating Chatbot Button -->
+    <button id="aiChatBubbleBtn" title="Chat IA" style="padding:0; background:none; border:none;">
+        <img src="{{ asset('images/logo chatbot.png') }}" alt="Chatbot" style="width:60px; height:60px; border-radius:50%; box-shadow:0 4px 16px rgba(16,185,129,0.18); object-fit:cover; display:block;">
+    </button>
+    <div id="aiChatOverlay" aria-hidden="true"></div>
+    <!-- Chatbot Popup -->
+    <div id="aiChatPopup">
+        <div id="aiChatPopupHeader">
+            <span style="font-size: 20px; display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.5px;">
+                <span>Sport Insight AI</span>
+            </span>
+            <button id="aiChatPopupClose" title="Fermer">&times;</button>
+        </div>
+        <div id="aiChatHistory"></div>
+        <form id="aiChatForm">
+            <input type="text" id="aiChatInput" placeholder="Posez une question sur ce match" autocomplete="off">
+            <button type="submit" id="aiChatSendBtn" aria-label="Envoyer">
+                <img src="{{ asset('chatbot/msg.png') }}" alt="Envoyer">
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Chatbot floating logic
+        const chatBtn = document.getElementById('aiChatBubbleBtn');
+        const chatOverlay = document.getElementById('aiChatOverlay');
+        const chatPopup = document.getElementById('aiChatPopup');
+        const chatClose = document.getElementById('aiChatPopupClose');
+        function openChatPopup() {
+            chatOverlay.classList.add('open');
+            chatPopup.classList.add('open');
+        }
+        function closeChatPopup() {
+            chatOverlay.classList.remove('open');
+            chatPopup.classList.remove('open');
+        }
+        // Toggle on click (ouvre/ferme)
+        chatBtn.onclick = () => {
+            if (chatPopup.classList.contains('open')) {
+                closeChatPopup();
+            } else {
+                openChatPopup();
+            }
+        };
+        chatOverlay.onclick = () => closeChatPopup();
+        chatClose.onclick = () => closeChatPopup();
+        // Fermer avec Echap
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeChatPopup(); });
+
+        // Chatbot logic (floating only, improved detection)
+        const matchContext = `Match: {{ match.equipeDomicile.nom }} vs {{ match.equipeExterieur.nom }}\nDate: {{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'N/A' }}\nHeure: {{ match.heureDebut ? match.heureDebut|date('H:i') : 'N/A' }}\nLieu: {{ match.lieu }}\nType: {{ match.type }}\nStatut: {{ match.statut }}\nScore: {{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}`;
+        function isMatchRelated(question) {
+            const q = question.toLowerCase();
+            const keywords = [
+                '{{ match.equipeDomicile.nom|lower }}',
+                '{{ match.equipeExterieur.nom|lower }}',
+                '{{ match.lieu|lower }}',
+                '{{ match.type|lower }}',
+                '{{ match.statut|lower }}',
+                'score', 'date', 'heure', 'statut', 'joueur', 'buteur', 'résultat', 'formation', 'arbitre', 'stade', 'domicile', 'extérieur', 'match', 'adversaire', 'but', 'remplaçant', 'entraineur', 'coach', 'victoire', 'défaite', 'égalité', 'mi-temps', 'temps', 'minute', 'carton', 'pénalty', 'tir', 'gardien', 'capitaine', 'équipe', 'effectif', 'joueurs', 'composition', 'liste', 'nom', 'qui', 'présence', 'absent', 'présent', 'remplaçant', 'titulaires', 'remplaçants'
+            ];
+            if (keywords.some(k => k && q.includes(k))) return true;
+            if (/\b(match|rencontre|partie|jeu)\b/.test(q)) return true;
+            if (/\b(\d{1,2}[-: ]\d{1,2})\b/.test(q)) return true;
+            return false;
+        }
+        const chatEndpoint = '{{ path('app_front_matchs_ai_chat', {'id': match.id}) }}';
+        const botAvatar = '{{ asset('images/logo chatbot.png') }}';
+        const outOfScopeMessage = 'Desole, je reponds uniquement au detail du match {{ match.equipeDomicile.nom|e('js') }} vs {{ match.equipeExterieur.nom|e('js') }}.';
+        async function fakeAIResponse(question) {
+            if (!isMatchRelated(question)) {
+                return outOfScopeMessage;
+            }
+
+            try {
+                const response = await fetch(chatEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: question }),
+                });
+
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    data = null;
+                }
+
+                if (!response.ok) {
+                    return (data && data.reply) ? data.reply : 'Erreur serveur.';
+                }
+
+                return (data && data.reply) ? data.reply : 'Information non disponible dans le detail du match.';
+            } catch (error) {
+                return 'Erreur de connexion. Veuillez reessayer.';
+            }
+
+            const q = question.toLowerCase();
+            // Réponses sur les équipes
+            if (q.includes('équipe') || q.includes('equipes') || q.includes('team')) {
+                return `Les équipes sont : <b>{{ match.equipeDomicile.nom }}</b> (domicile) et <b>{{ match.equipeExterieur.nom }}</b> (extérieur).`;
+            }
+            // Réponse sur les joueurs (affiche la liste pour chaque équipe)
+            if (q.includes('joueur') || q.includes('joueurs') || q.includes('effectif') || q.includes('composition') || q.includes('liste')) {
+                let html = `<div style='margin-bottom:10px;'><b>{{ match.equipeDomicile.nom }}</b> (domicile):<ul style='margin:6px 0 10px 18px;padding:0;'>`;
+                {% set joueursDomicile = match.matchLineups|filter(lineup => lineup.type == 'domicile')|sort((a, b) => a.joueur.numero <=> b.joueur.numero) %}
+                {% for lineup in joueursDomicile %}
+                    html += `<li>{{ lineup.joueur.numero }} - {{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}</li>`;
+                {% endfor %}
+                html += `</ul></div><div><b>{{ match.equipeExterieur.nom }}</b> (extérieur):<ul style='margin:6px 0 0 18px;padding:0;'>`;
+                {% set joueursExterieur = match.matchLineups|filter(lineup => lineup.type == 'exterieur')|sort((a, b) => a.joueur.numero <=> b.joueur.numero) %}
+                {% for lineup in joueursExterieur %}
+                    html += `<li>{{ lineup.joueur.numero }} - {{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}</li>`;
+                {% endfor %}
+                html += `</ul></div>`;
+                return html;
+            }
+            if (!isMatchRelated(question)) {
+                return "<span style='color:#ef4444'>❌ Je peux répondre uniquement aux questions sur ce match. Posez-moi une question concernant les équipes, le score, la date, le lieu, etc.</span>";
+            }
+            if (q.includes('score')) {
+                return `Le score est : <b>{{ match.scoreEquipeDomicile ?? 0 }}</b> - <b>{{ match.scoreEquipeExterieur ?? 0 }}</b>`;
+            }
+            if (q.includes('date')) {
+                return `Le match a lieu le <b>{{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'N/A' }}</b> à <b>{{ match.heureDebut ? match.heureDebut|date('H:i') : 'N/A' }}</b>`;
+            }
+            if (q.includes('lieu') || q.includes('stade')) {
+                return `Le match se joue à <b>{{ match.lieu }}</b>`;
+            }
+            if (q.includes('type')) {
+                return `Type de match : <b>{{ match.type }}</b>`;
+            }
+            if (q.includes('statut')) {
+                return `Statut du match : <b>{{ match.statut }}</b>`;
+            }
+            if (q.includes('domicile')) {
+                return `L'équipe à domicile est <b>{{ match.equipeDomicile.nom }}</b>`;
+            }
+            if (q.includes('extérieur')) {
+                return `L'équipe à l'extérieur est <b>{{ match.equipeExterieur.nom }}</b>`;
+            }
+            // Ajout d'une réponse générique améliorée
+            return "C'est une bonne question sur ce match ! (Démo IA locale)";
+        }
+        function escapeChatHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        document.getElementById('aiChatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('aiChatInput');
+            const history = document.getElementById('aiChatHistory');
+            const question = input.value.trim();
+            if (!question) return;
+            history.innerHTML += `<div class='ai-msg-user'><div class='ai-bubble ai-bubble-user'>${escapeChatHtml(question)}</div></div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+            const response = await fakeAIResponse(question);
+            history.innerHTML += `<div class='ai-msg-bot'><img class='ai-bot-avatar' src='${botAvatar}' alt='AI'><div class='ai-bubble ai-bubble-bot'>${escapeChatHtml(response).replace(/\r?\n/g, '<br>')}</div></div>`;
+            history.scrollTop = history.scrollHeight;
+        });
+    </script>
+{% endblock %}

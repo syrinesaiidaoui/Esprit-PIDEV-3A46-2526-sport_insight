@@ -33,6 +33,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+<<<<<<< HEAD
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */
@@ -57,4 +58,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     //            ->getOneOrNullResult()
     //        ;
     //    }
+=======
+    /**
+     * @return User[] Returns an array of User objects with ROLE_ADMIN
+     */
+    public function findAdmins(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.roles LIKE :role')
+            ->setParameter('role', '%"ROLE_ADMIN"%')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

@@ -35,6 +35,7 @@
             "./migrations/.gitignore"
         ]
     },
+<<<<<<< HEAD
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.20",
         "recipe": {
@@ -42,6 +43,18 @@
             "branch": "main",
             "version": "1.20",
             "ref": "1ff300d8c030f55c99219cc55050b97a695af3f6"
+=======
+    "knplabs/knp-paginator-bundle": {
+        "version": "v6.10.0"
+    },
+    "knplabs/knp-snappy-bundle": {
+        "version": "1.10",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.5",
+            "ref": "c81bdcf4a9d4e7b1959071457f9608631865d381"
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         }
     },
     "phpunit/phpunit": {
@@ -58,6 +71,21 @@
             "./tests/bootstrap.php"
         ]
     },
+<<<<<<< HEAD
+=======
+    "stripe/stripe-php": {
+        "version": "19.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "19.0",
+            "ref": "d6829c693e3927a8972c7671d74a1a5c505712b0"
+        },
+        "files": [
+            "./config/packages/stripe.yaml"
+        ]
+    },
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     "symfony/asset-mapper": {
         "version": "6.4",
         "recipe": {
@@ -142,7 +170,11 @@
         ]
     },
     "symfony/maker-bundle": {
+<<<<<<< HEAD
         "version": "1.65",
+=======
+        "version": "1.66",
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -267,6 +299,12 @@
             "./templates/base.html.twig"
         ]
     },
+<<<<<<< HEAD
+=======
+    "symfony/ux-chartjs": {
+        "version": "v2.32.0"
+    },
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     "symfony/ux-turbo": {
         "version": "2.32",
         "recipe": {
@@ -301,6 +339,7 @@
             "./config/routes/web_profiler.yaml"
         ]
     },
+<<<<<<< HEAD
     "symfony/webapp-pack": {
         "version": "1.4",
         "recipe": {
@@ -311,9 +350,33 @@
         },
         "files": [
             "./config/packages/messenger.yaml"
+=======
+    "symfony/workflow": {
+        "version": "6.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "3.3",
+            "ref": "3b2f8ca32a07fcb00f899649053943fa3d8bbfb6"
+        },
+        "files": [
+            "./config/packages/workflow.yaml"
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         ]
     },
     "twig/extra-bundle": {
         "version": "v3.23.0"
+<<<<<<< HEAD
+=======
+    },
+    "vich/uploader-bundle": {
+        "version": "2.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.13",
+            "ref": "1b3064c2f6b255c2bc2f56461aaeb76b11e07e36"
+        }
+>>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     }
 }
