@@ -8,21 +8,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #f0f7f2;
-    --surface:   #ffffff;
-    --card:      #f8fdf9;
-    --border:    #d1e8d8;
+    --bg:        var(--bg-main);
+    --surface:   rgba(255,255,255,.78);
+    --card:      rgba(255,255,255,.9);
+    --border:    rgba(148,163,184,.28);
     --accent:    #16a34a;
     --accent-lt: #22c55e;
     --accent-dk: #14532d;
     --accent2:   #ef4444;
     --gold:      #f59e0b;
-    --text:      #1a2e22;
-    --muted:     #6b8f77;
+    --text:      var(--text-main);
+    --muted:     var(--text-soft);
     --radius:    12px;
   }
 
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; margin: 0; }
+  [data-theme="dark"] {
+    --bg:        #020617;
+    --surface:   rgba(15,23,42,.78);
+    --card:      rgba(15,23,42,.88);
+    --border:    rgba(148,163,184,.32);
+    --accent:    #34d399;
+    --accent-lt: #4ade80;
+    --accent-dk: #bbf7d0;
+    --text:      #e2e8f0;
+    --muted:     #94a3b8;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    margin: 0;
+  }
 
   /* ─── HERO BANNER ────────────────────────────────────────── */
   .hero-banner {
@@ -262,6 +279,86 @@
   .btn-view:hover   { border-color: var(--accent); color: var(--accent); background: #f0fdf4; }
   .btn-delete { border-color: var(--border); color: var(--muted); }
   .btn-delete:hover { border-color: var(--accent2); color: var(--accent2); background: #fef2f2; }
+
+  .train-card-notes {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .train-card-score-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+  .train-score-pill {
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .train-score-pill--phys {
+    background: #e6fffa;
+    color: #065f46;
+  }
+  .train-score-pill--tech {
+    background: #eff6ff;
+    color: #1e3a8a;
+  }
+  .train-score-pill--tact {
+    background: #fff7ed;
+    color: #92400e;
+  }
+  .btn-ai-advice {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: #fff;
+    border: none;
+    font-size: 11px;
+    padding: 5px;
+    border-radius: 8px;
+  }
+
+  [data-theme="dark"] .search-wrap,
+  [data-theme="dark"] .train-card,
+  [data-theme="dark"] .empty-state,
+  [data-theme="dark"] .modal-box {
+    background: var(--surface);
+    border-color: var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  [data-theme="dark"] .search-wrap input,
+  [data-theme="dark"] .search-wrap select {
+    background: var(--card);
+  }
+  [data-theme="dark"] .train-card-time {
+    background: rgba(52,211,153,.16);
+    border-color: rgba(74,222,128,.35);
+  }
+  [data-theme="dark"] .train-card-time .time-txt { color: #bbf7d0; }
+  [data-theme="dark"] .train-card-footer { border-top-color: rgba(148,163,184,.2); }
+  [data-theme="dark"] .btn-view:hover { background: rgba(52,211,153,.16); }
+  [data-theme="dark"] .btn-delete:hover { background: rgba(239,68,68,.16); }
+  [data-theme="dark"] .empty-icon {
+    background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(30,64,175,.22));
+    border-color: rgba(148,163,184,.35);
+  }
+  [data-theme="dark"] .modal-overlay { background: rgba(2,6,23,.55); }
+  [data-theme="dark"] .btn-ai-advice {
+    background: linear-gradient(135deg, #059669, #10b981);
+  }
+  [data-theme="dark"] .train-score-pill--phys {
+    background: rgba(20,184,166,.22);
+    color: #99f6e4;
+  }
+  [data-theme="dark"] .train-score-pill--tech {
+    background: rgba(59,130,246,.22);
+    color: #bfdbfe;
+  }
+  [data-theme="dark"] .train-score-pill--tact {
+    background: rgba(245,158,11,.22);
+    color: #fde68a;
+  }
 
   /* ─── EMPTY STATE ────────────────────────────────────────── */
   .empty-state {
@@ -1416,6 +1513,72 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     background: #f59e0b;
     border-radius: 50%;
     animation: pulse 2s infinite;
+  }
+
+  [data-theme="dark"] #aiModal .modal-box {
+    background: rgba(15,23,42,.94);
+    border-color: rgba(148,163,184,.34);
+    box-shadow: 0 24px 64px rgba(2,6,23,.75);
+  }
+  [data-theme="dark"] #aiModal .ai-tabs {
+    background: rgba(2,6,23,.5);
+    border-bottom-color: rgba(148,163,184,.24);
+  }
+  [data-theme="dark"] #aiModal .ai-tab {
+    color: #94a3b8;
+  }
+  [data-theme="dark"] #aiModal .ai-tab.active {
+    background: rgba(52,211,153,.14);
+    color: #34d399;
+    border-color: rgba(52,211,153,.32);
+  }
+  [data-theme="dark"] #aiModal .ai-tab-content,
+  [data-theme="dark"] #aiModal .score-card,
+  [data-theme="dark"] #aiModal .tip-card,
+  [data-theme="dark"] #aiModal .nutrition-section,
+  [data-theme="dark"] #aiModal .calorie-card,
+  [data-theme="dark"] #aiModal .hydration-card,
+  [data-theme="dark"] #aiModal .macro-bar-item,
+  [data-theme="dark"] #aiModal .meal-card,
+  [data-theme="dark"] #aiModal .workout-card,
+  [data-theme="dark"] #aiModal .workout-card-body,
+  [data-theme="dark"] #aiModal .supplement-card,
+  [data-theme="dark"] #aiModal .nutri-tip-card,
+  [data-theme="dark"] #aiModal .api-food-card {
+    background: rgba(15,23,42,.74);
+    border-color: rgba(148,163,184,.3);
+    color: #e2e8f0;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  [data-theme="dark"] #aiModal .score-bar-track,
+  [data-theme="dark"] #aiModal .macro-bar-track,
+  [data-theme="dark"] #aiModal .api-nutrient-bar {
+    background: rgba(148,163,184,.22);
+  }
+  [data-theme="dark"] #aiModal .score-card-message,
+  [data-theme="dark"] #aiModal .macro-desc,
+  [data-theme="dark"] #aiModal .supplement-when,
+  [data-theme="dark"] #aiModal .api-food-serving,
+  [data-theme="dark"] #aiModal .api-nutrient-name,
+  [data-theme="dark"] #aiModal .hydration-tips {
+    color: #94a3b8;
+  }
+  [data-theme="dark"] #aiModal .workout-food-item,
+  [data-theme="dark"] #aiModal .api-nutrient-row {
+    border-bottom-color: rgba(148,163,184,.22);
+  }
+  [data-theme="dark"] #aiModal .food-calc-input {
+    background: rgba(15,23,42,.72);
+    border-color: rgba(148,163,184,.32);
+  }
+  [data-theme="dark"] #aiModal .food-calc-input::placeholder {
+    color: #94a3b8;
+  }
+  [data-theme="dark"] #aiModal .api-badge {
+    background: rgba(245,158,11,.16);
+    border-color: rgba(245,158,11,.4);
+    color: #fcd34d;
   }
 
   @media (max-width: 600px) {

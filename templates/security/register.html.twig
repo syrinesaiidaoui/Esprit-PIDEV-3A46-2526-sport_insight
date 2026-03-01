@@ -1,0 +1,63 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}Create Account - Sport Insight{% endblock %}
+
+{% block hero %}
+    <div class="hero">
+        <h1>Join Sport Insight</h1>
+        <p>Create your account to access training, matches, and purchases.</p>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="page-container d-flex justify-content-center">
+        <div class="front-card" style="max-width:520px; width:100%">
+            <h3 class="mb-3">Create account</h3>
+
+            {{ form_start(registrationForm) }}
+                <div class="mb-3">
+                    {{ form_label(registrationForm.prenom) }}
+                    {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.prenom) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(registrationForm.nom) }}
+                    {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.nom) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(registrationForm.email) }}
+                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.email) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(registrationForm.telephone) }}
+                    {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.telephone) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(registrationForm.dateNaissance) }}
+                    {{ form_widget(registrationForm.dateNaissance, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.dateNaissance) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(registrationForm.plainPassword.first) }}
+                    {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.plainPassword.first) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(registrationForm.plainPassword.second) }}
+                    {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.plainPassword.second) }}
+                </div>
+
+                {{ form_errors(registrationForm) }}
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Create account</button>
+                    <a href="{{ path('app_login') }}" class="btn btn-secondary">Back to sign in</a>
+                </div>
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
+{% endblock %}

@@ -47,28 +47,6 @@
             background: var(--body-bg);
         }
 
-        .create-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.15s;
-            cursor: pointer;
-        }
-
-        .create-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
         .matchs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
@@ -396,9 +374,6 @@
                 <a href="{{ path('app_front_matchs_index', { order: currentOrder == 'asc' ? 'desc' : 'asc' }) }}" class="sort-link">
                     {{ currentOrder == 'asc' ? '↑ Ordre croissant' : '↓ Ordre décroissant' }}
                 </a>
-                <a href="{{ path('app_front_matchs_new') }}" class="create-btn">
-                    ➕ Nouveau Match
-                </a>
             </div>
         </div>
 
@@ -493,9 +468,6 @@
                 <div class="empty-state-icon">⚽</div>
                 <h2>Aucun match trouvé</h2>
                 <p>Il n'y a actuellement aucun match prévu.</p>
-                <a href="{{ path('app_front_matchs_new') }}" class="create-btn">
-                    ➕ Créer un match
-                </a>
             </div>
         {% endif %}
     </div>

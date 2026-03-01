@@ -16,9 +16,6 @@ class Equipe
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
-    private ?string $id_equipe = null;
-
     #[Assert\NotBlank(message: 'Le nom de l\'équipe est obligatoire.')]
     #[Assert\Length(
         max: 100,
@@ -74,18 +71,6 @@ class Equipe
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getIdEquipe(): ?string
-    {
-        return $this->id_equipe;
-    }
-
-    public function setIdEquipe(string $id_equipe): static
-    {
-        $this->id_equipe = $id_equipe;
-
-        return $this;
     }
 
     public function getNom(): ?string

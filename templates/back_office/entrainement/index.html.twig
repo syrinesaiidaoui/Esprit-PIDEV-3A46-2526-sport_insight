@@ -24,7 +24,7 @@
   <div class="data-table-header d-flex justify-content-between mb-4">
     <div>
       <h3>Liste des entrainements</h3>
-      <span class="text-muted" style="font-size:13px">
+      <span class="muted-soft" style="font-size:13px">
         {{ entrainements|length }} entrainement(s)
       </span>
     </div>
@@ -41,7 +41,7 @@
         <option value="asc" {% if sort_dir == 'asc' %}selected{% endif %}>Ascendant</option>
         <option value="desc" {% if sort_dir == 'desc' %}selected{% endif %}>Descendant</option>
       </select>
-      <button type="submit" class="btn btn-sm btn-secondary">Rechercher</button>
+      <button type="submit" class="btn btn-sm btn-outline-secondary">Rechercher</button>
     </form>
   </div>
 
@@ -101,7 +101,7 @@
     </table>
   {% else %}
     <div class="text-center p-5">
-      <p class="text-muted">Aucun entrainement pour le moment.</p>
+      <p class="muted-soft">Aucun entrainement pour le moment.</p>
     </div>
   {% endif %}
 </div>

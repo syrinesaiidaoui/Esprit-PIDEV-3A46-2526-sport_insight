@@ -24,16 +24,15 @@
           {# ZONE IA ET NOTES #}
           {% set myEval = evaluation_map[entrainement.id]|default(null) %}
           {% if myEval %}
-            <div class="train-card-notes" style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
-              <div style="display:flex; gap:5px; font-size:11px;">
-                <span style="background:#e6fffa; padding:3px 6px; border-radius:4px; color:#065f46;">Phys: <b>{{ myEval.notePhysique }}</b></span>
-                <span style="background:#eff6ff; padding:3px 6px; border-radius:4px; color:#1e3a8a;">Tech: <b>{{ myEval.noteTechnique }}</b></span>
-                <span style="background:#fff7ed; padding:3px 6px; border-radius:4px; color:#92400e;">Tact: <b>{{ myEval.noteTactique }}</b></span>
+            <div class="train-card-notes">
+              <div class="train-card-score-row">
+                <span class="train-score-pill train-score-pill--phys">Phys: <b>{{ myEval.notePhysique }}</b></span>
+                <span class="train-score-pill train-score-pill--tech">Tech: <b>{{ myEval.noteTechnique }}</b></span>
+                <span class="train-score-pill train-score-pill--tact">Tact: <b>{{ myEval.noteTactique }}</b></span>
               </div>
               
               <button type="button" 
-                      class="btn-action" 
-                      style="background: linear-gradient(135deg, #16a34a, #22c55e); color: white; border: none; font-size: 11px; padding: 5px; cursor: pointer; border-radius: 8px;"
+                      class="btn-action btn-ai-advice" 
                       onclick="getAiAdvice({{ myEval.notePhysique }}, {{ myEval.noteTechnique }}, {{ myEval.noteTactique }}, '{{ entrainement.type|e('js') }}')">
                 ✨ Conseils du Coach IA
               </button>

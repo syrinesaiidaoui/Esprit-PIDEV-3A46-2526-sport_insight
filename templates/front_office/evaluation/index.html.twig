@@ -8,23 +8,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #f0f7f2;
-    --surface:   #ffffff;
-    --card:      #f8fdf9;
-    --border:    #d1e8d8;
+    --bg:        var(--bg-main);
+    --surface:   rgba(255,255,255,.78);
+    --card:      rgba(255,255,255,.9);
+    --border:    rgba(148,163,184,.28);
     --accent:    #16a34a;
     --accent-lt: #22c55e;
     --accent-dk: #14532d;
     --accent2:   #ef4444;
     --gold:      #f59e0b;
-    --text:      #1a2e22;
-    --muted:     #6b8f77;
+    --text:      var(--text-main);
+    --muted:     var(--text-soft);
     --radius:    12px;
     --blue:      #1d4ed8;
     --orange:    #c2410c;
   }
 
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; margin: 0; }
+  [data-theme="dark"] {
+    --bg:        #020617;
+    --surface:   rgba(15,23,42,.78);
+    --card:      rgba(15,23,42,.88);
+    --border:    rgba(148,163,184,.32);
+    --accent:    #34d399;
+    --accent-lt: #4ade80;
+    --accent-dk: #bbf7d0;
+    --text:      #e2e8f0;
+    --muted:     #94a3b8;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    margin: 0;
+  }
 
   /* ─── HERO ───────────────────────────────────────────────── */
   .hero-banner { position: relative; height: 240px; overflow: hidden; border-radius: 0 0 24px 24px; margin-bottom: 32px; }
@@ -298,6 +315,57 @@
   .btn-cancel:hover { border-color: var(--text); color: var(--text); }
   .btn-confirm-delete { padding: 10px 24px; background: var(--accent2); border: none; color: white; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 16px rgba(239,68,68,.25); transition: box-shadow .15s, transform .15s; }
   .btn-confirm-delete:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(239,68,68,.4); }
+
+  [data-theme="dark"] .toolbar,
+  [data-theme="dark"] .report-card,
+  [data-theme="dark"] .empty-state,
+  [data-theme="dark"] .modal-box,
+  [data-theme="dark"] .stat-card {
+    background: var(--surface);
+    border-color: var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  [data-theme="dark"] .toolbar input {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  [data-theme="dark"] .toolbar input::placeholder { color: var(--muted); }
+  [data-theme="dark"] .stat-card.physique {
+    background: linear-gradient(135deg, rgba(22,163,74,.2), rgba(16,185,129,.08));
+    border-color: rgba(74,222,128,.38);
+  }
+  [data-theme="dark"] .stat-card.technique {
+    background: linear-gradient(135deg, rgba(29,78,216,.2), rgba(96,165,250,.08));
+    border-color: rgba(96,165,250,.35);
+  }
+  [data-theme="dark"] .stat-card.tactique {
+    background: linear-gradient(135deg, rgba(194,65,12,.22), rgba(251,146,60,.1));
+    border-color: rgba(251,146,60,.35);
+  }
+  [data-theme="dark"] .stat-card-sub { color: #94a3b8; }
+  [data-theme="dark"] .stat-bar-bg { background: rgba(148,163,184,.26); }
+  [data-theme="dark"] .report-card:hover {
+    border-color: rgba(74,222,128,.45);
+    box-shadow: 0 16px 38px rgba(2,6,23,.52);
+  }
+  [data-theme="dark"] .rc-player {
+    background: linear-gradient(160deg, #052e2b 0%, #064e3b 100%);
+  }
+  [data-theme="dark"] .rc-scores {
+    border-left-color: rgba(148,163,184,.24);
+    border-right-color: rgba(148,163,184,.24);
+  }
+  [data-theme="dark"] .score-track { background: rgba(148,163,184,.2); }
+  [data-theme="dark"] .btn-view:hover { background: rgba(52,211,153,.18); }
+  [data-theme="dark"] .btn-edit:hover { background: rgba(251,191,36,.18); color: #fcd34d; }
+  [data-theme="dark"] .btn-delete:hover { background: rgba(239,68,68,.18); }
+  [data-theme="dark"] .empty-icon {
+    background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(30,64,175,.2));
+    border-color: rgba(148,163,184,.35);
+  }
+  [data-theme="dark"] .modal-overlay { background: rgba(2,6,23,.55); }
 
   @media (max-width: 900px) {
     .report-card { grid-template-columns: 1fr; }

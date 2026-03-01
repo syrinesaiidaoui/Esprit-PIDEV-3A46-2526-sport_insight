@@ -61,7 +61,9 @@ class Sponsor
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    /**
+     * @deprecated kept for legacy forms; not stored
+     */
     private ?string $adresse = null;
 
     #[Vich\UploadableField(mapping: 'sponsor_logo', fileNameProperty: 'logoName')]
@@ -132,6 +134,18 @@ class Sponsor
     public function setBudget(float $budget): static
     {
         $this->budget = $budget;
+
+        return $this;
+    }
+
+    public function getAdresse(): ?string
+    {
+        return $this->adresse;
+    }
+
+    public function setAdresse(?string $adresse): static
+    {
+        $this->adresse = $adresse;
 
         return $this;
     }
@@ -215,15 +229,4 @@ class Sponsor
         return $this;
     }
 
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(?string $adresse): static
-    {
-        $this->adresse = $adresse;
-
-        return $this;
-    }
 }
