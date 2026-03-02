@@ -3,10 +3,10 @@
 namespace App\Controller\BackOffice;
 
 use App\Entity\Entrainement;
-use App\Entity\User; // Ajouté pour trouver les joueurs
+use App\Entity\User;
 use App\Form\EntrainementType;
 use App\Repository\EntrainementRepository;
-use App\Service\NotificationService; // Ajouté pour le mail/notif
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,13 +28,13 @@ final class EntrainementController extends AbstractController
             $qb->andWhere('LOWER(e.type) LIKE :searchType')
                 ->setParameter('searchType', '%' . strtolower($searchType) . '%');
         }
-        
+
         if ($sortBy === 'dateEntrainement') {
             $qb->orderBy('e.dateEntrainement', $sortDir === 'desc' ? 'DESC' : 'ASC');
         } else {
             $qb->orderBy('e.id', 'DESC');
         }
-        
+
         $entrainements = $qb->getQuery()->getResult();
 
         return $this->render('back_office/entrainement/index.html.twig', [
@@ -45,7 +45,6 @@ final class EntrainementController extends AbstractController
         ]);
     }
 
-    // UNE SEULE MÉTHODE NEW ICI
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notifier): Response
     {
@@ -57,20 +56,20 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
-            // 1. Récupérer les joueurs associés à cet entraînement
+            // Notify associated players and trainer
             $recipients = $entrainement->getJoueurs()->toArray();
             if ($entrainement->getEntraineur()) {
                 $recipients[] = $entrainement->getEntraineur();
             }
 
             $notified = [];
-            foreach ($recipients as $joueur) {
-                $key = $joueur->getId() ?? spl_object_id($joueur);
+            foreach ($recipients as $recipient) {
+                $key = $recipient->getId() ?? spl_object_id($recipient);
                 if (isset($notified[$key])) {
                     continue;
                 }
 
-                $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+                $notifier->notifyPlayerNewTraining($recipient, $entrainement);
                 $notified[$key] = true;
             }
 
@@ -112,10 +111,12 @@ final class EntrainementController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Entrainement $entrainement, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid(
-            'delete'.$entrainement->getId(),
-            $request->request->get('_token')
-        )) {
+        if (
+            $this->isCsrfTokenValid(
+                'delete' . $entrainement->getId(),
+                $request->request->get('_token')
+            )
+        ) {
             $entityManager->remove($entrainement);
             $entityManager->flush();
             $this->addFlash('danger', 'Entraînement supprimé.');

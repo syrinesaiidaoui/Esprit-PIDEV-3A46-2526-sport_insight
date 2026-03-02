@@ -27,9 +27,9 @@
             --pitch-700: #1b4a35;
             --pitch-600: #1f6b49;
             --pitch-500: #2b8b60;
-        --line: #e5e7eb;
-        --border-color: #dbe2ea;
-        --surface: #f6f8f7;
+            --line: #e5e7eb;
+            --border-color: #dbe2ea;
+            --surface: #f6f8f7;
             --ink: #101827;
             --muted: #5e6b66;
             --warn: #f59e0b;
@@ -38,6 +38,8 @@
             --page-bg: radial-gradient(circle at 0% 0%, #eef8f1 0, #f8faf9 44%, #f3f5f4 100%);
             --top-navbar-bg: #111827;
             --hero-grad: linear-gradient(120deg, var(--pitch-900), var(--pitch-600));
+            --primary: #10b981;
+            --primary-hover: #059669;
             --card-bg: #ffffff;
             --footer-bg: var(--pitch-900);
             --footer-text: #c2d5ca;
@@ -65,7 +67,7 @@
 
         body {
             margin: 0;
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--page-bg);
             color: var(--ink);
         }
@@ -229,21 +231,21 @@
             padding: 0 18px;
         }
 
+        .front-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .front-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -6px rgba(0, 0, 0, 0.08);
+        }
+
         .section-title {
             font-size: 36px;
             margin: 0 0 16px;
-        }
-
-        .front-card {
-            background: var(--card-bg);
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 10px 30px rgba(16, 24, 39, 0.04);
-        }
-
-        .front-card:hover {
-            box-shadow: 0 16px 32px rgba(16, 24, 39, 0.08);
         }
 
         .badge-soft {
@@ -257,10 +259,6 @@
             text-transform: uppercase;
             letter-spacing: .5px;
         }
-
-        .stock-ok { color: #15803d; font-weight: 700; }
-        .stock-low { color: #b45309; font-weight: 700; }
-        .stock-out { color: #b91c1c; font-weight: 700; }
 
         .btn {
             border-radius: 10px !important;
@@ -279,11 +277,47 @@
             background: var(--card-bg) !important;
         }
 
+        .front-table {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .front-table table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .front-table th {
+            background: #f8fafc;
+            padding: 16px 20px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .front-table td {
+            padding: 16px 20px;
+            font-size: 14px;
+            color: var(--ink);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .front-table tr:last-child td { border-bottom: none; }
+        .front-table tr:hover { background-color: #f1f5f9; }
+
         .site-footer {
             margin-top: 54px;
             background: var(--footer-bg);
             color: var(--footer-text);
-            padding: 26px 16px;
+            padding: 40px;
             text-align: center;
             font-size: 13px;
         }
@@ -315,13 +349,6 @@
             border-color: rgba(45, 212, 191, 0.45);
         }
 
-        [data-theme="dark"] .badge-soft { background: #163a34; color: #99f6e4; }
-        [data-theme="dark"] .btn-chip { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.16); }
-        [data-theme="dark"] .flash-success { background: #052e1a; color: #bbf7d0; border-color: #166534; }
-        [data-theme="dark"] .flash-warning { background: #422006; color: #fde68a; border-color: #92400e; }
-        [data-theme="dark"] .flash-danger,
-        [data-theme="dark"] .flash-error { background: #450a0a; color: #fecaca; border-color: #991b1b; }
-
         .flash-stack {
             margin-bottom: 16px;
             display: grid;
@@ -339,78 +366,17 @@
         .flash-warning { background: #fff7e5; color: #92400e; border: 1px solid #fde68a; }
         .flash-danger, .flash-error { background: #fef0f0; color: #991b1b; border: 1px solid #fecaca; }
 
-        .front-table {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .front-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .front-table thead th {
-            padding: 12px 24px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--muted);
-            font-weight: 600;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border-color);
-            text-align: left;
-        }
-
-        .front-table tbody td {
-            padding: 14px 24px;
-            font-size: 14px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .front-table tbody tr:last-child td { border-bottom: none; }
-        .front-table tbody tr:hover { background: rgba(16, 24, 39, 0.04); }
-
-        .badge-success { background: rgba(16,185,129,0.1); color: #059669; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .badge-warning { background: rgba(245,158,11,0.1); color: #d97706; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .badge-danger { background: rgba(239,68,68,0.1); color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .badge-info { background: rgba(59,130,246,0.1); color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-
-        .front-card .card-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(16, 185, 129, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            color: var(--pitch-500);
-            font-size: 22px;
-        }
-
         @media (max-width: 980px) {
-            .top-navbar {
-                padding: 0 16px;
-            }
-
+            .top-navbar { padding: 0 16px; }
             .nav-links { display: none; }
-            .nav-actions { gap: 8px; }
             .hero h1 { font-size: 42px; }
         }
 
         @media (max-width: 640px) {
-            .hero {
-                border-radius: 0;
-                margin-top: 0;
-                padding: 40px 20px;
-            }
-
+            .hero { border-radius: 0; margin-top: 0; padding: 40px 20px; }
             .hero h1 { font-size: 35px; }
             .section-title { font-size: 28px; }
             .page-container { padding: 0 12px; }
-            .theme-fab { left: 12px; bottom: 12px; width: 56px; height: 56px; }
         }
     </style>
     {% block stylesheets %}{% endblock %}
@@ -424,27 +390,41 @@
             <span class="nav-brand-text">{{ 'nav.brand'|trans }}</span>
         </a>
 
-                <ul class="nav-links">
+        <ul class="nav-links">
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle {{ app.request.get('_route') starts with 'front_entrainement' or app.request.get('_route') starts with 'front_participation' or app.request.get('_route') starts with 'front_evaluation' or app.request.get('_route') starts with 'front_matchmaking' ? 'active' : '' }}" data-bs-toggle="dropdown">
                     {{ 'nav.training'|trans }}
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ path('front_entrainement_index') }}">??? Entrainements</a></li>
-                    <li><a class="dropdown-item" href="{{ path('front_participation_index') }}">?? Participations</a></li>
-                    <li><a class="dropdown-item" href="{{ path('front_evaluation_index') }}">? Évaluations</a></li>
+                    <li><a class="dropdown-item" href="{{ path('front_entrainement_index') }}">🏋️ Entrainements</a></li>
+                    <li><a class="dropdown-item" href="{{ path('front_participation_index') }}">📜 Participations</a></li>
+                    <li><a class="dropdown-item" href="{{ path('front_evaluation_index') }}">⭐ Évaluations</a></li>
                     <li><hr class="dropdown-divider" style="margin:4px 0;"></li>
-                    <li><a class="dropdown-item" href="{{ path('front_matchmaking_index') }}" style="color:#16a34a;font-weight:800;">?? Matchmaking (IA)</a></li>
+                    <li><a class="dropdown-item" href="{{ path('front_matchmaking_index') }}" style="color:#16a34a;font-weight:800;">🤖 Matchmaking (IA)</a></li>
                 </ul>
             </li>
             <li><a href="{{ path('app_front_equipes_index') }}" class="{{ app.request.get('_route') starts with 'app_front_equipes' ? 'active' : '' }}">{{ 'nav.teams'|trans }}</a></li>
             <li><a href="{{ path('app_joueurs_index') }}" class="{{ app.request.get('_route') starts with 'app_joueur' ? 'active' : '' }}">{{ 'nav.players'|trans }}</a></li>
             <li><a href="{{ path('app_front_matchs_index') }}" class="{{ app.request.get('_route') starts with 'app_front_matchs' ? 'active' : '' }}">{{ 'nav.matches'|trans }}</a></li>
             <li><a href="{{ path('front_equipement_index') }}" class="{{ app.request.get('_route') starts with 'front_equipement' ? 'active' : '' }}">{{ 'nav.equipment'|trans }}</a></li>
+            <li><a href="{{ path('app_annonce_index') }}" class="{{ app.request.get('_route') starts with 'app_annonce' ? 'active' : '' }}">Annonces</a></li>
             <li><a href="{{ path('front_sponsoring_index') }}" class="{{ app.request.get('_route') starts with 'front_sponsoring' ? 'active' : '' }}">Sponsors</a></li>
         </ul>
 
         <div class="nav-actions">
+            {% if app.user %}
+                <div style="display: flex; align-items: center; gap: 8px; margin-right: 8px;">
+                    <a href="{{ path('app_profile_edit') }}" style="text-decoration: none; display: flex; align-items: center; gap: 8px; color: white;">
+                        <span style="font-size: 13px; font-weight: 700;">{{ app.user.prenom }}</span>
+                        {% if app.user.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--primary);">
+                        {% else %}
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: #374151; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600;">{{ app.user.prenom|first }}{{ app.user.nom|first }}</div>
+                        {% endif %}
+                    </a>
+                </div>
+            {% endif %}
+
             <div class="btn-chip lang-switch" role="group" aria-label="Choisir la langue">
                 <a href="{{ path('app_locale_switch', {'locale':'fr'}) }}" class="{{ app.request.locale starts with 'fr' ? 'active' : '' }}">FR</a>
                 <span style="color:#4b5563;">|</span>
@@ -458,6 +438,7 @@
             {% endif %}
             <a href="{{ path('back_entrainement_index') }}" class="btn-chip">{{ 'nav.admin'|trans }}</a>
         </div>
+
     </nav>
 
     {% if app.request.get('_route') != 'app_login' and app.request.get('_route') != 'app_logout' %}
@@ -469,9 +450,11 @@
     <div class="page-container">
         <div class="flash-stack">
             {% for label, messages in app.flashes %}
-                {% for message in messages %}
-                    <div class="flash-item flash-{{ label }}">{{ message }}</div>
-                {% endfor %}
+                {% if label != 'moderation_error' %}
+                    {% for message in messages %}
+                        <div class="flash-item flash-{{ label == 'danger' ? 'danger' : (label == 'success' ? 'success' : label) }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
             {% endfor %}
         </div>
 
@@ -528,7 +511,8 @@
         })();
     </script>
     {% include '_partials/global_form_ux.html.twig' %}
-    {% block javascripts %}{% endblock %}
+    {% block javascripts %}
+        {{ importmap('app') }}
+    {% endblock %}
 </body>
 </html>
-

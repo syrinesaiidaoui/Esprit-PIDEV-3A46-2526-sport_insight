@@ -5,10 +5,14 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     joueurs_directory: '%kernel.project_dir%/public/uploads/joueurs'
+    photos_directory: '%kernel.project_dir%/public/uploads/photos'
     app.openweather_api_key: '%env(OPENWEATHER_API_KEY)%'
     app.training_notification_recipient: '%env(TRAINING_NOTIFICATION_RECIPIENT)%'
     app.groq_api_key: '%env(GROQ_API_KEY)%'
     stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
+    app.facepp_api_key: '%env(FACEPP_API_KEY)%'
+    app.facepp_api_secret: '%env(FACEPP_API_SECRET)%'
+    app.face_recognition_simulation: true
 
 services:
     # default configuration for services in *this* file
@@ -31,8 +35,8 @@ services:
         arguments:
             $sid: '%env(TWILIO_SID)%'
             $authToken: '%env(TWILIO_AUTH_TOKEN)%'
-            $fromPhone: '%env(TWILIO_PHONE)%'
-            $defaultCountry: '%env(TWILIO_DEFAULT_COUNTRY)%'
+            $fromPhone: '%env(TWILIO_FROM_PHONE)%'
+            $defaultCountry: '+216'
 
     App\Service\NotificationService:
         arguments:

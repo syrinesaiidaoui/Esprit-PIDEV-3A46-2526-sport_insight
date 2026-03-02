@@ -8,6 +8,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class EquipeType extends AbstractType
@@ -15,7 +17,17 @@ class EquipeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('id_equipe', TextType::class, [
+                'label' => 'Identifiant de l\'équipe',
+                'attr' => ['placeholder' => 'Ex: EQ-001'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'L\'identifiant de l\'équipe est obligatoire.'
+                    ]),
+                ],
+            ])
             ->add('nom', TextType::class, [
+                'label' => 'Nom de l\'équipe',
                 'constraints' => [
                     new Assert\NotBlank([
                         'message' => 'Le nom de l\'équipe est obligatoire.'
@@ -27,6 +39,7 @@ class EquipeType extends AbstractType
                 ],
             ])
             ->add('coach', TextType::class, [
+                'label' => 'Nom du coach',
                 'required' => false,
                 'constraints' => [
                     new Assert\Length([
@@ -34,6 +47,18 @@ class EquipeType extends AbstractType
                         'maxMessage' => 'Le nom du coach ne peut pas dépasser {{ limit }} caractères.'
                     ]),
                 ],
+            ])
+            ->add('adresse', TextType::class, [
+                'label' => 'Adresse',
+                'required' => false,
+            ])
+            ->add('telephone', TelType::class, [
+                'label' => 'Téléphone',
+                'required' => false,
+            ])
+            ->add('email', EmailType::class, [
+                'label' => 'Email de contact',
+                'required' => false,
             ])
             ->add('image', FileType::class, [
                 'label' => 'Logo de l\'équipe',

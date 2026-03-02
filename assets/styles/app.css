@@ -1,5 +1,11 @@
-/* Global utilities only. Keep this file neutral to avoid overriding page themes. */
+/* Global utilities and themes */
 * { box-sizing: border-box; }
 
 .mb-8 { margin-bottom: 8px; }
 .mb-16 { margin-bottom: 16px; }
+
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    min-height: 100vh;
+    background-attachment: fixed;
+}

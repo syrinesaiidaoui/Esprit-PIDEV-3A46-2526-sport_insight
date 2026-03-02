@@ -24,7 +24,8 @@ class OrderController extends AbstractController
         #[Autowire(service: 'state_machine.order_status')]
         private readonly WorkflowInterface $orderWorkflow,
         private readonly OrderNotificationService $orderNotificationService
-    ) {}
+    ) {
+    }
 
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(Request $request, OrderRepository $orderRepository): Response
@@ -132,7 +133,7 @@ class OrderController extends AbstractController
             if (count($errors) > 0) {
                 return $this->render('order/new.html.twig', [
                     'order' => $order,
-                    'form' => $form,
+                    'form' => $form->createView(),
                     'errors' => $errors,
                 ]);
             }
@@ -141,19 +142,19 @@ class OrderController extends AbstractController
                 $entityManager->persist($order);
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Commande creee avec succes.');
+                $this->addFlash('success', 'Commande créée avec succès.');
                 return $this->redirectToRoute('app_order_index');
             }
         }
 
         return $this->render('order/new.html.twig', [
             'order' => $order,
-            'form' => $form,
+            'form' => $form->createView(),
             'errors' => [],
         ]);
     }
 
-    #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_order_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Order $order): Response
     {
         return $this->render('order/show.html.twig', [
@@ -161,7 +162,7 @@ class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
         if ($order->getItems()->isEmpty() && $order->getProduct() !== null && (int) $order->getQuantity() > 0) {
@@ -186,26 +187,26 @@ class OrderController extends AbstractController
             if (count($errors) > 0) {
                 return $this->render('order/edit.html.twig', [
                     'order' => $order,
-                    'form' => $form,
+                    'form' => $form->createView(),
                     'errors' => $errors,
                 ]);
             }
 
             if ($form->isValid()) {
                 $entityManager->flush();
-                $this->addFlash('success', 'Commande mise a jour avec succes.');
+                $this->addFlash('success', 'Commande mise à jour avec succès.');
                 return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
             }
         }
 
         return $this->render('order/edit.html.twig', [
             'order' => $order,
-            'form' => $form,
+            'form' => $form->createView(),
             'errors' => [],
         ]);
     }
 
-    #[Route('/{id}/status/{status}', name: 'app_order_change_status', methods: ['POST'])]
+    #[Route('/{id}/status/{status}', name: 'app_order_change_status', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function changeStatus(Order $order, string $status, Request $request, EntityManagerInterface $entityManager): Response
     {
         if (!$this->isCsrfTokenValid('order_status_' . $order->getId(), (string) $request->request->get('_token'))) {
@@ -242,21 +243,21 @@ class OrderController extends AbstractController
             try {
                 $this->orderNotificationService->sendShippingNotification($order);
             } catch (\Throwable) {
-                $this->addFlash('warning', "Statut mis a jour, mais l'email d'expedition n'a pas pu etre envoye.");
+                $this->addFlash('warning', "Statut mis à jour, mais l'email d'expédition n'a pas pu être envoyé.");
             }
         }
 
-        $this->addFlash('success', sprintf('Commande #%d mise a jour: %s', (int) $order->getId(), $status));
+        $this->addFlash('success', sprintf('Commande #%d mise à jour: %s', (int) $order->getId(), $status));
         return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
     }
 
-    #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_order_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $order->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($order);
             $entityManager->flush();
-            $this->addFlash('success', 'Commande supprimee avec succes.');
+            $this->addFlash('success', 'Commande supprimée avec succès.');
         }
 
         return $this->redirectToRoute('app_order_index');
@@ -312,7 +313,7 @@ class OrderController extends AbstractController
                 $errors[] = 'Nom du porteur de carte invalide.';
             }
             if (!preg_match('/^\d{16}$/', (string) $cardNumberRaw)) {
-                $errors[] = 'Numero de carte invalide (16 chiffres requis).';
+                $errors[] = 'Numéro de carte invalide (16 chiffres requis).';
             }
             if (!preg_match('/^(0[1-9]|1[0-2])\/\d{2}$/', $expiry)) {
                 $errors[] = 'Date expiration invalide (MM/YY).';

@@ -13,35 +13,35 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 
-#[Route('/legacy-order')]
+#[Route('/order')]
 class OrderController extends AbstractController
 {
-    #[Route('/', name: 'legacy_order_index', methods: ['GET'])]
+    #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(Request $request, OrderRepository $orderRepository): Response
     {
         // access control removed to allow public access during local development
-        
+
         // Search and filter functionality
         $searchTerm = $request->query->get('search', '');
         $statusFilter = $request->query->get('status', '');
         $sortBy = $request->query->get('sort', 'orderDate');
         $sortOrder = $request->query->get('order', 'DESC');
-        
+
         $qb = $orderRepository->createQueryBuilder('o')
             ->leftJoin('o.product', 'p')
             ->leftJoin('o.entraineur', 'u');
-        
+
         if ($searchTerm) {
             $qb->where('p.name LIKE :search')
-               ->orWhere('u.email LIKE :search')
-               ->setParameter('search', '%' . $searchTerm . '%');
+                ->orWhere('u.email LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
         }
-        
+
         if ($statusFilter && in_array($statusFilter, ['pending', 'confirmed', 'shipped', 'delivered', 'rejected'])) {
             $qb->andWhere('o.status = :status')
-               ->setParameter('status', $statusFilter);
+                ->setParameter('status', $statusFilter);
         }
-        
+
         // Sorting
         $allowedSorts = ['id', 'orderDate', 'status', 'quantity', 'product'];
         if (in_array($sortBy, $allowedSorts)) {
@@ -51,7 +51,7 @@ class OrderController extends AbstractController
                 $qb->orderBy('o.' . $sortBy, strtoupper($sortOrder) === 'DESC' ? 'DESC' : 'ASC');
             }
         }
-        
+
         $orders = $qb->getQuery()->getResult();
 
         $stats = [
@@ -64,15 +64,15 @@ class OrderController extends AbstractController
             'revenue' => 0.0,
         ];
         foreach ($orders as $order) {
-            $status = (string)$order->getStatus();
+            $status = (string) $order->getStatus();
             if (array_key_exists($status, $stats)) {
                 $stats[$status]++;
             }
             if (in_array($status, ['confirmed', 'shipped', 'delivered'], true)) {
-                $stats['revenue'] += ((float)$order->getProduct()?->getPrice() * (int)$order->getQuantity());
+                $stats['revenue'] += ((float) $order->getProduct()?->getPrice() * (int) $order->getQuantity());
             }
         }
-        
+
         return $this->render('order/index.html.twig', [
             'orders' => $orders,
             'searchTerm' => $searchTerm,
@@ -85,11 +85,9 @@ class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'legacy_order_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        // access control removed to allow public access during local development
-        
         $order = new Order();
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
@@ -97,17 +95,17 @@ class OrderController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Server-side validation
             $errors = $validator->validate($order);
-            
+
             if (count($errors) > 0) {
                 foreach ($errors as $error) {
                     $this->addFlash('danger', $error->getMessage());
                 }
                 return $this->render('order/new.html.twig', [
                     'order' => $order,
-                    'form' => $form,
+                    'form' => $form->createView(),
                 ]);
             }
-            
+
             $entityManager->persist($order);
             $entityManager->flush();
 
@@ -116,42 +114,38 @@ class OrderController extends AbstractController
 
         return $this->render('order/new.html.twig', [
             'order' => $order,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/{id}', name: 'legacy_order_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
     public function show(Order $order): Response
     {
-        // access control removed to allow public access during local development
-        
         return $this->render('order/show.html.twig', [
             'order' => $order,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'legacy_order_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        // access control removed to allow public access during local development
-        
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Server-side validation
             $errors = $validator->validate($order);
-            
+
             if (count($errors) > 0) {
                 foreach ($errors as $error) {
                     $this->addFlash('danger', $error->getMessage());
                 }
                 return $this->render('order/edit.html.twig', [
                     'order' => $order,
-                    'form' => $form,
+                    'form' => $form->createView(),
                 ]);
             }
-            
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
@@ -159,16 +153,14 @@ class OrderController extends AbstractController
 
         return $this->render('order/edit.html.twig', [
             'order' => $order,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/{id}', name: 'legacy_order_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
-        // access control removed to allow public access during local development
-        
-        if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $order->getId(), $request->request->get('_token'))) {
             try {
                 $entityManager->remove($order);
                 $entityManager->flush();

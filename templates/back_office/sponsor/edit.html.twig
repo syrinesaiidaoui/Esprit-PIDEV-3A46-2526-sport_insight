@@ -11,7 +11,7 @@
         {# Afficher le logo actuel #}
         <div class="card form-card" style="margin-bottom: 20px;">
             <h3>Logo actuel</h3>
-            {% set logo = sponsor.logoName ?? sponsor.logo %}
+            {% set logo = sponsor.logoName %}
             {% if logo %}
                 <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ sponsor.nom }}" width="150" style="border-radius: 6px; border: 1px solid #ddd;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
             {% else %}

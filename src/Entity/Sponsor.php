@@ -144,21 +144,7 @@ class Sponsor
     public function setLogoName(?string $logoName): static
     {
         $this->logoName = $logoName;
-
         return $this;
-    }
-
-    public function setLogoFile(?File $file = null): void
-    {
-        $this->logoFile = $file;
-        if (null !== $file) {
-            $this->updatedAt = new \DateTimeImmutable();
-        }
-    }
-
-    public function getLogoFile(): ?File
-    {
-        return $this->logoFile;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable
@@ -169,20 +155,32 @@ class Sponsor
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
-
         return $this;
     }
 
-    public function getLogo(): ?string
+    public function getAdresse(): ?string
     {
-        return $this->logoName;
+        return $this->adresse;
     }
 
-    public function setLogo(?string $logo): static
+    public function setAdresse(?string $adresse): static
     {
-        $this->logoName = $logo;
-
+        $this->adresse = $adresse;
         return $this;
+    }
+
+    public function getLogoFile(): ?File
+    {
+        return $this->logoFile;
+    }
+
+    public function setLogoFile(?File $logoFile = null): void
+    {
+        $this->logoFile = $logoFile;
+
+        if (null !== $logoFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
     }
 
     /**
@@ -211,18 +209,6 @@ class Sponsor
                 $contratSponsor->setSponsor(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(?string $adresse): static
-    {
-        $this->adresse = $adresse;
 
         return $this;
     }

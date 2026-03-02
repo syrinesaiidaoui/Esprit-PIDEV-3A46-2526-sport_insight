@@ -19,16 +19,25 @@ class NutritionService
     private function matchSport(string $type): string
     {
         $type = strtolower(trim($type));
-        if (str_contains($type, 'foot')) return 'football';
-        if (str_contains($type, 'basket')) return 'basketball';
-        if (str_contains($type, 'tenn')) return 'tennis';
-        if (str_contains($type, 'nata') || str_contains($type, 'swim')) return 'natation';
-        if (str_contains($type, 'muscu') || str_contains($type, 'physique') || str_contains($type, 'body')) return 'musculation';
-        if (str_contains($type, 'athle') || str_contains($type, 'course') || str_contains($type, 'run')) return 'athletisme';
-        if (str_contains($type, 'vel') || str_contains($type, 'cycl')) return 'cyclisme';
-        if (str_contains($type, 'box')) return 'boxe';
-        if (str_contains($type, 'yoga') || str_contains($type, 'pilat')) return 'yoga';
-        
+        if (str_contains($type, 'foot'))
+            return 'football';
+        if (str_contains($type, 'basket'))
+            return 'basketball';
+        if (str_contains($type, 'tenn'))
+            return 'tennis';
+        if (str_contains($type, 'nata') || str_contains($type, 'swim'))
+            return 'natation';
+        if (str_contains($type, 'muscu') || str_contains($type, 'physique') || str_contains($type, 'body'))
+            return 'musculation';
+        if (str_contains($type, 'athle') || str_contains($type, 'course') || str_contains($type, 'run'))
+            return 'athletisme';
+        if (str_contains($type, 'vel') || str_contains($type, 'cycl'))
+            return 'cyclisme';
+        if (str_contains($type, 'box'))
+            return 'boxe';
+        if (str_contains($type, 'yoga') || str_contains($type, 'pilat'))
+            return 'yoga';
+
         return $type;
     }
 
@@ -55,8 +64,10 @@ class NutritionService
 
     private function getTrainingIntensity(float $moyenne): string
     {
-        if ($moyenne < 8) return 'light';
-        if ($moyenne < 14) return 'moderate';
+        if ($moyenne < 8)
+            return 'light';
+        if ($moyenne < 14)
+            return 'moderate';
         return 'intense';
     }
 
@@ -122,7 +133,7 @@ class NutritionService
 
     private function getHydrationAdvice(string $intensity, string $type): array
     {
-        $litres = match($intensity) {
+        $litres = match ($intensity) {
             'light' => ['min' => 1.5, 'max' => 2.0],
             'moderate' => ['min' => 2.0, 'max' => 3.0],
             'intense' => ['min' => 3.0, 'max' => 4.0],
@@ -304,8 +315,6 @@ class NutritionService
                     continue;
                 }
 
-                // API Ninjas v1/nutrition returns a flat JSON array directly.
-                // Use toArray(false) to avoid throwing on edge responses and keep retries simple.
                 $result = $response->toArray(false);
                 if (is_array($result) && !empty($result)) {
                     return $result;
@@ -505,9 +514,9 @@ class NutritionService
             return [];
         }
 
-        $grams = (float)$matchedFood['serving_size_g'];
+        $grams = (float) $matchedFood['serving_size_g'];
         if (preg_match('/(\d+(?:[.,]\d+)?)\s*(kg|g|ml|l)\b/i', $normalized, $matches)) {
-            $value = (float)str_replace(',', '.', $matches[1]);
+            $value = (float) str_replace(',', '.', $matches[1]);
             $unit = strtolower($matches[2]);
 
             if ($unit === 'kg' || $unit === 'l') {
@@ -516,23 +525,24 @@ class NutritionService
                 $grams = $value;
             }
         } elseif (preg_match('/\b(\d+(?:[.,]\d+)?)\b/', $normalized, $matches)) {
-            // If user entered only a count (e.g. "3 eggs"), convert using default serving size.
-            $count = (float)str_replace(',', '.', $matches[1]);
+            $count = (float) str_replace(',', '.', $matches[1]);
             if ($count > 0) {
-                $grams = $count * (float)$matchedFood['serving_size_g'];
+                $grams = $count * (float) $matchedFood['serving_size_g'];
             }
         }
 
         $factor = $grams / 100;
 
-        return [[
-            'name' => $matchedFood['name'],
-            'serving_size_g' => round($grams, 1),
-            'calories' => round((float)$matchedFood['calories'] * $factor, 1),
-            'protein_g' => round((float)$matchedFood['protein_g'] * $factor, 1),
-            'carbohydrates_total_g' => round((float)$matchedFood['carbohydrates_total_g'] * $factor, 1),
-            'fat_total_g' => round((float)$matchedFood['fat_total_g'] * $factor, 1),
-        ]];
+        return [
+            [
+                'name' => $matchedFood['name'],
+                'serving_size_g' => round($grams, 1),
+                'calories' => round((float) $matchedFood['calories'] * $factor, 1),
+                'protein_g' => round((float) $matchedFood['protein_g'] * $factor, 1),
+                'carbohydrates_total_g' => round((float) $matchedFood['carbohydrates_total_g'] * $factor, 1),
+                'fat_total_g' => round((float) $matchedFood['fat_total_g'] * $factor, 1),
+            ]
+        ];
     }
 
     /**
@@ -557,10 +567,8 @@ class NutritionService
         ];
 
         $matchedType = $this->matchSport($type);
-        // If it matched a known sport, use the predefined query. 
-        // Otherwise, assume the user might have entered a food query directly.
         $query = $sportFoods[$matchedType] ?? $type;
-        
+
         if (empty($query)) {
             $query = '200g chicken breast and 150g rice';
         }

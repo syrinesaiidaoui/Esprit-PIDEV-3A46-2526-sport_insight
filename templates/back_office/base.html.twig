@@ -311,168 +311,28 @@
             color: var(--text-dark);
         }
 
-        .data-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table tbody tr:hover {
-            background: var(--table-row-hover);
-        }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover { background: var(--table-row-hover); }
 
         /* ===== BADGES ===== */
-        .badge-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #d97706;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-info {
-            background: rgba(59, 130, 246, 0.1);
-            color: #2563eb;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: #059669; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-info { background: rgba(59, 130, 246, 0.1); color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
 
         /* ===== BUTTONS ===== */
-        .btn-primary {
-            background: var(--primary) !important;
-            border-color: var(--primary) !important;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 16px;
-        }
-        .btn-add-product {
-            padding: 8px 14px;
-            font-size: 13px;
-            font-weight: 600;
-        }
+        .btn-primary { background: var(--primary) !important; border-color: var(--primary) !important; border-radius: 8px; font-size: 14px; font-weight: 500; padding: 8px 16px; }
+        .btn-primary:hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; }
+        .btn-outline-secondary { border-radius: 8px; font-size: 14px; font-weight: 500; padding: 8px 16px; background: var(--header-control-bg) !important; color: var(--header-control-text) !important; border-color: var(--border-color) !important; }
 
-        .btn-primary:hover {
-            background: var(--primary-hover) !important;
-            border-color: var(--primary-hover) !important;
-        }
+        .data-table a { color: var(--link-color); }
 
-        .btn-outline-secondary {
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 16px;
-            background: var(--header-control-bg) !important;
-            color: var(--header-control-text) !important;
-            border-color: var(--border-color) !important;
-        }
+        .theme-controls { display: inline-flex; align-items: center; gap: 8px; }
+        .theme-controls .btn.active { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; }
 
-        .data-table a {
-            color: var(--link-color);
-        }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
 
-        .data-table .form-control,
-        .data-table .form-select,
-        .page-content .form-control,
-        .page-content .form-select {
-            background: var(--input-bg) !important;
-            color: var(--input-text) !important;
-            border-color: var(--input-border) !important;
-        }
-
-        .data-table .form-control::placeholder {
-            color: var(--text-muted);
-            opacity: 1;
-        }
-
-        .page-content .pagination .page-link {
-            background: var(--pagination-bg);
-            color: var(--pagination-text);
-            border-color: var(--border-color);
-        }
-
-        .page-content .pagination .page-item.active .page-link {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-        }
-
-        .theme-controls {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .theme-controls .btn.active {
-            background: var(--primary) !important;
-            color: #fff !important;
-            border-color: var(--primary) !important;
-        }
-
-        .admin-form-shell {
-            max-width: 1100px;
-        }
-
-        .page-content .form-label,
-        .page-content label {
-            color: var(--text-dark);
-        }
-
-        .muted-soft {
-            color: var(--text-muted) !important;
-        }
-
-        /* ===== AVATAR ===== */
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; }
-            .page-content { padding: 16px; }
-        }
-
-        @media (max-width: 1100px) {
-            .admin-kpis {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 640px) {
-            .admin-kpis {
-                grid-template-columns: 1fr;
-            }
-        }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .page-content { padding: 16px; } }
     </style>
     {% block stylesheets %}{% endblock %}
 </head>
@@ -529,7 +389,7 @@
 
             <a href="{{ path('app_order_index') }}"
                class="sidebar-link {{ app.request.get('_route') starts with 'app_order' ? 'active' : '' }}">
-                <i class="lucide-cart"></i>
+                <i class="lucide-shopping-cart"></i>
                 Commandes
             </a>
 
@@ -537,6 +397,24 @@
                class="sidebar-link {{ app.request.get('_route') starts with 'back_sponsoring' ? 'active' : '' }}">
                 <i class="lucide-briefcase"></i>
                 Sponsoring
+            </a>
+
+            <a href="{{ path('back_office_invitation_index') }}"
+               class="sidebar-link {{ app.request.get('_route') starts with 'back_office_invitation' ? 'active' : '' }}">
+                <i class="lucide-mail"></i>
+                Invitations
+            </a>
+
+            <a href="{{ path('back_annonce_index') }}"
+               class="sidebar-link {{ app.request.get('_route') starts with 'back_annonce' ? 'active' : '' }}">
+                <i class="lucide-message-square"></i>
+                Annonces
+            </a>
+
+            <a href="{{ path('back_commentaire_index') }}"
+               class="sidebar-link {{ app.request.get('_route') starts with 'back_commentaire' ? 'active' : '' }}">
+                <i class="lucide-message-circle"></i>
+                Commentaires
             </a>
         </nav>
 

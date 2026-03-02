@@ -1,0 +1,76 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}Inscription - Sport Insight{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center" style="margin-top: 60px; margin-bottom: 60px;">
+    <div class="col-md-7">
+        <div class="front-card shadow-lg" style="padding: 40px; border-radius: 16px; border: none; background: white;">
+            <div class="text-center mb-5">
+                <div class="nav-brand-icon" style="width: 60px; height: 60px; margin: 0 auto 16px; font-size: 24px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">SI</div>
+                <h1 class="h3 mb-3 fw-bold">Rejoignez l'aventure Sport Insight</h1>
+                <p class="text-muted">Créez votre compte en quelques secondes.</p>
+            </div>
+
+            {{ form_start(registrationForm, {'attr': {'class': 'row g-3'}}) }}
+                <div class="col-md-6 mb-3">
+                    {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.nom, {'attr': {'style': 'padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.nom) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(registrationForm.prenom, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.prenom, {'attr': {'style': 'padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.prenom) }}
+                </div>
+                <div class="col-md-12 mb-3">
+                    {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.email, {'attr': {'style': 'padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.email) }}
+                </div>
+                <div class="col-md-12 mb-3">
+                    {{ form_label(registrationForm.password, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.password, {'attr': {'style': 'padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.password) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(registrationForm.telephone, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.telephone, {'attr': {'style': 'padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.telephone) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(registrationForm.dateNaissance, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.dateNaissance, {'attr': {'style': 'padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.dateNaissance) }}
+                </div>
+                <div class="col-md-12 mb-4">
+                    {{ form_label(registrationForm.photo, null, {'label_attr': {'class': 'form-label fw-600', 'style': 'font-size: 14px; color: #475569;'}}) }}
+                    {{ form_widget(registrationForm.photo, {'attr': {'style': 'padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0;'}}) }}
+                    {{ form_errors(registrationForm.photo) }}
+                    <div class="form-text mt-2" style="font-size: 12px;">Format accepté : JPG, PNG, WEBP. Max 2Mo.</div>
+                </div>
+
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" style="border-radius: 10px; font-size: 16px; transition: all 0.2s;">
+                        Créer mon compte
+                    </button>
+                </div>
+
+                <div class="text-center mt-5 pt-3 border-top" style="border-color: #f1f5f9 !important;">
+                    <p class="mb-0 text-muted" style="font-size: 14px;">
+                        Déjà un compte ? 
+                        <a href="{{ path('app_login') }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">Connectez-vous</a>
+                    </p>
+                </div>
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-600 { font-weight: 600; }
+    .btn-primary:active { transform: scale(0.98); }
+    .front-card { background: #fff; }
+    .invalid-feedback { font-size: 12px; margin-top: 4px; color: #ef4444; }
+</style>
+{% endblock %}

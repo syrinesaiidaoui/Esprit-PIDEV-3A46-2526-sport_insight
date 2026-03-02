@@ -12,12 +12,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\EvaluationRepository;
+use App\Service\NotificationService;
 
 #[Route('/front/entrainement', name: 'front_entrainement_')]
 final class EntrainementController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, \App\Repository\EvaluationRepository $evaluationRepository): Response
+    public function index(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, EvaluationRepository $evaluationRepository): Response
     {
         $searchType = $request->query->get('search_type', '');
         $sortBy = $request->query->get('sort_by', '');
@@ -35,7 +37,6 @@ final class EntrainementController extends AbstractController
         }
         $entrainements = $qb->getQuery()->getResult();
 
-        // build participation map for current user
         $participationMap = [];
         $evaluationMap = [];
         $user = $this->getUser();
@@ -52,7 +53,6 @@ final class EntrainementController extends AbstractController
                 $participationMap[$p->getEntrainement()->getId()] = $p->getPresence();
             }
 
-            // fetch user's evaluations for these entrainements
             $evals = $evaluationRepository->createQueryBuilder('e')
                 ->andWhere('e.joueur = :user')
                 ->andWhere('e.entrainement IN (:ids)')
@@ -76,7 +76,7 @@ final class EntrainementController extends AbstractController
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
-    public function search(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, \App\Repository\EvaluationRepository $evaluationRepository): JsonResponse
+    public function search(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, EvaluationRepository $evaluationRepository): JsonResponse
     {
         $q = (string) $request->query->get('q', '');
         $sortBy = (string) $request->query->get('sort_by', '');
@@ -85,7 +85,7 @@ final class EntrainementController extends AbstractController
         $qb = $entrainementRepository->createQueryBuilder('e');
         if ($q !== '') {
             $qb->andWhere('LOWER(e.type) LIKE :q OR LOWER(e.lieu) LIKE :q')
-               ->setParameter('q', '%' . strtolower($q) . '%');
+                ->setParameter('q', '%' . strtolower($q) . '%');
         }
 
         if ($sortBy === 'dateEntrainement') {
@@ -134,7 +134,7 @@ final class EntrainementController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, \App\Service\NotificationService $notifier): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notifier): Response
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -144,19 +144,20 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
+            // Notify associated players and trainer
             $recipients = $entrainement->getJoueurs()->toArray();
             if ($entrainement->getEntraineur()) {
                 $recipients[] = $entrainement->getEntraineur();
             }
 
             $notified = [];
-            foreach ($recipients as $joueur) {
-                $key = $joueur->getId() ?? spl_object_id($joueur);
+            foreach ($recipients as $recipient) {
+                $key = $recipient->getId() ?? spl_object_id($recipient);
                 if (isset($notified[$key])) {
                     continue;
                 }
 
-                $notifier->notifyPlayerNewTraining($joueur, $entrainement);
+                $notifier->notifyPlayerNewTraining($recipient, $entrainement);
                 $notified[$key] = true;
             }
 
@@ -165,7 +166,7 @@ final class EntrainementController extends AbstractController
         }
 
         return $this->render('front_office/entrainement/new.html.twig', [
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -192,7 +193,6 @@ final class EntrainementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
             return $this->redirectToRoute('front_entrainement_index');
         }
 
@@ -205,10 +205,12 @@ final class EntrainementController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Entrainement $entrainement, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid(
-            'delete'.$entrainement->getId(),
-            $request->request->get('_token')
-        )) {
+        if (
+            $this->isCsrfTokenValid(
+                'delete' . $entrainement->getId(),
+                $request->request->get('_token')
+            )
+        ) {
             $entityManager->remove($entrainement);
             $entityManager->flush();
         }

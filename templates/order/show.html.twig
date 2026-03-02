@@ -40,7 +40,7 @@
             <div><strong>Nom:</strong> {{ order.entraineur ? order.entraineur.nom : '-' }}</div>
             <div><strong>Email:</strong> {{ order.contactEmail ?: (order.entraineur ? order.entraineur.email : '-') }}</div>
             <div><strong>Telephone:</strong> {{ order.contactPhone ?: (order.entraineur ? order.entraineur.telephone : '-') }}</div>
-            <div><strong>Date de commande:</strong> {{ order.orderDate ? order.orderDate|date('Y-m-d') : '-' }}</div>
+            <div><strong>Date de commande:</strong> {{ order.orderDate ? order.orderDate|date('Y-m-d H:i') : '-' }}</div>
             <div><strong>Statut:</strong> {{ order.status }}</div>
             <div><strong>Mode de paiement:</strong> {{ order.paymentMethod == 'online' ? 'Paiement en ligne' : 'Paiement a la livraison' }}</div>
             <div><strong>Statut paiement:</strong> {{ order.paymentStatus ?: 'pending' }}</div>

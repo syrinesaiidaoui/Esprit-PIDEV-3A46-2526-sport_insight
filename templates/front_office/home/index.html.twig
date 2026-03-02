@@ -1,133 +1,392 @@
 ﻿{% extends 'front_office/base.html.twig' %}
 
-{% block title %}Sport Insight | Boutique Football{% endblock %}
+{% block title %}Sport Insight — Accueil & Boutique{% endblock %}
 
-{% block hero %}
-<section class="hero">
-    <span class="badge-soft">Nouvelle collection</span>
-    <h1>Composez Votre Kit De Match</h1>
-    <p>Chaussures, maillots, ballons, gants et essentiels d entrainement avec options pro : coupe, taille, matiere, edition et personnalisation.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
-        <a href="{{ path('front_equipement_index') }}" class="btn btn-primary">Voir tous les produits</a>
-        <a href="{{ path('front_equipement_index', {category: 'Boots'}) }}" class="btn btn-secondary">Voir les chaussures</a>
-    </div>
-</section>
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── HERO ───────────────────────────────────────────────── */
+  .si-hero {
+    position: relative;
+    min-height: 550px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .si-hero-bg {
+    position: absolute; inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&auto=format&fit=crop&q=80');
+    background-size: cover;
+    background-position: center 30%;
+    filter: brightness(.32) saturate(1.3);
+    transform: scale(1.04);
+    transition: transform 12s ease;
+  }
+  .si-hero:hover .si-hero-bg { transform: scale(1); }
+
+  .si-hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(10,20,14,.92) 0%, rgba(22,163,74,.15) 60%, rgba(10,20,14,.8) 100%);
+  }
+
+  .si-hero-dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(22,163,74,.16) 1px, transparent 1px);
+    background-size: 30px 30px;
+    mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, black, transparent);
+  }
+
+  .si-hero-content {
+    position: relative; z-index: 2;
+    padding: 100px 24px 90px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .si-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    background: rgba(22,163,74,.14);
+    border: 1px solid rgba(22,163,74,.35);
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #4ade80;
+    margin-bottom: 24px;
+  }
+
+  .si-hero-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.4; transform:scale(1.5); }
+  }
+
+  .si-hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(50px, 8vw, 90px);
+    letter-spacing: 5px;
+    line-height: .9;
+    color: #fff;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 32px rgba(0,0,0,.5);
+  }
+
+  .si-hero h1 em { font-style: normal; color: #4ade80; }
+
+  .si-hero p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: rgba(255,255,255,.7);
+    max-width: 600px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+
+  .si-hero-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .si-hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: #16a34a;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: 99px;
+    text-decoration: none;
+    box-shadow: 0 0 32px rgba(22,163,74,.45);
+    transition: transform .2s, box-shadow .2s, background .15s;
+  }
+
+  .si-hero-cta:hover {
+    background: #22c55e;
+    transform: translateY(-2px);
+    box-shadow: 0 0 48px rgba(22,163,74,.65);
+    color: white;
+  }
+
+  .si-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: rgba(255,255,255,.1);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: 99px;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+    transition: background .2s, transform .2s;
+  }
+
+  .si-hero-secondary:hover {
+    background: rgba(255,255,255,.2);
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  /* ─── SECTION ────────────────────────────────────────────── */
+  .si-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  .si-section-head {
+    margin-bottom: 36px;
+  }
+
+  .si-section-head h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 3px;
+    color: #1a2e22;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .si-section-head p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: #6b8f77;
+  }
+
+  /* ─── SPORT CARDS GRID ───────────────────────────────────── */
+  .sport-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .sport-card-featured {
+    grid-column: span 2;
+  }
+
+  .sport-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 300px;
+    display: flex;
+    align-items: flex-end;
+    text-decoration: none;
+    transition: transform .25s, box-shadow .25s;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,.05);
+  }
+
+  .sport-card:hover { transform: translateY(-8px); box-shadow: 0 24px 64px rgba(0,0,0,.15); }
+
+  .sport-card-img {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(.45) saturate(1.1);
+    transition: filter .3s, transform .8s;
+  }
+  .sport-card:hover .sport-card-img { filter: brightness(.35); transform: scale(1.08); }
+
+  .sport-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,20,14,.95) 0%, rgba(10,20,14,.3) 55%, transparent 100%);
+  }
+
+  .sport-card-body {
+    position: relative; z-index: 2;
+    padding: 32px;
+    width: 100%;
+  }
+
+  .sport-card-tag {
+    display: inline-block;
+    padding: 5px 14px;
+    background: #16a34a;
+    color: white;
+    border-radius: 99px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .sport-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .sport-card-featured h3 { font-size: 42px; }
+
+  .sport-card p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(255,255,255,.7);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    max-width: 450px;
+  }
+
+  .sport-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #4ade80;
+    text-decoration: none;
+    transition: gap .15s;
+  }
+  .sport-card:hover .sport-card-link { gap: 12px; }
+
+  /* Small cards row */
+  .sport-cards-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .sport-card-sm {
+    min-height: 200px;
+  }
+
+  .sport-card-sm h3 { font-size: 24px; }
+
+  @media (max-width: 900px) {
+    .sport-cards-grid { grid-template-columns: 1fr 1fr; }
+    .sport-card-featured { grid-column: span 2; }
+    .sport-cards-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .sport-cards-grid, .sport-cards-row { grid-template-columns: 1fr; }
+    .sport-card-featured { grid-column: span 1; }
+    .si-hero h1 { font-size: 45px; }
+  }
+</style>
 {% endblock %}
 
 {% block body %}
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:stretch;margin-bottom:18px;">
-    <article class="front-card" style="background:linear-gradient(140deg,#0f2f22,#1f6b49);color:#fff;">
-        <p style="margin:0;color:#d7f3e2;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;">Offre vedette</p>
-        <h2 style="font-size:40px;margin:6px 0 10px;">Economisez 20% sur les chaussures Elite</h2>
-        <p style="max-width:530px;color:#d7f3e2;">Versions terrain sec et indoor disponibles. Stock limite pour les tailles 40-45.</p>
-        <a href="{{ path('front_equipement_index', {q: 'boots'}) }}" class="btn btn-light" style="margin-top:10px;">Profiter de cette offre</a>
-    </article>
-
-    <aside class="front-card">
-        <h3 style="margin:0 0 10px;font-size:30px;">Acces rapide</h3>
-        <div style="display:grid;gap:10px;">
-            <a class="btn btn-secondary" href="{{ path('front_equipement_cart') }}">Voir le panier</a>
-            <a class="btn btn-secondary" href="{{ path('front_equipement_orders') }}">Suivre les commandes</a>
-            <a class="btn btn-secondary" href="{{ path('front_equipement_index', {sort: 'price'}) }}">Trier par prix</a>
-        </div>
-    </aside>
+{# ── HERO ── #}
+<div class="si-hero">
+  <div class="si-hero-bg"></div>
+  <div class="si-hero-overlay"></div>
+  <div class="si-hero-dots"></div>
+  <div class="si-hero-content">
+    <div class="si-hero-badge">Plateforme Elite de gestion sportive</div>
+    <h1>Sport<br><em>Insight</em></h1>
+    <p>Gérez vos entraînements, composez vos kits de match et pilotez votre club avec une précision professionnelle.</p>
+    <div class="si-hero-btns">
+        <a href="{{ path('front_entrainement_index') }}" class="si-hero-cta">Gérer le club</a>
+        <a href="{{ path('front_equipement_index') }}" class="si-hero-secondary">Visiter la boutique</a>
+    </div>
+  </div>
 </div>
 
-<h2 class="section-title">Categories Boutique</h2>
-<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px;">
-    <a class="front-card" href="{{ path('front_equipement_index', {category: 'Boots'}) }}" style="text-decoration:none;color:inherit;">
-        <span class="badge-soft">Boots</span>
-        <h3 style="font-size:28px;margin:8px 0 6px;">Chaussures par surface</h3>
-        <p style="margin:0;color:var(--muted);">Terrain sec, terrain gras, turf et indoor.</p>
-    </a>
-    <a class="front-card" href="{{ path('front_equipement_index', {category: 'Jersey'}) }}" style="text-decoration:none;color:inherit;">
-        <span class="badge-soft">Jerseys</span>
-        <h3 style="font-size:28px;margin:8px 0 6px;">Kits et tenues supporters</h3>
-        <p style="margin:0;color:var(--muted);">Domicile, exterieur, coupe slim ou reguliere, personnalisation joueur.</p>
-    </a>
-    <a class="front-card" href="{{ path('front_equipement_index', {category: 'Accessories'}) }}" style="text-decoration:none;color:inherit;">
-        <span class="badge-soft">Accessories</span>
-        <h3 style="font-size:28px;margin:8px 0 6px;">Sacs, chaussettes, protections</h3>
-        <p style="margin:0;color:var(--muted);">Essentiels prets en packs pour match et entrainement.</p>
-    </a>
-    <a class="front-card" href="{{ path('front_equipement_index', {q: 'goalkeeper'}) }}" style="text-decoration:none;color:inherit;">
-        <span class="badge-soft">Gardien</span>
-        <h3 style="font-size:28px;margin:8px 0 6px;">Gants et grip</h3>
-        <p style="margin:0;color:var(--muted);">Coupe negative, hybride, options protege-doigts.</p>
-    </a>
-    <a class="front-card" href="{{ path('front_equipement_index', {q: 'ball'}) }}" style="text-decoration:none;color:inherit;">
-        <span class="badge-soft">Balls</span>
-        <h3 style="font-size:28px;margin:8px 0 6px;">Match et entrainement</h3>
-        <p style="margin:0;color:var(--muted);">Choisissez par age, surface et durabilite.</p>
-    </a>
-    <a class="front-card" href="{{ path('front_equipement_index', {q: 'training'}) }}" style="text-decoration:none;color:inherit;">
-        <span class="badge-soft">Training</span>
-        <h3 style="font-size:28px;margin:8px 0 6px;">Tenues performance</h3>
-        <p style="margin:0;color:var(--muted);">Sous-couches, hauts et couches pour tous les temps.</p>
-    </a>
-</div>
+{# ── HUB SECTION ── #}
+<div class="si-section">
+  <div class="si-section-head">
+    <h2>Le Hub de Votre Club</h2>
+    <p>Accès rapide à tous les modules essentiels de Sport Insight.</p>
+  </div>
 
-<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
-    <div class="front-card">
-        <h3 style="font-size:26px;margin:0 0 6px;">Livraison et retrait</h3>
-        <p style="margin:0;color:var(--muted);">Livraison rapide, retrait en magasin et suivi depuis votre compte.</p>
-    </div>
-    <div class="front-card">
-        <h3 style="font-size:26px;margin:0 0 6px;">Retours faciles</h3>
-        <p style="margin:0;color:var(--muted);">Retours sous 30 jours pour les articles non utilises, support paiement inclus.</p>
-    </div>
-    <div class="front-card">
-        <h3 style="font-size:26px;margin:0 0 6px;">Tailles enregistrees</h3>
-        <p style="margin:0;color:var(--muted);">Conservez votre profil de taille pour des achats plus rapides.</p>
-</div>
+  <div class="sport-cards-grid">
+    {# Featured — Entrainements #}
+    <a href="{{ path('front_entrainement_index') }}" class="sport-card sport-card-featured">
+      <div class="sport-card-img" style="background-image:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&auto=format&fit=crop&q=80')"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-body">
+        <span class="sport-card-tag">🏋️ Coaching</span>
+        <h3>Entraînements & Coaching</h3>
+        <p>Planifiez vos séances, gérez les horaires et suivez la progression technique de vos équipes sur le terrain.</p>
+        <span class="sport-card-link">Accéder au planning →</span>
+      </div>
+    </a>
 
-<h2 class="section-title" style="margin-top:32px;">Nos sections</h2>
-<div class="row g-4" style="margin-top:12px;">
-    <div class="col-md-4">
-        <a href="{{ path('front_entrainement_index') }}" style="text-decoration:none;color:inherit">
-            <div class="front-card">
-                <div class="card-icon"><i class="lucide-dumbbell"></i></div>
-                <h3>Entrainement</h3>
-                <p>Consultez le planning des seances, les horaires et les types d entrainement de l equipe.</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="{{ path('app_front_equipes_index') }}" style="text-decoration:none;color:inherit">
-            <div class="front-card">
-                <div class="card-icon"><i class="lucide-users"></i></div>
-                <h3>Equipes</h3>
-                <p>Explorez les effectifs, classements et performances de chaque equipe.</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="{{ path('app_joueurs_index') }}" style="text-decoration:none;color:inherit">
-            <div class="front-card">
-                <div class="card-icon"><i class="lucide-user-plus"></i></div>
-                <h3>Joueurs</h3>
-                <p>Decouvrez les profils, postes et statistiques des joueurs adherents.</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="{{ path('app_front_matchs_index') }}" style="text-decoration:none;color:inherit">
-            <div class="front-card">
-                <div class="card-icon"><i class="lucide-trophy"></i></div>
-                <h3>Matchs club</h3>
-                <p>Calendrier complet, resultats, compositions et suivi des rencontres.</p>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="{{ path('front_equipement_index') }}" style="text-decoration:none;color:inherit">
-            <div class="front-card">
-                <div class="card-icon"><i class="lucide-shirt"></i></div>
-                <h3>Equipement</h3>
-                <p>La boutique sport complete regorge de tenues et accessoires pro.</p>
-            </div>
-        </a>
-    </div>
-</div>
+    {# Side — Shop #}
+    <a href="{{ path('front_equipement_index') }}" class="sport-card">
+      <div class="sport-card-img" style="background-image:url('https://images.unsplash.com/photo-1511818234664-d62f0263640b?w=600&auto=format&fit=crop&q=80')"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-body">
+        <span class="sport-card-tag">🛍️ Boutique</span>
+        <h3>Équipements Pro</h3>
+        <p>Maillots, chaussures Elite et accessoires de match personnalisables.</p>
+        <span class="sport-card-link">Acheter maintenant →</span>
+      </div>
+    </a>
+  </div>
+
+  {# Bottom row: 4 small cards #}
+  <div class="sport-cards-row">
+    <a href="{{ path('app_front_matchs_index') }}" class="sport-card sport-card-sm">
+      <div class="sport-card-img" style="background-image:url('https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=500&auto=format&fit=crop&q=80')"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-body">
+        <span class="sport-card-tag">⚽ Matchs</span>
+        <h3>Calendrier</h3>
+        <span class="sport-card-link">Voir →</span>
+      </div>
+    </a>
+
+    <a href="{{ path('front_participation_index') }}" class="sport-card sport-card-sm">
+      <div class="sport-card-img" style="background-image:url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=500&auto=format&fit=crop&q=80')"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-body">
+        <span class="sport-card-tag">👥 Suivi</span>
+        <h3>Présences</h3>
+        <span class="sport-card-link">Gérer →</span>
+      </div>
+    </a>
+
+    <a href="{{ path('front_sponsoring_index') }}" class="sport-card sport-card-sm">
+      <div class="sport-card-img" style="background-image:url('https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=500&auto=format&fit=crop&q=80')"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-body">
+        <span class="sport-card-tag">🤝 Partenaires</span>
+        <h3>Sponsoring</h3>
+        <span class="sport-card-link">Découvrir →</span>
+      </div>
+    </a>
+
+    <a href="{{ path('app_annonce_index') }}" class="sport-card sport-card-sm">
+      <div class="sport-card-img" style="background-image:url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&auto=format&fit=crop&q=80')"></div>
+      <div class="sport-card-overlay"></div>
+      <div class="sport-card-body">
+        <span class="sport-card-tag">📢 News</span>
+        <h3>Annonces</h3>
+        <span class="sport-card-link">Lire →</span>
+      </div>
+    </a>
+  </div>
 </div>
 {% endblock %}

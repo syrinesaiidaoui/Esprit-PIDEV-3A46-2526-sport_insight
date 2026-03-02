@@ -34,7 +34,7 @@
                     <tr>
                         <th>Logo</th>
                         <td>
-                            {% set logo = sponsor.logoName ?? sponsor.logo %}
+                            {% set logo = sponsor.logoName %}
                             {% if logo %}
                                 <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ sponsor.nom }}" width="100" style="border-radius: 6px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
                             {% else %}

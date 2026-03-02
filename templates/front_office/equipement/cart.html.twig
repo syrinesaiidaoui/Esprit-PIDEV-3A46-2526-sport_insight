@@ -80,7 +80,7 @@
                     <th>Prix</th>
                     <th>Qte</th>
                     <th>Sous-total</th>
-                    <th></th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -90,12 +90,12 @@
                             <strong>{{ item.product.name }}</strong>
                             <div style="font-size:12px;color:#64748b;">{{ item.product.category ?: 'Equipement football' }}</div>
                         </td>
-                        <td style="font-size:12px;color:#475569;">taille {{ item.size ?: item.product.size ?: 'M' }} | couleur noire | edition pro</td>
+                        <td style="font-size:12px;color:#475569;">taille {{ item.size ?: item.product.size ?: 'M' }}</td>
                         <td>{{ item.product.price|number_format(2, '.', ',') }} USD</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ (item.product.price * item.quantity)|number_format(2, '.', ',') }} USD</td>
                         <td>
-                            <a href="{{ path('front_equipement_remove', {id: item.product.id}) }}" class="btn btn-secondary">Retirer</a>
+                            <a href="{{ path('front_equipement_remove', {id: item.product.id}) }}" class="btn btn-secondary btn-sm">Retirer</a>
                         </td>
                     </tr>
                 {% else %}
@@ -108,15 +108,15 @@
     </section>
 
     <aside class="front-card">
-        <h2 style="font-size:30px;margin:0 0 10px;">Resume de commande</h2>
+        <h2 style="font-size:30px;margin:0 0 10px;">Résumé de commande</h2>
 
         <div class="summary-row"><span>Sous-total</span><strong>{{ total|number_format(2, '.', ',') }} USD</strong></div>
         <div class="summary-row"><span>Code promo</span><span>-0.00 USD</span></div>
         <div class="summary-row"><span>Livraison estimee</span><span>8.00 USD</span></div>
         <div class="summary-row total"><span>Total</span><span>{{ (total + 8)|number_format(2, '.', ',') }} USD</span></div>
 
-        <div style="margin-top:10px;">
-            <label for="promo" style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:800;">Code promo</label>
+        <div style="margin-top:20px;">
+            <label for="promo" style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:800;display:block;margin-bottom:8px;">Code promo</label>
             <div style="display:flex;gap:6px;">
                 <input id="promo" class="form-control" placeholder="MATCHDAY10">
                 <button class="btn btn-secondary" type="button">Appliquer</button>
@@ -129,8 +129,11 @@
             <label><input type="radio" name="ship"> Retrait en magasin</label>
         </div>
 
-        <div style="margin-top:12px;display:grid;gap:8px;">
-            <a href="{{ path('front_equipement_checkout') }}" class="btn btn-primary">Passer au paiement</a>
+        <div style="margin-top:20px;display:grid;gap:8px;">
+            <form method="post" action="{{ path('front_equipement_checkout') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('checkout') }}">
+                <button class="btn btn-primary" type="submit" style="width:100%;">Passer au paiement</button>
+            </form>
             <a href="{{ path('front_equipement_index') }}" class="btn btn-secondary">Continuer vos achats</a>
         </div>
 

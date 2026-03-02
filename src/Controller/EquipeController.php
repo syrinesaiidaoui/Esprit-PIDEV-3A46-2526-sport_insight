@@ -55,7 +55,7 @@ final class EquipeController extends AbstractController
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
 
                 try {
                     $imageFile->move('uploads/equipes', $newFilename);
@@ -64,7 +64,7 @@ final class EquipeController extends AbstractController
                     // Handle file upload error
                 }
             }
-            
+
             $entityManager->persist($equipe);
             $entityManager->flush();
 
@@ -73,7 +73,7 @@ final class EquipeController extends AbstractController
 
         return $this->render('equipe/new.html.twig', [
             'equipe' => $equipe,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -101,7 +101,7 @@ final class EquipeController extends AbstractController
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
 
                 try {
                     $imageFile->move('uploads/equipes', $newFilename);
@@ -110,7 +110,7 @@ final class EquipeController extends AbstractController
                     // Handle file upload error
                 }
             }
-            
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_equipe_index', [], Response::HTTP_SEE_OTHER);
@@ -118,7 +118,7 @@ final class EquipeController extends AbstractController
 
         return $this->render('equipe/edit.html.twig', [
             'equipe' => $equipe,
-            'form' => $form,
+            'form' => $form->createView(),
             'delete_form' => $deleteForm->createView(),
         ]);
     }

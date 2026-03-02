@@ -16,6 +16,7 @@ class Equipe
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message: 'L\'identifiant de l\'équipe est obligatoire.')]
     #[ORM\Column(length: 100)]
     private ?string $id_equipe = null;
 

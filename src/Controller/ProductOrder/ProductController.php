@@ -17,7 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
-// security attribute import removed for public/no-login mode
 
 #[Route('/product')]
 class ProductController extends AbstractController
@@ -32,29 +31,32 @@ class ProductController extends AbstractController
         ProductRepository $productRepository,
         OrderRepository $orderRepository,
         ChartBuilderInterface $chartBuilder
-    ): Response
-    {
+    ): Response {
         // Pagination and search
         $searchTerm = trim($request->query->get('search', ''));
         $sortBy = $request->query->get('sort', 'id');
         $sortOrder = $request->query->get('order', 'ASC');
-        $page = max(1, (int)$request->query->get('page', 1));
+        $page = max(1, (int) $request->query->get('page', 1));
         $perPage = 5;
         $searchTerm = htmlspecialchars($searchTerm, ENT_QUOTES, 'UTF-8');
+
         $qb = $productRepository->createQueryBuilder('p');
         if ($searchTerm) {
             $qb->where('p.name LIKE :search')
-               ->orWhere('p.category LIKE :search')
-               ->orWhere('p.brand LIKE :search')
-               ->setParameter('search', '%' . $searchTerm . '%');
+                ->orWhere('p.category LIKE :search')
+                ->orWhere('p.brand LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
         }
+
         $allowedSorts = ['id', 'name', 'price', 'stock', 'category'];
         if (in_array($sortBy, $allowedSorts)) {
             $qb->orderBy('p.' . $sortBy, strtoupper($sortOrder) === 'DESC' ? 'DESC' : 'ASC');
         }
+
         $qb->setFirstResult(($page - 1) * $perPage)
-           ->setMaxResults($perPage);
+            ->setMaxResults($perPage);
         $products = $qb->getQuery()->getResult();
+
         // Get total count for pagination
         $countQb = $productRepository->createQueryBuilder('p');
         if ($searchTerm) {
@@ -63,8 +65,8 @@ class ProductController extends AbstractController
                 ->orWhere('p.brand LIKE :search')
                 ->setParameter('search', '%' . $searchTerm . '%');
         }
-        $totalProducts = (int)$countQb->select('COUNT(p.id)')->getQuery()->getSingleScalarResult();
-        $totalPages = (int)ceil($totalProducts / $perPage);
+        $totalProducts = (int) $countQb->select('COUNT(p.id)')->getQuery()->getSingleScalarResult();
+        $totalPages = (int) ceil($totalProducts / $perPage);
 
         $allProducts = $productRepository->findAll();
         $allOrders = $orderRepository->findAll();
@@ -73,6 +75,7 @@ class ProductController extends AbstractController
         $outOfStockCount = 0;
         $stockHealth = ['Healthy (>10)' => 0, 'Low (1-10)' => 0, 'Out (0)' => 0];
         $categoryStock = [];
+
         foreach ($allProducts as $p) {
             $stock = (int) $p->getStock();
             $category = $p->getCategory() ?: 'Non catégorisé';
@@ -109,21 +112,8 @@ class ProductController extends AbstractController
                 continue;
             }
 
-            $orderTotal = $order->getComputedTotal();
+            $orderTotal = (float) $order->getTotalAmount();
             $revenue += $orderTotal;
-
-            if (!$order->getItems()->isEmpty()) {
-                foreach ($order->getItems() as $item) {
-                    $product = $item->getProduct();
-                    if (!$product) {
-                        continue;
-                    }
-                    $name = $product->getName() ?? 'Produit';
-                    $line = (float) $item->getUnitPrice() * (int) $item->getQuantity();
-                    $revenueByProduct[$name] = ($revenueByProduct[$name] ?? 0.0) + $line;
-                }
-                continue;
-            }
 
             $product = $order->getProduct();
             if ($product) {
@@ -138,17 +128,19 @@ class ProductController extends AbstractController
         $totalOrders = count($allOrders);
         $deliveryRate = $totalOrders > 0 ? (int) round(($deliveredOrders / $totalOrders) * 100) : 0;
 
-        // ===== Charts (Power BI-style quick views) =====
+        // ===== Charts =====
         $categoryStockChart = $chartBuilder->createChart(Chart::TYPE_BAR);
         $categoryStockChart->setData([
             'labels' => array_keys($categoryStock),
-            'datasets' => [[
-                'label' => 'Stock par catégorie',
-                'data' => array_values($categoryStock),
-                'backgroundColor' => 'rgba(59, 130, 246, 0.75)',
-                'borderColor' => 'rgb(37, 99, 235)',
-                'borderWidth' => 1,
-            ]],
+            'datasets' => [
+                [
+                    'label' => 'Stock par catégorie',
+                    'data' => array_values($categoryStock),
+                    'backgroundColor' => 'rgba(59, 130, 246, 0.75)',
+                    'borderColor' => 'rgb(37, 99, 235)',
+                    'borderWidth' => 1,
+                ]
+            ],
         ]);
         $categoryStockChart->setOptions([
             'indexAxis' => 'y',
@@ -159,11 +151,13 @@ class ProductController extends AbstractController
         $stockHealthChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
         $stockHealthChart->setData([
             'labels' => array_keys($stockHealth),
-            'datasets' => [[
-                'data' => array_values($stockHealth),
-                'backgroundColor' => ['#22c55e', '#f59e0b', '#ef4444'],
-                'borderWidth' => 0,
-            ]],
+            'datasets' => [
+                [
+                    'data' => array_values($stockHealth),
+                    'backgroundColor' => ['#22c55e', '#f59e0b', '#ef4444'],
+                    'borderWidth' => 0,
+                ]
+            ],
         ]);
         $stockHealthChart->setOptions([
             'plugins' => [
@@ -174,13 +168,15 @@ class ProductController extends AbstractController
         $revenueByProductChart = $chartBuilder->createChart(Chart::TYPE_BAR);
         $revenueByProductChart->setData([
             'labels' => array_keys($revenueByProduct),
-            'datasets' => [[
-                'label' => 'CA par produit (USD)',
-                'data' => array_values($revenueByProduct),
-                'backgroundColor' => 'rgba(234, 88, 12, 0.75)',
-                'borderColor' => 'rgb(194, 65, 12)',
-                'borderWidth' => 1,
-            ]],
+            'datasets' => [
+                [
+                    'label' => 'CA par produit (USD)',
+                    'data' => array_values($revenueByProduct),
+                    'backgroundColor' => 'rgba(234, 88, 12, 0.75)',
+                    'borderColor' => 'rgb(194, 65, 12)',
+                    'borderWidth' => 1,
+                ]
+            ],
         ]);
         $revenueByProductChart->setOptions([
             'indexAxis' => 'y',
@@ -213,18 +209,14 @@ class ProductController extends AbstractController
     #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        // access control removed to allow public access during local development
-        
         $product = new Product();
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            // Server-side validation - primary source of truth
             $errors = $this->validationService->validate($product);
-            
+
             if (count($errors) > 0) {
-                // Add all errors to form
                 foreach ($errors as $field => $fieldErrors) {
                     foreach ($fieldErrors as $error) {
                         $this->addFlash('error', "{$field}: {$error}");
@@ -232,7 +224,7 @@ class ProductController extends AbstractController
                 }
                 return $this->render('product/new.html.twig', [
                     'product' => $product,
-                    'form' => $form,
+                    'form' => $form->createView(),
                     'errors' => $errors,
                 ]);
             }
@@ -249,35 +241,29 @@ class ProductController extends AbstractController
 
         return $this->render('product/new.html.twig', [
             'product' => $product,
-            'form' => $form,
+            'form' => $form->createView(),
             'errors' => [],
         ]);
     }
 
-    #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_product_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Product $product): Response
     {
-        // access control removed to allow public access during local development
-        
         return $this->render('product/show.html.twig', [
             'product' => $product,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        // access control removed to allow public access during local development
-        
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            // Server-side validation - primary source of truth
             $errors = $this->validationService->validate($product);
-            
+
             if (count($errors) > 0) {
-                // Add all errors to form
                 foreach ($errors as $field => $fieldErrors) {
                     foreach ($fieldErrors as $error) {
                         $this->addFlash('error', "{$field}: {$error}");
@@ -285,7 +271,7 @@ class ProductController extends AbstractController
                 }
                 return $this->render('product/edit.html.twig', [
                     'product' => $product,
-                    'form' => $form,
+                    'form' => $form->createView(),
                     'errors' => $errors,
                 ]);
             }
@@ -301,23 +287,21 @@ class ProductController extends AbstractController
 
         return $this->render('product/edit.html.twig', [
             'product' => $product,
-            'form' => $form,
+            'form' => $form->createView(),
             'errors' => [],
         ]);
     }
 
-    #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_product_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
     {
-        // access control removed to allow public access during local development
-        
-        if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $product->getId(), $request->request->get('_token'))) {
             try {
                 $entityManager->remove($product);
                 $entityManager->flush();
                 $this->addFlash('success', 'Produit supprimé avec succès');
             } catch (ForeignKeyConstraintViolationException $e) {
-                $this->addFlash('error', 'Impossible de supprimer le produit : des commandes référencent ce produit. Supprimez ou mettez à jour les commandes d\'abord.');
+                $this->addFlash('error', 'Impossible de supprimer le produit : des commandes référencent ce produit.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la suppression du produit');
             }
@@ -345,4 +329,3 @@ class ProductController extends AbstractController
         $product->setImage($newFilename);
     }
 }
-

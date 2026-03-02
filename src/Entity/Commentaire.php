@@ -20,13 +20,25 @@ class Commentaire
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $dateCommentaire = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $auteurAnonyme = null;
+
     #[ORM\ManyToOne(inversedBy: 'commentaires')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $joueur = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Annonce $annonce = null;
+
+    #[ORM\Column]
+    private int $nbLikes = 0;
+
+    #[ORM\Column(length: 20)]
+    private string $moderationStatus = 'PENDING';
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $moderationReason = null;
 
     public function getId(): ?int
     {
@@ -69,6 +81,18 @@ class Commentaire
         return $this;
     }
 
+    public function getAuteurAnonyme(): ?string
+    {
+        return $this->auteurAnonyme;
+    }
+
+    public function setAuteurAnonyme(?string $auteurAnonyme): static
+    {
+        $this->auteurAnonyme = $auteurAnonyme;
+
+        return $this;
+    }
+
     public function getAnnonce(): ?Annonce
     {
         return $this->annonce;
@@ -77,6 +101,42 @@ class Commentaire
     public function setAnnonce(?Annonce $annonce): static
     {
         $this->annonce = $annonce;
+
+        return $this;
+    }
+
+    public function getNbLikes(): int
+    {
+        return $this->nbLikes;
+    }
+
+    public function setNbLikes(int $nbLikes): static
+    {
+        $this->nbLikes = $nbLikes;
+
+        return $this;
+    }
+
+    public function getModerationStatus(): string
+    {
+        return $this->moderationStatus;
+    }
+
+    public function setModerationStatus(string $moderationStatus): static
+    {
+        $this->moderationStatus = $moderationStatus;
+
+        return $this;
+    }
+
+    public function getModerationReason(): ?string
+    {
+        return $this->moderationReason;
+    }
+
+    public function setModerationReason(?string $moderationReason): static
+    {
+        $this->moderationReason = $moderationReason;
 
         return $this;
     }

@@ -4,11 +4,8 @@
 {% block page_title %}Sponsoring{% endblock %}
 
 {% block header_actions %}
-    <a href="{{ path('app_sponsor_new') }}" class="btn btn-primary btn-sm">
-        <i class="lucide-plus" style="font-size:14px"></i> Nouveau sponsor
-    </a>
-    <a href="{{ path('app_contrat_sponsor_new') }}" class="btn btn-success btn-sm">
-        <i class="lucide-plus" style="font-size:14px"></i> Nouveau contrat
+    <a href="{{ path('app_contrat_sponsor_new') }}" class="btn btn-primary btn-sm">
+        <i class="lucide-plus" style="font-size:14px; margin-right:4px;"></i> Ajouter contrat
     </a>
 {% endblock %}
 
@@ -17,95 +14,33 @@
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-label">Sponsors actifs</div>
-                <div class="stat-card-value">{{ sponsors|length }}</div>
-                <div class="stat-card-sub">Total sponsors</div>
+                <div class="stat-card-value">{{ stats.actifs|default(0) }}</div>
+                <div class="stat-card-sub">Pipeline de sponsoring</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-label">Revenu annuel</div>
-                <div class="stat-card-value">{{ (sponsors|reduce((carry, sponsor) => carry + sponsor.budget, 0) / 1000)|round(0) }}K DT</div>
-                <div class="stat-card-sub">Budget total</div>
+                <div class="stat-card-label">Revenu total</div>
+                <div class="stat-card-value">{{ stats.revenue|default(0) }} DT</div>
+                <div class="stat-card-sub">Montant des contrats</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-label">Contrats actifs</div>
+                <div class="stat-card-label">Contrats</div>
                 <div class="stat-card-value">{{ contrats|length }}</div>
-                <div class="stat-card-sub">Total contrats</div>
+                <div class="stat-card-sub">Total enregistrés</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-label">Valeur moyenne</div>
-                <div class="stat-card-value">{% if contrats|length > 0 %}{{ (contrats|reduce((carry, contrat) => carry + contrat.montant, 0) / contrats|length / 1000)|round(0) }}K{% else %}0{% endif %} DT</div>
-                <div class="stat-card-sub">Par contrat</div>
+                <div class="stat-card-label">Paiements</div>
+                <div class="stat-card-value">{{ stats.payes|default(0) }}</div>
+                <div class="stat-card-sub">Contrats payés</div>
             </div>
         </div>
     </div>
-    <!-- Graphiques -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📊 Sponsors vs Contrats</h3>
-                </div>
-                <div class="card-body">
-                    <canvas id="chartSponsors" class="chartjs-render-monitor"></canvas>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const ctx = document.getElementById('chartSponsors').getContext('2d');
-                            new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: ['Sponsors', 'Contrats'],
-                                    datasets: [{
-                                        label: 'Nombre total',
-                                        data: [{{ totalSponsors }}, {{ totalContrats }}],
-                                        backgroundColor: ['#10b981', '#3b82f6'],
-                                        borderColor: ['#059669', '#2563eb'],
-                                        borderWidth: 2
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: {
-                                        legend: { display: false }
-                                    }
-                                }
-                            });
-                        });
-                    </script>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>💰 Budget par Sponsor (Top 5)</h3>
-                </div>
-                <div class="card-body">
-                    <canvas id="chartBudget" class="chartjs-render-monitor"></canvas>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const ctx = document.getElementById('chartBudget').getContext('2d');
-                            new Chart(ctx, {
-                                type: 'doughnut',
-                                data: {
-                                    labels: [{% for sponsor in sponsors|slice(0,5) %}'{{ sponsor.nom }}'{% if not loop.last %},{% endif %}{% endfor %}],
-                                    datasets: [{
-                                        data: [{% for sponsor in sponsors|slice(0,5) %}{{ sponsor.budget }}{% if not loop.last %},{% endif %}{% endfor %}],
-                                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                                    }]
-                                },
-                                options: { responsive: true }
-                            });
-                        });
-                    </script>
-                </div>
-            </div>
-        </div>
-    </div>
+
     <div class="data-table">
         <div class="data-table-header toolbar">
             <h3>Liste des contrats sponsors</h3>
@@ -120,15 +55,10 @@
                     Réinitialiser
                 </a>
             </form>
-            
-            <a href="{{ path('app_contrat_sponsor_new') }}" class="btn btn-sm btn-primary btn-add-product">
-                <i class="lucide-plus" style="font-size:14px; margin-right:4px;"></i> Ajouter contrat
-            </a>
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>Logo</th>
                     <th>Sponsor</th>
                     <th>Montant</th>
                     <th>Paiement</th>
@@ -144,14 +74,16 @@
                     {% for contrat in contrats %}
                         <tr>
                             <td>
-                                {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
-                                {% if logo %}
-                                    <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="{{ contrat.sponsor.nom }}" style="height:32px; width:32px; object-fit:contain; border-radius:4px; background:#fff; padding:2px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
-                                {% else %}
-                                    <div style="height:32px; width:32px; display:flex; align-items:center; justify-content:center; background:var(--body-bg); border-radius:4px; color:var(--text-muted); font-weight:700; font-size:12px;">{{ contrat.sponsor.nom[0] ?? 'S' }}</div>
-                                {% endif %}
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {% set logo = contrat.sponsor.logoName ?? (contrat.sponsor.logo ?? null) %}
+                                    {% if logo %}
+                                        <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="" style="height:32px; width:32px; object-fit:contain; border-radius:4px; background:#fff; padding:2px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                                    {% else %}
+                                        <div style="height:32px; width:32px; display:flex; align-items:center; justify-content:center; background:var(--body-bg); border-radius:4px; color:var(--text-muted); font-weight:700; font-size:12px;">{{ contrat.sponsor.nom[0] ?? 'S' }}</div>
+                                    {% endif %}
+                                    <strong>{{ contrat.sponsor.nom }}</strong>
+                                </div>
                             </td>
-                            <td><strong>{{ contrat.sponsor.nom }}</strong></td>
                             <td style="font-weight:600; color:var(--primary);">{{ contrat.montant }} DT</td>
                             <td>
                                 {% if contrat.statutPaiement == 'Payé' %}
@@ -173,7 +105,7 @@
                             <td>
                                 <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                                     {% if contrat.statutPaiement != 'Payé' %}
-                                        <a href="{{ path('app_payment_checkout', {'id': contrat.id}) }}" class="btn btn-sm" style="background:var(--primary); color:white; border:none; border-radius:4px; padding:4px 8px; font-weight:600; text-decoration:none;">💳 Lien Stripe</a>
+                                        <a href="{{ path('app_payment_checkout', {'id': contrat.id}) }}" class="btn btn-sm" style="background:var(--primary); color:white; border:none; border-radius:4px; padding:4px 8px; font-weight:600; text-decoration:none;">💳 Stripe</a>
                                     {% endif %}
                                     <a href="{{ path('app_contrat_sponsor_edit', {'id': contrat.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
                                     <a href="{{ path('app_contrat_sponsor_pdf', {'id': contrat.id}) }}" class="btn btn-sm btn-outline-secondary" target="_blank">PDF</a>
@@ -187,37 +119,10 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center; padding: 20px;">Aucun contrat sponsor trouvé</td>
+                        <td colspan="8" style="text-align:center; padding: 20px;">Aucun contrat sponsor trouvé</td>
                     </tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
-
-    <style>
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--table-head-bg);
-        }
-
-        .card-header h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-    </style>
 {% endblock %}

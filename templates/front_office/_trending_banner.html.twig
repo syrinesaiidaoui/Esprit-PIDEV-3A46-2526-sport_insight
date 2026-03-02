@@ -5,21 +5,21 @@
     </div>
     <div style="flex:1 1 auto;">
         {% set names = [] %}
-            {% for item in trendingItems %}
-                {% set names = names|merge([item.product.name]) %}
-            {% endfor %}
+        {% for item in trendingItems %}
+            {% set names = names|merge([item.product.name]) %}
+        {% endfor %}
 
-            {% if names is defined and names|length > 0 %}
-            <div style="font-weight:700; color:var(--dark); font-size:16px;">{{ 'trending.title'|trans }}</div>
+        {% if names is defined and names|length > 0 %}
+            <div style="font-weight:700; color:var(--dark); font-size:16px;">Tendances du mois :</div>
             <div style="margin-top:6px; color:var(--text-muted);">
-                {{ names|slice(0,3)|join(', ') }}{% if names|length > 3 %} {{ 'trending.more'|trans({'%count%': names|length - 3}) }}{% endif %} - {{ 'trending.suffix'|trans }}
+                {{ names|slice(0,3)|join(', ') }}{% if names|length > 3 %} et {{ names|length - 3 }} autres{% endif %} - Les plus achetés ce mois-ci.
             </div>
         {% else %}
-            <div style="font-weight:700; color:var(--dark); font-size:16px;">{{ 'trending.empty.title'|trans }}</div>
-            <div style="margin-top:6px; color:var(--text-muted);">{{ 'trending.empty.desc'|trans }}</div>
+            <div style="font-weight:700; color:var(--dark); font-size:16px;">Aucun article tendance pour le moment</div>
+            <div style="margin-top:6px; color:var(--text-muted);">Soyez le premier à acheter pour lancer une tendance !</div>
         {% endif %}
     </div>
     <div style="flex:0 0 auto;">
-        <a href="{{ path('app_shop_index') }}" class="btn btn-primary">{{ 'trending.button'|trans }}</a>
+        <a href="{{ path('app_shop_index') }}" class="btn btn-primary">Voir les tendances</a>
     </div>
 </div>

@@ -33,7 +33,8 @@ final class MatchsController extends AbstractController
         }
 
         // Vérifier si le joueur est déjà ajouté
-        $existing = $match->getMatchLineups()->filter(fn($l) => 
+        $existing = $match->getMatchLineups()->filter(
+            fn($l) =>
             $l->getJoueur()->getId() === $joueurId && $l->getType() === $type
         );
 
@@ -69,7 +70,8 @@ final class MatchsController extends AbstractController
             return $this->json(['error' => 'Invalid type'], Response::HTTP_BAD_REQUEST);
         }
 
-        $lineup = $match->getMatchLineups()->filter(fn($l) => 
+        $lineup = $match->getMatchLineups()->filter(
+            fn($l) =>
             $l->getJoueur()->getId() === $joueurId && $l->getType() === $type
         )->first();
 
@@ -86,12 +88,11 @@ final class MatchsController extends AbstractController
     #[Route(name: 'app_matchs_index', methods: ['GET'])]
     public function index(MatchsRepository $matchsRepository, Request $request): Response
     {
-        $sortOrder = $request->query->get('order', 'asc'); // Default order is 'asc'
+        $sortOrder = $request->query->get('order', 'asc');
         $search = $request->query->get('search', '');
 
         $qb = $matchsRepository->createQueryBuilder('m');
 
-        // Recherche textuelle : lieu
         if ($search) {
             $qb->andWhere('LOWER(m.lieu) LIKE LOWER(:search)')
                 ->setParameter('search', '%' . $search . '%');
@@ -123,7 +124,7 @@ final class MatchsController extends AbstractController
 
         return $this->render('matchs/new.html.twig', [
             'match' => $match,
-            'form' => $form,
+            'form' => $form->createView(),
             'joueurs_domicile_json' => '[]',
             'joueurs_exterieur_json' => '[]',
         ]);
@@ -137,11 +138,9 @@ final class MatchsController extends AbstractController
             ->setMethod('POST')
             ->getForm();
 
-        // Récupérer les lineups triés par numéro
         $domicileLineups = $match->getMatchLineups()->filter(fn($l) => $l->getType() === 'domicile')->toArray();
         $exterieurLineups = $match->getMatchLineups()->filter(fn($l) => $l->getType() === 'exterieur')->toArray();
 
-        // Trier par numéro
         usort($domicileLineups, fn($a, $b) => $a->getJoueur()->getNumero() <=> $b->getJoueur()->getNumero());
         usort($exterieurLineups, fn($a, $b) => $a->getJoueur()->getNumero() <=> $b->getJoueur()->getNumero());
 
@@ -172,7 +171,7 @@ final class MatchsController extends AbstractController
         $domicileLineups = $match->getMatchLineups()->filter(fn($l) => $l->getType() === 'domicile')->toArray();
         $exterieurLineups = $match->getMatchLineups()->filter(fn($l) => $l->getType() === 'exterieur')->toArray();
 
-        $formatJoueur = function($lineup) {
+        $formatJoueur = function ($lineup) {
             return [
                 'id' => $lineup->getJoueur()->getId(),
                 'nom' => $lineup->getJoueur()->getNom(),
@@ -196,10 +195,11 @@ final class MatchsController extends AbstractController
     #[Route('/{id}', name: 'app_matchs_delete', methods: ['POST'])]
     public function delete(Request $request, Matchs $match, EntityManagerInterface $entityManager): Response
     {
-        $entityManager->remove($match);
-        $entityManager->flush();
+        if ($this->isCsrfTokenValid('delete_' . $match->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($match);
+            $entityManager->flush();
+        }
 
         return $this->redirectToRoute('app_matchs_index', [], Response::HTTP_SEE_OTHER);
     }
 }
-

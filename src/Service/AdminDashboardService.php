@@ -72,11 +72,13 @@ class AdminDashboardService
                 // Legacy single-product orders
                 $productName = $order->getProduct()?->getName();
                 if ($productName) {
-                    $productSales[$productName] = $productSales[$productName] ?? [
-                        'name' => $productName,
-                        'quantity' => 0,
-                        'revenue' => 0.0,
-                    ];
+                    if (!isset($productSales[$productName])) {
+                        $productSales[$productName] = [
+                            'name' => $productName,
+                            'quantity' => 0,
+                            'revenue' => 0.0,
+                        ];
+                    }
                     $productSales[$productName]['quantity'] += $quantity;
                     $productSales[$productName]['revenue'] += $lineTotal;
                 }
@@ -91,11 +93,13 @@ class AdminDashboardService
                     $qty = max(0, (int) $item->getQuantity());
                     $line = $item->getUnitPrice() ? $qty * (float) $item->getUnitPrice() : 0.0;
 
-                    $productSales[$name] = $productSales[$name] ?? [
-                        'name' => $name,
-                        'quantity' => 0,
-                        'revenue' => 0.0,
-                    ];
+                    if (!isset($productSales[$name])) {
+                        $productSales[$name] = [
+                            'name' => $name,
+                            'quantity' => 0,
+                            'revenue' => 0.0,
+                        ];
+                    }
                     $productSales[$name]['quantity'] += $qty;
                     $productSales[$name]['revenue'] += $line;
                 }
@@ -123,7 +127,7 @@ class AdminDashboardService
         }
 
         $overview['totalRevenue'] = round($overview['totalRevenue'], 2);
-        usort($productSales, static fn (array $a, array $b): int => $b['quantity'] <=> $a['quantity']);
+        usort($productSales, static fn(array $a, array $b): int => $b['quantity'] <=> $a['quantity']);
 
         return [
             'overview' => $overview,

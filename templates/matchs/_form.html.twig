@@ -24,6 +24,7 @@
         {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
         {{ form_errors(form.statut) }}
     </div>
+    
     <div class="mb-3">
         {{ form_label(form.equipeDomicile, null, {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.equipeDomicile, {'attr': {'class': 'form-control'}}) }}
@@ -34,6 +35,7 @@
         {{ form_widget(form.equipeExterieur, {'attr': {'class': 'form-control'}}) }}
         {{ form_errors(form.equipeExterieur) }}
     </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
@@ -72,15 +74,17 @@
             <div id="joueurs_domicile_list" class="mt-3">
                 <h6>Joueurs sélectionnés:</h6>
                 <div id="joueurs_domicile_selected" class="list-group">
-                    {% for lineup in match.matchLineups %}
-                        {% if lineup.type == 'domicile' %}
-                            <div class="list-group-item joueur-item-domicile" data-joueur-id="{{ lineup.joueur.id }}">
-                                <span class="badge bg-info">{{ lineup.joueur.numero }}</span>
-                                {{ lineup.joueur.nom }} {{ lineup.joueur.prenom }}
-                                <button type="button" class="btn btn-sm btn-danger float-end" onclick="removeJoueurDomicile(this)">Retirer</button>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                    {% if match is defined and match.matchLineups is defined %}
+                        {% for lineup in match.matchLineups %}
+                            {% if lineup.type == 'domicile' %}
+                                <div class="list-group-item joueur-item-domicile" data-joueur-id="{{ lineup.joueur.id }}">
+                                    <span class="badge bg-info">{{ lineup.joueur.numero }}</span>
+                                    {{ lineup.joueur.nom }} {{ lineup.joueur.prenom }}
+                                    <button type="button" class="btn btn-sm btn-danger float-end" onclick="removeJoueurDomicile(this)">Retirer</button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -107,26 +111,29 @@
             <div id="joueurs_exterieur_list" class="mt-3">
                 <h6>Joueurs sélectionnés:</h6>
                 <div id="joueurs_exterieur_selected" class="list-group">
-                    {% for lineup in match.matchLineups %}
-                        {% if lineup.type == 'exterieur' %}
-                            <div class="list-group-item joueur-item-exterieur" data-joueur-id="{{ lineup.joueur.id }}">
-                                <span class="badge bg-info">{{ lineup.joueur.numero }}</span>
-                                {{ lineup.joueur.nom }} {{ lineup.joueur.prenom }}
-                                <button type="button" class="btn btn-sm btn-danger float-end" onclick="removeJoueurExterieur(this)">Retirer</button>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                    {% if match is defined and match.matchLineups is defined %}
+                        {% for lineup in match.matchLineups %}
+                            {% if lineup.type == 'exterieur' %}
+                                <div class="list-group-item joueur-item-exterieur" data-joueur-id="{{ lineup.joueur.id }}">
+                                    <span class="badge bg-info">{{ lineup.joueur.numero }}</span>
+                                    {{ lineup.joueur.nom }} {{ lineup.joueur.prenom }}
+                                    <button type="button" class="btn btn-sm btn-danger float-end" onclick="removeJoueurExterieur(this)">Retirer</button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
+    <button class="btn btn-success" style="margin-bottom: 20px;">{{ button_label|default('Enregistrer') }}</button>
+
     <script>
         const MAX_JOUEURS = 11;
-        const JOUEURS_DOMICILE_EXISTANTS = {{ joueurs_domicile_json|raw }};
-        const JOUEURS_EXTERIEUR_EXISTANTS = {{ joueurs_exterieur_json|raw }};
+        const JOUEURS_DOMICILE_EXISTANTS = {{ joueurs_domicile_json|default('[]')|raw }};
+        const JOUEURS_EXTERIEUR_EXISTANTS = {{ joueurs_exterieur_json|default('[]')|raw }};
 
-        // DÉFINIR TOUTES LES FONCTIONS EN PREMIER
         function loadJoueursDomicile(equipeId) {
             if (!equipeId) {
                 document.getElementById('joueurs_domicile_select').innerHTML = '<option>Sélectionnez une équipe</option>';
@@ -134,42 +141,25 @@
                 return;
             }
 
-            console.log('Appel fetch pour équipe:', equipeId);
             const url = `/api/joueurs/${equipeId}`;
-            console.log('URL fetch:', url);
-
             fetch(url)
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(joueurs => {
-                    console.log('Joueurs reçus:', joueurs);
                     const select = document.getElementById('joueurs_domicile_select');
                     select.innerHTML = '';
-                    
                     if (!joueurs || joueurs.length === 0) {
                         select.innerHTML = '<option>Aucun joueur disponible</option>';
                         document.getElementById('equipe_domicile_name').textContent = 'Aucun joueur';
                         return;
                     }
-                    
                     joueurs.forEach(joueur => {
                         const option = document.createElement('option');
                         option.value = joueur.id;
                         option.textContent = joueur.label;
                         select.appendChild(option);
                     });
-                    // Mettre à jour le nom de l'équipe
-                    const equipeName = document.querySelector('select[name="matchs[equipeDomicile]"]');
-                    document.getElementById('equipe_domicile_name').textContent = equipeName.options[equipeName.selectedIndex].text;
-                })
-                .catch(error => {
-                    console.error('Erreur lors du chargement des joueurs:', error);
-                    document.getElementById('joueurs_domicile_select').innerHTML = '<option>Erreur: ' + error.message + '</option>';
+                    const equipeSelect = document.querySelector('select[name*="[equipeDomicile]"]');
+                    document.getElementById('equipe_domicile_name').textContent = equipeSelect.options[equipeSelect.selectedIndex].text;
                 });
         }
 
@@ -180,42 +170,25 @@
                 return;
             }
 
-            console.log('Appel fetch pour équipe extérieur:', equipeId);
             const url = `/api/joueurs/${equipeId}`;
-            console.log('URL fetch:', url);
-
             fetch(url)
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(joueurs => {
-                    console.log('Joueurs extérieur reçus:', joueurs);
                     const select = document.getElementById('joueurs_exterieur_select');
                     select.innerHTML = '';
-                    
                     if (!joueurs || joueurs.length === 0) {
                         select.innerHTML = '<option>Aucun joueur disponible</option>';
                         document.getElementById('equipe_exterieur_name').textContent = 'Aucun joueur';
                         return;
                     }
-                    
                     joueurs.forEach(joueur => {
                         const option = document.createElement('option');
                         option.value = joueur.id;
                         option.textContent = joueur.label;
                         select.appendChild(option);
                     });
-                    // Mettre à jour le nom de l'équipe
-                    const equipeName = document.querySelector('select[name="matchs[equipeExterieur]"]');
-                    document.getElementById('equipe_exterieur_name').textContent = equipeName.options[equipeName.selectedIndex].text;
-                })
-                .catch(error => {
-                    console.error('Erreur chargement joueurs extérieur:', error);
-                    document.getElementById('joueurs_exterieur_select').innerHTML = '<option>Erreur: ' + error.message + '</option>';
+                    const equipeSelect = document.querySelector('select[name*="[equipeExterieur]"]');
+                    document.getElementById('equipe_exterieur_name').textContent = equipeSelect.options[equipeSelect.selectedIndex].text;
                 });
         }
 
@@ -226,217 +199,113 @@
             const badgeColor = type === 'domicile' ? 'bg-info' : 'bg-success';
             
             const container = document.getElementById(containerId);
-            if (!container) return;
-            
-            if (document.querySelector(`[data-joueur-id="${joueurId}"].${itemClass}`)) {
-                return;
-            }
-
-            if (container.children.length >= MAX_JOUEURS) {
-                return;
-            }
+            if (!container || document.querySelector(`[data-joueur-id="${joueurId}"].${itemClass}`)) return;
+            if (container.children.length >= MAX_JOUEURS) return;
 
             const div = document.createElement('div');
             div.className = `list-group-item ${itemClass}`;
             div.setAttribute('data-joueur-id', joueurId);
-            
-            const content = document.createElement('span');
-            content.innerHTML = `
+            div.innerHTML = `
                 <span class="badge ${badgeColor}">${joueurLabel.split(' - ')[0]}</span>
                 ${joueurLabel}
                 <button type="button" class="btn btn-sm btn-danger float-end" onclick="${removeFunction}(this)">Retirer</button>
             `;
-            div.appendChild(content);
             container.appendChild(div);
         }
 
         function addJoueurDomicile() {
             const select = document.getElementById('joueurs_domicile_select');
-            const selectedOptions = [];
+            const selectedOptions = Array.from(select.options).filter(o => o.selected && o.value);
+            if (selectedOptions.length === 0) return;
             
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].selected && select.options[i].value) {
-                    selectedOptions.push(select.options[i]);
-                }
-            }
-            
-            if (selectedOptions.length === 0) {
-                alert('Veuillez sélectionner au moins un joueur');
-                return;
-            }
-            
-            const form = document.querySelector('form');
-            const matchId = form.getAttribute('data-match-id');
-            
-            console.log('🔍 addJoueurDomicile - matchId:', matchId);
-            console.log('🔍 matchId === "new"?', matchId === 'new');
-            
-            // NOUVEAU MATCH: Juste ajouter au DOM
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
             if (matchId === 'new') {
-                console.log('✅ C\'EST UN NOUVEAU MATCH - Ajout sans AJAX');
+                selectedOptions.forEach(option => displayJoueurInList('domicile', option.value, option.text));
+            } else {
                 selectedOptions.forEach(option => {
-                    displayJoueurInList('domicile', option.value, option.text);
+                    fetch(`/matchs/${matchId}/add-joueur`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({joueur_id: option.value, type: 'domicile'})
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) displayJoueurInList('domicile', option.value, option.text);
+                    });
                 });
-                for (let i = 0; i < select.options.length; i++) {
-                    select.options[i].selected = false;
-                }
-                return;
             }
-            
-            console.log('🚀 C\'EST UN MATCH EXISTANT - Utilisation AJAX');
-            // MATCH EXISTANT: Faire AJAX
-            selectedOptions.forEach(option => {
-                fetch(`/matchs/${matchId}/add-joueur`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({joueur_id: option.value, type: 'domicile'})
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        displayJoueurInList('domicile', option.value, option.text);
-                    }
-                })
-                .catch(e => console.error('Erreur:', e));
-            });
-            
-            for (let i = 0; i < select.options.length; i++) {
-                select.options[i].selected = false;
-            }
+            select.selectedIndex = -1;
         }
 
         function addJoueurExterieur() {
             const select = document.getElementById('joueurs_exterieur_select');
-            const selectedOptions = [];
+            const selectedOptions = Array.from(select.options).filter(o => o.selected && o.value);
+            if (selectedOptions.length === 0) return;
             
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].selected && select.options[i].value) {
-                    selectedOptions.push(select.options[i]);
-                }
-            }
-            
-            if (selectedOptions.length === 0) {
-                alert('Veuillez sélectionner au moins un joueur');
-                return;
-            }
-            
-            const form = document.querySelector('form');
-            const matchId = form.getAttribute('data-match-id');
-            
-            console.log('🔍 addJoueurExterieur - matchId:', matchId);
-            console.log('🔍 matchId === "new"?', matchId === 'new');
-            
-            // NOUVEAU MATCH: Juste ajouter au DOM
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
             if (matchId === 'new') {
-                console.log('✅ C\'EST UN NOUVEAU MATCH - Ajout sans AJAX');
+                selectedOptions.forEach(option => displayJoueurInList('exterieur', option.value, option.text));
+            } else {
                 selectedOptions.forEach(option => {
-                    displayJoueurInList('exterieur', option.value, option.text);
+                    fetch(`/matchs/${matchId}/add-joueur`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({joueur_id: option.value, type: 'exterieur'})
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) displayJoueurInList('exterieur', option.value, option.text);
+                    });
                 });
-                for (let i = 0; i < select.options.length; i++) {
-                    select.options[i].selected = false;
-                }
-                return;
             }
-            
-            console.log('🚀 C\'EST UN MATCH EXISTANT - Utilisation AJAX');
-            // MATCH EXISTANT: Faire AJAX
-            selectedOptions.forEach(option => {
-                fetch(`/matchs/${matchId}/add-joueur`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({joueur_id: option.value, type: 'exterieur'})
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        displayJoueurInList('exterieur', option.value, option.text);
-                    }
-                })
-                .catch(e => console.error('Erreur:', e));
-            });
-            
-            for (let i = 0; i < select.options.length; i++) {
-                select.options[i].selected = false;
-            }
+            select.selectedIndex = -1;
         }
 
         function removeJoueurDomicile(button) {
             const div = button.closest('.joueur-item-domicile');
             const joueurId = div.getAttribute('data-joueur-id');
-            const form = document.querySelector('form');
-            const matchId = form.getAttribute('data-match-id');
-            
-            fetch(`/matchs/${matchId}/remove-joueur/${joueurId}`, {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({type: 'domicile'})
-            })
-            .then(() => div.remove())
-            .catch(e => console.error('Erreur:', e));
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
+            if (matchId === 'new') {
+                div.remove();
+            } else {
+                fetch(`/matchs/${matchId}/remove-joueur/${joueurId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type: 'domicile'})
+                }).then(() => div.remove());
+            }
         }
 
         function removeJoueurExterieur(button) {
             const div = button.closest('.joueur-item-exterieur');
             const joueurId = div.getAttribute('data-joueur-id');
-            const form = document.querySelector('form');
-            const matchId = form.getAttribute('data-match-id');
-            
-            fetch(`/matchs/${matchId}/remove-joueur/${joueurId}`, {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({type: 'exterieur'})
-            })
-            .then(() => div.remove())
-            .catch(e => console.error('Erreur:', e));
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
+            if (matchId === 'new') {
+                div.remove();
+            } else {
+                fetch(`/matchs/${matchId}/remove-joueur/${joueurId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type: 'exterieur'})
+                }).then(() => div.remove());
+            }
         }
 
-        // MAINTENANT INITIALISER APRÈS QUE TOUTES LES FONCTIONS SOIENT DÉFINIES
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOMContentLoaded triggered');
-            
-            // Charger les joueurs existants
-            if (JOUEURS_DOMICILE_EXISTANTS && JOUEURS_DOMICILE_EXISTANTS.length > 0) {
-                JOUEURS_DOMICILE_EXISTANTS.forEach(joueur => {
-                    displayJoueurInList('domicile', joueur.id, `${joueur.numero} - ${joueur.prenom} ${joueur.nom}`);
-                });
+            if (JOUEURS_DOMICILE_EXISTANTS.length) {
+                JOUEURS_DOMICILE_EXISTANTS.forEach(j => displayJoueurInList('domicile', j.id, `${j.numero} - ${j.prenom} ${j.nom}`));
             }
-            if (JOUEURS_EXTERIEUR_EXISTANTS && JOUEURS_EXTERIEUR_EXISTANTS.length > 0) {
-                JOUEURS_EXTERIEUR_EXISTANTS.forEach(joueur => {
-                    displayJoueurInList('exterieur', joueur.id, `${joueur.numero} - ${joueur.prenom} ${joueur.nom}`);
-                });
+            if (JOUEURS_EXTERIEUR_EXISTANTS.length) {
+                JOUEURS_EXTERIEUR_EXISTANTS.forEach(j => displayJoueurInList('exterieur', j.id, `${j.numero} - ${j.prenom} ${j.nom}`));
             }
 
-            // Trouver les vrais IDs des champs select
-            const equipeDomicileSelect = document.querySelector('select[name="matchs[equipeDomicile]"]');
-            const equipeExterieurSelect = document.querySelector('select[name="matchs[equipeExterieur]"]');
+            const domSelect = document.querySelector('select[name*="[equipeDomicile]"]');
+            const extSelect = document.querySelector('select[name*="[equipeExterieur]"]');
 
-            console.log('equipeDomicileSelect:', equipeDomicileSelect);
-            console.log('equipeDomicileSelect.value:', equipeDomicileSelect ? equipeDomicileSelect.value : 'null');
-
-            if (equipeDomicileSelect) {
-                equipeDomicileSelect.addEventListener('change', function() {
-                    console.log('Équipe domicile changée:', this.value);
-                    loadJoueursDomicile(this.value);
-                });
-                // Initialiser si une équipe est déjà sélectionnée
-                if (equipeDomicileSelect.value) {
-                    console.log('Chargement des joueurs domicile pour:', equipeDomicileSelect.value);
-                    loadJoueursDomicile(equipeDomicileSelect.value);
-                }
+            if (domSelect) {
+                domSelect.addEventListener('change', function() { loadJoueursDomicile(this.value); });
+                if (domSelect.value) loadJoueursDomicile(domSelect.value);
             }
-
-            if (equipeExterieurSelect) {
-                equipeExterieurSelect.addEventListener('change', function() {
-                    console.log('Équipe extérieure changée:', this.value);
-                    loadJoueursExterieur(this.value);
-                });
-                // Initialiser si une équipe est déjà sélectionnée
-                if (equipeExterieurSelect.value) {
-                    console.log('Chargement des joueurs extérieur pour:', equipeExterieurSelect.value);
-                    loadJoueursExterieur(equipeExterieurSelect.value);
-                }
+            if (extSelect) {
+                extSelect.addEventListener('change', function() { loadJoueursExterieur(this.value); });
+                if (extSelect.value) loadJoueursExterieur(extSelect.value);
             }
         });
     </script>
-    <button class="btn btn-success">{{ button_label|default('Save') }}</button>
 {{ form_end(form) }}

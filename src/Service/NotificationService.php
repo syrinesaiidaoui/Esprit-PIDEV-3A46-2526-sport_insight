@@ -8,59 +8,74 @@ use App\Entity\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Psr\Log\LoggerInterface;
 
 class NotificationService
 {
-    public function __construct(
-        private MailerInterface $mailer,
-        private EntityManagerInterface $em,
-        private \Psr\Log\LoggerInterface $logger,
-        private string $trainingRecipient = ''
-    ) {}
+  public function __construct(
+    private MailerInterface $mailer,
+    private EntityManagerInterface $em,
+    private LoggerInterface $logger,
+    private string $trainingRecipient = ''
+  ) {
+  }
 
-    public function notifyPlayerNewTraining(User $player, Entrainement $training): void
-    {
-        // ── 1. Notification en base de données ──────────────────────────
-        $notif = new Notification();
-        $notif->setUser($player);
-        $notif->setMessage(
-            "Nouvel entraînement de " . $training->getType()
-            . " le " . $training->getDateEntrainement()->format('d/m/Y')
-            . " à " . $training->getHeureDebut()->format('H:i')
-            . " — " . $training->getLieu()
-        );
-        $notif->setCreatedAt(new \DateTime());
-        $notif->setIsRead(false);
+  public function notifyPlayerNewTraining(User $player, Entrainement $training): void
+  {
+    // ── 1. Notification en base de données ──────────────────────────
+    $notif = new Notification();
+    $notif->setUser($player);
+    $notif->setMessage(
+      "Nouvel entraînement de " . $training->getType()
+      . " le " . $training->getDateEntrainement()->format('d/m/Y')
+      . " à " . $training->getHeureDebut()->format('H:i')
+      . " — " . $training->getLieu()
+    );
+    $notif->setCreatedAt(new \DateTime());
+    $notif->setIsRead(false);
 
-        $this->em->persist($notif);
-        $this->em->flush();
+    $this->em->persist($notif);
+    $this->em->flush();
 
-        // ── 2. Email HTML riche ─────────────────────────────────────────
-        $coach = $training->getEntraineur();
-        $coachName = $coach ? $coach->getNomComplet() : 'Votre coach';
+    // ── 2. Email HTML riche ─────────────────────────────────────────
+    $coach = $training->getEntraineur();
+    $coachName = $coach ? $coach->getNomComplet() : 'Votre coach';
 
-        $date      = $training->getDateEntrainement()->format('l d F Y');
-        $heureD    = $training->getHeureDebut()->format('H:i');
-        $heureF    = $training->getHeureFin()->format('H:i');
-        $type      = htmlspecialchars($training->getType());
-        $lieu      = htmlspecialchars($training->getLieu());
-        $objectif  = nl2br(htmlspecialchars($training->getObjectif() ?? ''));
-        $prenom    = htmlspecialchars($player->getPrenom());
+    $date = $training->getDateEntrainement()->format('l d F Y');
+    $heureD = $training->getHeureDebut()->format('H:i');
+    $heureF = $training->getHeureFin()->format('H:i');
+    $type = htmlspecialchars($training->getType());
+    $lieu = htmlspecialchars($training->getLieu());
+    $objectif = nl2br(htmlspecialchars($training->getObjectif() ?? ''));
+    $prenom = htmlspecialchars($player->getPrenom());
 
-        // Translate day name to French
-        $joursFR = [
-            'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi',
-            'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche',
-        ];
-        $moisFR = [
-            'January' => 'Janvier', 'February' => 'Février', 'March' => 'Mars',
-            'April' => 'Avril', 'May' => 'Mai', 'June' => 'Juin',
-            'July' => 'Juillet', 'August' => 'Août', 'September' => 'Septembre',
-            'October' => 'Octobre', 'November' => 'Novembre', 'December' => 'Décembre',
-        ];
-        $dateFR = strtr($date, array_merge($joursFR, $moisFR));
+    // Translate day name to French
+    $joursFR = [
+      'Monday' => 'Lundi',
+      'Tuesday' => 'Mardi',
+      'Wednesday' => 'Mercredi',
+      'Thursday' => 'Jeudi',
+      'Friday' => 'Vendredi',
+      'Saturday' => 'Samedi',
+      'Sunday' => 'Dimanche',
+    ];
+    $moisFR = [
+      'January' => 'Janvier',
+      'February' => 'Février',
+      'March' => 'Mars',
+      'April' => 'Avril',
+      'May' => 'Mai',
+      'June' => 'Juin',
+      'July' => 'Juillet',
+      'August' => 'Août',
+      'September' => 'Septembre',
+      'October' => 'Octobre',
+      'November' => 'Novembre',
+      'December' => 'Décembre',
+    ];
+    $dateFR = strtr($date, array_merge($joursFR, $moisFR));
 
-        $html = <<<HTML
+    $html = <<<HTML
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -216,24 +231,24 @@ class NotificationService
 </html>
 HTML;
 
-        $recipientEmail = trim($this->trainingRecipient) !== ''
-            ? trim($this->trainingRecipient)
-            : trim((string) $player->getEmail());
+    $recipientEmail = trim($this->trainingRecipient) !== ''
+      ? trim($this->trainingRecipient)
+      : trim((string) $player->getEmail());
 
-        if ($recipientEmail === '') {
-            return;
-        }
-
-        $email = (new Email())
-            ->from('sportinsight.contact@gmail.com')
-            ->to($recipientEmail)
-            ->subject("🏋️ Nouvel entraînement {$type} — {$dateFR}")
-            ->html($html);
-
-        try {
-            $this->mailer->send($email);
-        } catch (\Exception $e) {
-            $this->logger->error('Email error: ' . $e->getMessage());
-        }
+    if ($recipientEmail === '') {
+      return;
     }
+
+    $email = (new Email())
+      ->from('sportinsight.contact@gmail.com')
+      ->to($recipientEmail)
+      ->subject("🏋️ Nouvel entraînement {$type} — {$dateFR}")
+      ->html($html);
+
+    try {
+      $this->mailer->send($email);
+    } catch (\Exception $e) {
+      $this->logger->error('Email error: ' . $e->getMessage());
+    }
+  }
 }

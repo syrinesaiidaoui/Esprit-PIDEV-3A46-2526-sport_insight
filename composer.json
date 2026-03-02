@@ -10,8 +10,7 @@
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "*",
-        "dompdf/dompdf": "^3.1",
-        "endroid/qr-code": "^6.1",
+        "google/cloud-translate": "^2.1",
         "knplabs/knp-paginator-bundle": "^6.10",
         "knplabs/knp-snappy-bundle": "^1.10",
         "phpdocumentor/reflection-docblock": "^5.2",
@@ -26,6 +25,7 @@
         "symfony/flex": "^2",
         "symfony/form": "6.4.*",
         "symfony/framework-bundle": "6.4.*",
+        "symfony/google-mailer": "6.4.*",
         "symfony/http-client": "6.4.*",
         "symfony/intl": "6.4.*",
         "symfony/mailer": "6.4.*",
@@ -48,11 +48,10 @@
         "symfony/web-link": "6.4.*",
         "symfony/workflow": "6.4.*",
         "symfony/yaml": "6.4.*",
+        "twilio/sdk": "*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/intl-extra": "^3.23",
         "twig/twig": "^2.12|^3.0",
-        "twilio/sdk": "^8.11",
-        "vich/uploader-bundle": "^2.9"
+        "vich/uploader-bundle": "*"
     },
     "config": {
         "allow-plugins": {

@@ -115,9 +115,90 @@ final class FrontMatchsController extends AbstractController
         // pass OpenWeather API key to template (from env parameter)
         $weatherApiKey = $this->getParameter('app.openweather_api_key');
 
-        // Logique dynamique pour le stade selon la ville du lieu du match
         $stadiums = [
-            'paris' => 'Parc des Princes', 'marseille' => 'Orange Vélodrome', 'lyon' => 'Groupama Stadium', 'lille' => 'Stade Pierre Mauroy', 'monaco' => 'Stade Louis II', 'montpellier' => 'Stade de la Mosson', 'rennes' => 'Stade de la Route de Lorient', 'bordeaux' => 'Matmut Atlantique', 'toulouse' => 'Stadium de Toulouse', 'nice' => 'Allianz Riviera', 'strasbourg' => 'Stade de la Meinau', 'madrid' => 'Santiago Bernabéu', 'barcelona' => 'Spotify Camp Nou', 'barcel' => 'Spotify Camp Nou', 'sevilla' => 'Estadio Ramón Sánchez Pizjuán', 'bilbao' => 'San Mamés', 'valencia' => 'Estadio de Mestalla', 'atletico' => 'Wanda Metropolitano', 'seville' => 'Estadio Ramón Sánchez Pizjuán', 'rome' => 'Stadio Olimpico', 'roma' => 'Stadio Olimpico', 'milan' => 'San Siro', 'milano' => 'San Siro', 'napoli' => 'Stadio San Paolo', 'naples' => 'Stadio San Paolo', 'juventus' => 'Allianz Stadium', 'turin' => 'Allianz Stadium', 'torino' => 'Allianz Stadium', 'munich' => 'Allianz Arena', 'münchen' => 'Allianz Arena', 'dortmund' => 'Signal Iduna Park', 'berlin' => 'Olympiastadion', 'hamburg' => 'Volksparkstadion', 'cologne' => 'RheinEnergieStadion', 'köln' => 'RheinEnergieStadion', 'düsseldorf' => 'Merkur Spiel-Arena', 'leverkusen' => 'BayArena', 'schalke' => 'Veltins-Arena', 'london' => 'Wembley Stadium', 'londres' => 'Wembley Stadium', 'manchester' => 'Etihad Stadium', 'liverpool' => 'Anfield', 'arsenal' => 'Emirates Stadium', 'chelsea' => 'Stamford Bridge', 'tottenham' => 'Tottenham Hotspur Stadium', 'brighton' => 'Amex Stadium', 'leeds' => 'Elland Road', 'newcastle' => 'St James Park', 'everton' => 'Goodison Park', 'lisbon' => 'Estádio da Luz', 'lisbonne' => 'Estádio da Luz', 'lisboa' => 'Estádio da Luz', 'benfica' => 'Estádio da Luz', 'porto' => 'Estádio do Dragão', 'sporting' => 'Estádio José Alvalade', 'amsterdam' => 'Johan Cruyff Arena', 'rotterdam' => 'Feyenoord Stadium', 'ajax' => 'Johan Cruyff Arena', 'feyenoord' => 'Feyenoord Stadium', 'psv' => 'Philips Stadion', 'eindhoven' => 'Philips Stadion', 'brussels' => 'Stade Roi Baudouin', 'bruxelles' => 'Stade Roi Baudouin', 'brugge' => 'Jan Breydel Stadium', 'anderlecht' => 'Parc Astrid', 'tunis' => 'Stade Olympique de Radès', 'tunisia' => 'Stade Olympique de Radès', 'carthage' => 'Stade Olympique de Radès', 'athens' => 'Georgios Karaiskakis', 'athènes' => 'Georgios Karaiskakis', 'istanbul' => 'Başakşehir Park', 'ankara' => 'Eryaman Stadium', 'moscow' => 'Luzhniki Stadium', 'moscou' => 'Luzhniki Stadium', 'geneva' => 'Stade de Genève', 'genève' => 'Stade de Genève', 'zurich' => 'Stadion Letzigrund', 'vienna' => 'Red Bull Arena', 'vienne' => 'Red Bull Arena', 'prague' => 'Eden Arena', 'budapest' => 'Puskás Stadium', 'warsaw' => 'Stadion Narodowy', 'varsovie' => 'Stadion Narodowy',
+            'paris' => 'Parc des Princes',
+            'marseille' => 'Orange Vélodrome',
+            'lyon' => 'Groupama Stadium',
+            'lille' => 'Stade Pierre Mauroy',
+            'monaco' => 'Stade Louis II',
+            'montpellier' => 'Stade de la Mosson',
+            'rennes' => 'Stade de la Route de Lorient',
+            'bordeaux' => 'Matmut Atlantique',
+            'toulouse' => 'Stadium de Toulouse',
+            'nice' => 'Allianz Riviera',
+            'strasbourg' => 'Stade de la Meinau',
+            'madrid' => 'Santiago Bernabéu',
+            'barcelona' => 'Spotify Camp Nou',
+            'barcel' => 'Spotify Camp Nou',
+            'sevilla' => 'Estadio Ramón Sánchez Pizjuán',
+            'bilbao' => 'San Mamés',
+            'valencia' => 'Estadio de Mestalla',
+            'atletico' => 'Wanda Metropolitano',
+            'seville' => 'Estadio Ramón Sánchez Pizjuán',
+            'rome' => 'Stadio Olimpico',
+            'roma' => 'Stadio Olimpico',
+            'milan' => 'San Siro',
+            'milano' => 'San Siro',
+            'napoli' => 'Stadio San Paolo',
+            'naples' => 'Stadio San Paolo',
+            'juventus' => 'Allianz Stadium',
+            'turin' => 'Allianz Stadium',
+            'torino' => 'Allianz Stadium',
+            'munich' => 'Allianz Arena',
+            'münchen' => 'Allianz Arena',
+            'dortmund' => 'Signal Iduna Park',
+            'berlin' => 'Olympiastadion',
+            'hamburg' => 'Volksparkstadion',
+            'cologne' => 'RheinEnergieStadion',
+            'köln' => 'RheinEnergieStadion',
+            'düsseldorf' => 'Merkur Spiel-Arena',
+            'leverkusen' => 'BayArena',
+            'schalke' => 'Veltins-Arena',
+            'london' => 'Wembley Stadium',
+            'londres' => 'Wembley Stadium',
+            'manchester' => 'Etihad Stadium',
+            'liverpool' => 'Anfield',
+            'arsenal' => 'Emirates Stadium',
+            'chelsea' => 'Stamford Bridge',
+            'tottenham' => 'Tottenham Hotspur Stadium',
+            'brighton' => 'Amex Stadium',
+            'leeds' => 'Elland Road',
+            'newcastle' => 'St James Park',
+            'everton' => 'Goodison Park',
+            'lisbon' => 'Estádio da Luz',
+            'lisbonne' => 'Estádio da Luz',
+            'lisboa' => 'Estádio da Luz',
+            'benfica' => 'Estádio da Luz',
+            'porto' => 'Estádio do Dragão',
+            'sporting' => 'Estádio José Alvalade',
+            'amsterdam' => 'Johan Cruyff Arena',
+            'rotterdam' => 'Feyenoord Stadium',
+            'ajax' => 'Johan Cruyff Arena',
+            'feyenoord' => 'Feyenoord Stadium',
+            'psv' => 'Philips Stadion',
+            'eindhoven' => 'Philips Stadion',
+            'brussels' => 'Stade Roi Baudouin',
+            'bruxelles' => 'Stade Roi Baudouin',
+            'brugge' => 'Jan Breydel Stadium',
+            'anderlecht' => 'Parc Astrid',
+            'tunis' => 'Stade Olympique de Radès',
+            'tunisia' => 'Stade Olympique de Radès',
+            'carthage' => 'Stade Olympique de Radès',
+            'athens' => 'Georgios Karaiskakis',
+            'athènes' => 'Georgios Karaiskakis',
+            'istanbul' => 'Başakşehir Park',
+            'ankara' => 'Eryaman Stadium',
+            'moscow' => 'Luzhniki Stadium',
+            'moscou' => 'Luzhniki Stadium',
+            'geneva' => 'Stade de Genève',
+            'genève' => 'Stade de Genève',
+            'zurich' => 'Stadion Letzigrund',
+            'vienna' => 'Red Bull Arena',
+            'vienne' => 'Red Bull Arena',
+            'prague' => 'Eden Arena',
+            'budapest' => 'Puskás Stadium',
+            'warsaw' => 'Stadion Narodowy',
+            'varsovie' => 'Stadion Narodowy',
         ];
         $lieu = strtolower($match->getLieu() ?? '');
         $stadiumGeo = ['nom' => 'Stade inconnu'];
@@ -144,7 +225,7 @@ final class FrontMatchsController extends AbstractController
             return new JsonResponse(['reply' => 'Requete invalide.'], 400);
         }
 
-        $message = trim((string)($payload['message'] ?? ''));
+        $message = trim((string) ($payload['message'] ?? ''));
         if ($message === '') {
             return new JsonResponse(['reply' => 'Veuillez saisir un message.'], 400);
         }
@@ -173,7 +254,7 @@ final class FrontMatchsController extends AbstractController
         $domicileLineups = $match->getMatchLineups()->filter(fn($l) => $l->getType() === 'domicile')->toArray();
         $exterieurLineups = $match->getMatchLineups()->filter(fn($l) => $l->getType() === 'exterieur')->toArray();
 
-        $formatJoueur = function($lineup) {
+        $formatJoueur = function ($lineup) {
             return [
                 'id' => $lineup->getJoueur()->getId(),
                 'nom' => $lineup->getJoueur()->getNom(),
@@ -211,7 +292,8 @@ final class FrontMatchsController extends AbstractController
         }
 
         // Vérifier si le joueur est déjà ajouté
-        $existing = $match->getMatchLineups()->filter(fn($l) => 
+        $existing = $match->getMatchLineups()->filter(
+            fn($l) =>
             $l->getJoueur()->getId() === $joueurId && $l->getType() === $type
         );
 
@@ -247,7 +329,8 @@ final class FrontMatchsController extends AbstractController
             return $this->json(['error' => 'Invalid type'], Response::HTTP_BAD_REQUEST);
         }
 
-        $lineup = $match->getMatchLineups()->filter(fn($l) => 
+        $lineup = $match->getMatchLineups()->filter(
+            fn($l) =>
             $l->getJoueur()->getId() === $joueurId && $l->getType() === $type
         )->first();
 
@@ -275,9 +358,90 @@ final class FrontMatchsController extends AbstractController
     #[Route('/{id}/export-pdf', name: 'app_front_matchs_export_pdf', methods: ['GET'])]
     public function exportPdf(Matchs $match, \Knp\Snappy\Pdf $knpSnappy): Response
     {
-        // Logique pour le stade (même que dans show())
         $stadiums = [
-            'paris' => 'Parc des Princes', 'marseille' => 'Orange Vélodrome', 'lyon' => 'Groupama Stadium', 'lille' => 'Stade Pierre Mauroy', 'monaco' => 'Stade Louis II', 'montpellier' => 'Stade de la Mosson', 'rennes' => 'Stade de la Route de Lorient', 'bordeaux' => 'Matmut Atlantique', 'toulouse' => 'Stadium de Toulouse', 'nice' => 'Allianz Riviera', 'strasbourg' => 'Stade de la Meinau', 'madrid' => 'Santiago Bernabéu', 'barcelona' => 'Spotify Camp Nou', 'barcel' => 'Spotify Camp Nou', 'sevilla' => 'Estadio Ramón Sánchez Pizjuán', 'bilbao' => 'San Mamés', 'valencia' => 'Estadio de Mestalla', 'atletico' => 'Wanda Metropolitano', 'seville' => 'Estadio Ramón Sánchez Pizjuán', 'rome' => 'Stadio Olimpico', 'roma' => 'Stadio Olimpico', 'milan' => 'San Siro', 'milano' => 'San Siro', 'napoli' => 'Stadio San Paolo', 'naples' => 'Stadio San Paolo', 'juventus' => 'Allianz Stadium', 'turin' => 'Allianz Stadium', 'torino' => 'Allianz Stadium', 'munich' => 'Allianz Arena', 'münchen' => 'Allianz Arena', 'dortmund' => 'Signal Iduna Park', 'berlin' => 'Olympiastadion', 'hamburg' => 'Volksparkstadion', 'cologne' => 'RheinEnergieStadion', 'köln' => 'RheinEnergieStadion', 'düsseldorf' => 'Merkur Spiel-Arena', 'leverkusen' => 'BayArena', 'schalke' => 'Veltins-Arena', 'london' => 'Wembley Stadium', 'londres' => 'Wembley Stadium', 'manchester' => 'Etihad Stadium', 'liverpool' => 'Anfield', 'arsenal' => 'Emirates Stadium', 'chelsea' => 'Stamford Bridge', 'tottenham' => 'Tottenham Hotspur Stadium', 'brighton' => 'Amex Stadium', 'leeds' => 'Elland Road', 'newcastle' => 'St James Park', 'everton' => 'Goodison Park', 'lisbon' => 'Estádio da Luz', 'lisbonne' => 'Estádio da Luz', 'lisboa' => 'Estádio da Luz', 'benfica' => 'Estádio da Luz', 'porto' => 'Estádio do Dragão', 'sporting' => 'Estádio José Alvalade', 'amsterdam' => 'Johan Cruyff Arena', 'rotterdam' => 'Feyenoord Stadium', 'ajax' => 'Johan Cruyff Arena', 'feyenoord' => 'Feyenoord Stadium', 'psv' => 'Philips Stadion', 'eindhoven' => 'Philips Stadion', 'brussels' => 'Stade Roi Baudouin', 'bruxelles' => 'Stade Roi Baudouin', 'brugge' => 'Jan Breydel Stadium', 'anderlecht' => 'Parc Astrid', 'tunis' => 'Stade Olympique de Radès', 'tunisia' => 'Stade Olympique de Radès', 'carthage' => 'Stade Olympique de Radès', 'athens' => 'Georgios Karaiskakis', 'athènes' => 'Georgios Karaiskakis', 'istanbul' => 'Başakşehir Park', 'ankara' => 'Eryaman Stadium', 'moscow' => 'Luzhniki Stadium', 'moscou' => 'Luzhniki Stadium', 'geneva' => 'Stade de Genève', 'genève' => 'Stade de Genève', 'zurich' => 'Stadion Letzigrund', 'vienna' => 'Red Bull Arena', 'vienne' => 'Red Bull Arena', 'prague' => 'Eden Arena', 'budapest' => 'Puskás Stadium', 'warsaw' => 'Stadion Narodowy', 'varsovie' => 'Stadion Narodowy',
+            'paris' => 'Parc des Princes',
+            'marseille' => 'Orange Vélodrome',
+            'lyon' => 'Groupama Stadium',
+            'lille' => 'Stade Pierre Mauroy',
+            'monaco' => 'Stade Louis II',
+            'montpellier' => 'Stade de la Mosson',
+            'rennes' => 'Stade de la Route de Lorient',
+            'bordeaux' => 'Matmut Atlantique',
+            'toulouse' => 'Stadium de Toulouse',
+            'nice' => 'Allianz Riviera',
+            'strasbourg' => 'Stade de la Meinau',
+            'madrid' => 'Santiago Bernabéu',
+            'barcelona' => 'Spotify Camp Nou',
+            'barcel' => 'Spotify Camp Nou',
+            'sevilla' => 'Estadio Ramón Sánchez Pizjuán',
+            'bilbao' => 'San Mamés',
+            'valencia' => 'Estadio de Mestalla',
+            'atletico' => 'Wanda Metropolitano',
+            'seville' => 'Estadio Ramón Sánchez Pizjuán',
+            'rome' => 'Stadio Olimpico',
+            'roma' => 'Stadio Olimpico',
+            'milan' => 'San Siro',
+            'milano' => 'San Siro',
+            'napoli' => 'Stadio San Paolo',
+            'naples' => 'Stadio San Paolo',
+            'juventus' => 'Allianz Stadium',
+            'turin' => 'Allianz Stadium',
+            'torino' => 'Allianz Stadium',
+            'munich' => 'Allianz Arena',
+            'münchen' => 'Allianz Arena',
+            'dortmund' => 'Signal Iduna Park',
+            'berlin' => 'Olympiastadion',
+            'hamburg' => 'Volksparkstadion',
+            'cologne' => 'RheinEnergieStadion',
+            'köln' => 'RheinEnergieStadion',
+            'düsseldorf' => 'Merkur Spiel-Arena',
+            'leverkusen' => 'BayArena',
+            'schalke' => 'Veltins-Arena',
+            'london' => 'Wembley Stadium',
+            'londres' => 'Wembley Stadium',
+            'manchester' => 'Etihad Stadium',
+            'liverpool' => 'Anfield',
+            'arsenal' => 'Emirates Stadium',
+            'chelsea' => 'Stamford Bridge',
+            'tottenham' => 'Tottenham Hotspur Stadium',
+            'brighton' => 'Amex Stadium',
+            'leeds' => 'Elland Road',
+            'newcastle' => 'St James Park',
+            'everton' => 'Goodison Park',
+            'lisbon' => 'Estádio da Luz',
+            'lisbonne' => 'Estádio da Luz',
+            'lisboa' => 'Estádio da Luz',
+            'benfica' => 'Estádio da Luz',
+            'porto' => 'Estádio do Dragão',
+            'sporting' => 'Estádio José Alvalade',
+            'amsterdam' => 'Johan Cruyff Arena',
+            'rotterdam' => 'Feyenoord Stadium',
+            'ajax' => 'Johan Cruyff Arena',
+            'feyenoord' => 'Feyenoord Stadium',
+            'psv' => 'Philips Stadion',
+            'eindhoven' => 'Philips Stadion',
+            'brussels' => 'Stade Roi Baudouin',
+            'bruxelles' => 'Stade Roi Baudouin',
+            'brugge' => 'Jan Breydel Stadium',
+            'anderlecht' => 'Parc Astrid',
+            'tunis' => 'Stade Olympique de Radès',
+            'tunisia' => 'Stade Olympique de Radès',
+            'carthage' => 'Stade Olympique de Radès',
+            'athens' => 'Georgios Karaiskakis',
+            'athènes' => 'Georgios Karaiskakis',
+            'istanbul' => 'Başakşehir Park',
+            'ankara' => 'Eryaman Stadium',
+            'moscow' => 'Luzhniki Stadium',
+            'moscou' => 'Luzhniki Stadium',
+            'geneva' => 'Stade de Genève',
+            'genève' => 'Stade de Genève',
+            'zurich' => 'Stadion Letzigrund',
+            'vienna' => 'Red Bull Arena',
+            'vienne' => 'Red Bull Arena',
+            'prague' => 'Eden Arena',
+            'budapest' => 'Puskás Stadium',
+            'warsaw' => 'Stadion Narodowy',
+            'varsovie' => 'Stadion Narodowy',
         ];
         $lieu = strtolower($match->getLieu() ?? '');
         $stadiumGeo = ['nom' => 'Stade inconnu'];
@@ -298,7 +462,7 @@ final class FrontMatchsController extends AbstractController
         $publicDir = $this->getParameter('kernel.project_dir') . '/public';
         $html = preg_replace_callback(
             '/src=["\']\/([^"\']+)["\']/',
-            function($matches) use ($publicDir) {
+            function ($matches) use ($publicDir) {
                 $filePath = $publicDir . '/' . $matches[1];
                 if (file_exists($filePath)) {
                     // Convertir le chemin Windows en URL file://
@@ -319,7 +483,7 @@ final class FrontMatchsController extends AbstractController
         try {
             // Convertir le chemin Windows en URL file:// (3 slashes pour Windows)
             $fileUrl = 'file:///' . str_replace('\\', '/', $tempHtmlFile);
-            
+
             $knpSnappy->generate($fileUrl, $tempFile, [
                 'page-size' => 'A4',
                 'margin-top' => 10,
@@ -335,7 +499,7 @@ final class FrontMatchsController extends AbstractController
             ]);
 
             $pdf = file_get_contents($tempFile);
-            
+
             // Nettoyage des fichiers temporaires
             @unlink($tempHtmlFile);
             @unlink($tempFile);
