@@ -40,6 +40,7 @@ class Annonce
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull(message: "La date de publication est obligatoire")]
     #[Assert\Type(\DateTime::class, message: "La date doit être au format valide")]
+    #[Assert\GreaterThanOrEqual('today', message: "La date de publication doit être aujourd'hui ou une date ultérieure")]
     private ?\DateTime $datePublication = null;
 
     #[ORM\Column(length: 255)]

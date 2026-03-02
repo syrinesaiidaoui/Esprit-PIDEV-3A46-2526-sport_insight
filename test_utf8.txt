@@ -1,0 +1,23 @@
+﻿PHPUnit 9.6.34 by Sebastian Bergmann and contributors.
+
+Testing App\Tests\AnnonceEntityTest
+.EE..                                                               5 / 5 (100%)
+
+Time: 00:00.046, Memory: 10.00 MB
+
+There were 2 errors:
+
+1) App\Tests\AnnonceEntityTest::testInvalidEmptyTitle
+Object of class Symfony\Component\Validator\ConstraintViolationList could not be converted to int
+
+C:\Users\SAYDA\Desktop\sport_insight finale copie\tests\AnnonceEntityTest.php:46
+C:\Users\SAYDA\Desktop\sport_insight finale copie\vendor\phpunit\phpunit\phpunit:107
+
+2) App\Tests\AnnonceEntityTest::testInvalidPastDate
+Object of class Symfony\Component\Validator\ConstraintViolationList could not be converted to int
+
+C:\Users\SAYDA\Desktop\sport_insight finale copie\tests\AnnonceEntityTest.php:61
+C:\Users\SAYDA\Desktop\sport_insight finale copie\vendor\phpunit\phpunit\phpunit:107
+
+ERRORS!
+Tests: 5, Assertions: 6, Errors: 2.
