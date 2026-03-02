@@ -51,22 +51,27 @@ class Entrainement
     #[Assert\Length(max: 255, maxMessage: 'Le lieu ne doit pas dépasser 255 caractères.')]
     private ?string $lieu = null;
 
-    #[ORM\ManyToOne(inversedBy: 'entrainements')]
+    #[ORM\ManyToOne(inversedBy: 'entrainementsCoaches')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $entraineur = null;
 
     /**
      * @var Collection<int, User>
      */
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'entrainements')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'entrainementsParticipes')]
     private Collection $joueurs;
 
+    /**
+     * @var Collection<int, Participation>
+     */
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
-private Collection $participations;
+    private Collection $participations;
 
-#[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
-private Collection $evaluations;
-
+    /**
+     * @var Collection<int, Evaluation>
+     */
+    #[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
+    private Collection $evaluations;
 
     public function __construct()
     {

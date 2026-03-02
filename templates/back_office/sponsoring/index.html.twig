@@ -4,9 +4,9 @@
 {% block page_title %}Sponsoring{% endblock %}
 
 {% block header_actions %}
-    <button class="btn btn-primary btn-sm">
-        <i class="lucide-plus" style="font-size:14px"></i> Nouveau sponsor
-    </button>
+    <a href="{{ path('app_contrat_sponsor_new') }}" class="btn btn-primary btn-sm">
+        <i class="lucide-plus" style="font-size:14px; margin-right:4px;"></i> Ajouter contrat
+    </a>
 {% endblock %}
 
 {% block body %}
@@ -14,86 +14,114 @@
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-label">Sponsors actifs</div>
-                <div class="stat-card-value">6</div>
-                <div class="stat-card-sub">2 en negociation</div>
+                <div class="stat-card-value">{{ stats.actifs|default(0) }}</div>
+                <div class="stat-card-sub">Pipeline de sponsoring</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-label">Revenu annuel</div>
-                <div class="stat-card-value">320K DT</div>
-                <div class="stat-card-sub">+25% vs an dernier</div>
+                <div class="stat-card-label">Revenu total</div>
+                <div class="stat-card-value">{{ stats.revenue|default(0) }} DT</div>
+                <div class="stat-card-sub">Montant des contrats</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-label">Contrats actifs</div>
-                <div class="stat-card-value">8</div>
-                <div class="stat-card-sub">2 expirent bientot</div>
+                <div class="stat-card-label">Contrats</div>
+                <div class="stat-card-value">{{ contrats|length }}</div>
+                <div class="stat-card-sub">Total enregistrés</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-label">Valeur moyenne</div>
-                <div class="stat-card-value">40K DT</div>
-                <div class="stat-card-sub">Par contrat</div>
+                <div class="stat-card-label">Paiements</div>
+                <div class="stat-card-value">{{ stats.payes|default(0) }}</div>
+                <div class="stat-card-sub">Contrats payés</div>
             </div>
         </div>
     </div>
 
     <div class="data-table">
-        <div class="data-table-header">
-            <h3>Liste des sponsors</h3>
+        <div class="data-table-header toolbar">
+            <h3>Liste des contrats sponsors</h3>
+            
+            <form method="GET" style="display: flex; gap: 8px; align-items: center; margin-bottom: 0;">
+                <input type="text" name="sponsor_nom" placeholder="Sponsor..." value="{{ sponsor_nom ?? '' }}" class="form-control" style="width: auto;">
+                <input type="date" name="date_debut" value="{{ date_debut ?? '' }}" class="form-control" style="width: auto;">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    Rechercher
+                </button>
+                <a href="{{ path('back_sponsoring_index') }}" class="btn btn-outline-secondary btn-sm">
+                    Réinitialiser
+                </a>
+            </form>
         </div>
         <table>
             <thead>
                 <tr>
                     <th>Sponsor</th>
-                    <th>Type</th>
                     <th>Montant</th>
-                    <th>Debut</th>
+                    <th>Paiement</th>
+                    <th>Début</th>
                     <th>Fin</th>
+                    <th>Équipe</th>
                     <th>Statut</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>Tunisie Telecom</strong></td>
-                    <td>Maillot principal</td>
-                    <td>120 000 DT/an</td>
-                    <td>01/07/2025</td>
-                    <td>30/06/2027</td>
-                    <td><span class="badge-success">Actif</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary">Modifier</button>
-                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>BIAT</strong></td>
-                    <td>Stade</td>
-                    <td>80 000 DT/an</td>
-                    <td>01/01/2025</td>
-                    <td>31/12/2026</td>
-                    <td><span class="badge-success">Actif</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary">Modifier</button>
-                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Coca-Cola</strong></td>
-                    <td>Boissons officiel</td>
-                    <td>45 000 DT/an</td>
-                    <td>01/09/2025</td>
-                    <td>31/08/2026</td>
-                    <td><span class="badge-warning">Expire bientot</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary">Modifier</button>
-                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </td>
-                </tr>
+                {% if contrats|length > 0 %}
+                    {% for contrat in contrats %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {% set logo = contrat.sponsor.logoName ?? (contrat.sponsor.logo ?? null) %}
+                                    {% if logo %}
+                                        <img src="{{ asset('uploads/logos/' ~ logo) }}" alt="" style="height:32px; width:32px; object-fit:contain; border-radius:4px; background:#fff; padding:2px;" onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                                    {% else %}
+                                        <div style="height:32px; width:32px; display:flex; align-items:center; justify-content:center; background:var(--body-bg); border-radius:4px; color:var(--text-muted); font-weight:700; font-size:12px;">{{ contrat.sponsor.nom[0] ?? 'S' }}</div>
+                                    {% endif %}
+                                    <strong>{{ contrat.sponsor.nom }}</strong>
+                                </div>
+                            </td>
+                            <td style="font-weight:600; color:var(--primary);">{{ contrat.montant }} DT</td>
+                            <td>
+                                {% if contrat.statutPaiement == 'Payé' %}
+                                    <span class="badge-success" style="font-size: 11px;">Payé ✅</span>
+                                {% else %}
+                                    <span class="badge-danger" style="font-size: 11px;">En attente ⏳</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="muted">{{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '-' }}</span></td>
+                            <td><span class="muted">{{ contrat.dateFin ? contrat.dateFin|date('d/m/Y') : '-' }}</span></td>
+                            <td>{{ contrat.equipe.nom ?? '-' }}</td>
+                            <td>
+                                {% if contrat.isExpired() %}
+                                    <span class="badge-danger">Expiré</span>
+                                {% else %}
+                                    <span class="badge-success">Actif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                                    {% if contrat.statutPaiement != 'Payé' %}
+                                        <a href="{{ path('app_payment_checkout', {'id': contrat.id}) }}" class="btn btn-sm" style="background:var(--primary); color:white; border:none; border-radius:4px; padding:4px 8px; font-weight:600; text-decoration:none;">💳 Stripe</a>
+                                    {% endif %}
+                                    <a href="{{ path('app_contrat_sponsor_edit', {'id': contrat.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
+                                    <a href="{{ path('app_contrat_sponsor_pdf', {'id': contrat.id}) }}" class="btn btn-sm btn-outline-secondary" target="_blank">PDF</a>
+                                    <form method="post" action="{{ path('app_contrat_sponsor_delete', {'id': contrat.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" style="margin:0;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contrat.id) }}">
+                                        <button type="submit" class="btn btn-sm" style="color:var(--danger); background:none; border:none; padding:4px 8px; font-weight:600;">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding: 20px;">Aucun contrat sponsor trouvé</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

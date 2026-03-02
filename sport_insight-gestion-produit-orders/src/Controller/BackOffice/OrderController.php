@@ -13,7 +13,7 @@ class OrderController extends AbstractController
     #[Route('/', name: 'back_orders_index')]
     public function index(OrderRepository $repo): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         $orders = $repo->findAll();
         return $this->render('back_office/order/index.html.twig', ['orders' => $orders]);
     }

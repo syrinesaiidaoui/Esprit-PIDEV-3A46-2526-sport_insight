@@ -3,8 +3,10 @@
 namespace App\Controller\BackOffice;
 
 use App\Entity\Entrainement;
+use App\Entity\User;
 use App\Form\EntrainementType;
 use App\Repository\EntrainementRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,11 +28,13 @@ final class EntrainementController extends AbstractController
             $qb->andWhere('LOWER(e.type) LIKE :searchType')
                 ->setParameter('searchType', '%' . strtolower($searchType) . '%');
         }
+
         if ($sortBy === 'dateEntrainement') {
             $qb->orderBy('e.dateEntrainement', $sortDir === 'desc' ? 'DESC' : 'ASC');
         } else {
             $qb->orderBy('e.id', 'DESC');
         }
+
         $entrainements = $qb->getQuery()->getResult();
 
         return $this->render('back_office/entrainement/index.html.twig', [
@@ -42,7 +46,7 @@ final class EntrainementController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notifier): Response
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -52,11 +56,29 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
+            // Notify associated players and trainer
+            $recipients = $entrainement->getJoueurs()->toArray();
+            if ($entrainement->getEntraineur()) {
+                $recipients[] = $entrainement->getEntraineur();
+            }
+
+            $notified = [];
+            foreach ($recipients as $recipient) {
+                $key = $recipient->getId() ?? spl_object_id($recipient);
+                if (isset($notified[$key])) {
+                    continue;
+                }
+
+                $notifier->notifyPlayerNewTraining($recipient, $entrainement);
+                $notified[$key] = true;
+            }
+
+            $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
             return $this->redirectToRoute('back_entrainement_index');
         }
 
         return $this->render('back_office/entrainement/new.html.twig', [
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -76,7 +98,7 @@ final class EntrainementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'Entraînement mis à jour.');
             return $this->redirectToRoute('back_entrainement_index');
         }
 
@@ -89,12 +111,15 @@ final class EntrainementController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Entrainement $entrainement, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid(
-            'delete'.$entrainement->getId(),
-            $request->request->get('_token')
-        )) {
+        if (
+            $this->isCsrfTokenValid(
+                'delete' . $entrainement->getId(),
+                $request->request->get('_token')
+            )
+        ) {
             $entityManager->remove($entrainement);
             $entityManager->flush();
+            $this->addFlash('danger', 'Entraînement supprimé.');
         }
 
         return $this->redirectToRoute('back_entrainement_index');

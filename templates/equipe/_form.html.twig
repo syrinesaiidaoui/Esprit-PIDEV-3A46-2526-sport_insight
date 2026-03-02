@@ -1,0 +1,38 @@
+{{ form_start(form, { 'attr': { 'enctype': 'multipart/form-data', 'class': 'equipe-form' } }) }}
+    <div class="mb-3">
+        {{ form_label(form.id_equipe, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.id_equipe, {'attr': {'class': 'form-control', 'placeholder': 'Ex: EQ-001'}}) }}
+        {{ form_errors(form.id_equipe) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'équipe'}}) }}
+        {{ form_errors(form.nom) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.coach, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.coach, {'attr': {'class': 'form-control', 'placeholder': 'Nom du coach'}}) }}
+        {{ form_errors(form.coach) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.adresse, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'placeholder': 'Adresse'}}) }}
+        {{ form_errors(form.adresse) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.telephone, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.telephone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
+        {{ form_errors(form.telephone) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email'}}) }}
+        {{ form_errors(form.email) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.image, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.image, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.image) }}
+    </div>
+    <button class="btn btn-success">{{ button_label|default('Save') }}</button>
+{{ form_end(form) }}

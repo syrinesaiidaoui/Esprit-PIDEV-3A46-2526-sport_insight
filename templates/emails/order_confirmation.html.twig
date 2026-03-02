@@ -1,0 +1,37 @@
+<h2>Thank you for your purchase — Sport Insight</h2>
+<p>Dear {{ user.nom|default('Customer') }} {{ user.prenom|default('') }},</p>
+<p>Thank you for your recent purchase. Here are the details of your order:</p>
+
+<table style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px">Order #</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px">Product</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px">Quantity</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px">Price</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set total = 0 %}
+        {% for order in orders %}
+            {% set total = total + (order.computedTotal|default(0)) %}
+            <tr>
+                <td style="padding:6px">{{ order.id }}</td>
+                <td style="padding:6px">{{ order.product ? order.product.name : 'N/A' }}</td>
+                <td style="padding:6px">{{ order.quantity }}</td>
+                <td style="padding:6px">${{ (order.computedTotal|default(0))|number_format(2, '.', ',') }}</td>
+                <td style="padding:6px">{{ order.status|upper }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3" style="padding:6px; font-weight:700">Total</td>
+            <td style="padding:6px; font-weight:700">${{ total|number_format(2, '.', ',') }}</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>We will notify you again once your package is shipped.</p>
+<p>If you have any questions, reply to this email.</p>
+<p>Best regards,<br>Sport Insight Team</p>

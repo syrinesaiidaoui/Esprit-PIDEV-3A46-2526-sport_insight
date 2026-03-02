@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 
 #[Route('/order')]
 class OrderController extends AbstractController
@@ -18,7 +19,7 @@ class OrderController extends AbstractController
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(Request $request, OrderRepository $orderRepository): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         // Search and filter functionality
         $searchTerm = $request->query->get('search', '');
@@ -65,7 +66,7 @@ class OrderController extends AbstractController
     #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         $order = new Order();
         $form = $this->createForm(OrderType::class, $order);
@@ -100,7 +101,7 @@ class OrderController extends AbstractController
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
     public function show(Order $order): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         return $this->render('order/show.html.twig', [
             'order' => $order,
@@ -110,7 +111,7 @@ class OrderController extends AbstractController
     #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
@@ -143,11 +144,18 @@ class OrderController extends AbstractController
     #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($order);
-            $entityManager->flush();
+            try {
+                $entityManager->remove($order);
+                $entityManager->flush();
+                $this->addFlash('success', 'Order deleted successfully.');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('danger', 'Cannot delete order: related records prevent deletion.');
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while deleting the order.');
+            }
         }
 
         return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);

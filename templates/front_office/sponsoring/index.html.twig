@@ -1,34 +1,228 @@
 {% extends 'front_office/base.html.twig' %}
 
-{% block title %}Sponsoring - FC Club{% endblock %}
+{% block title %}Nos Partenaires - Sport Insight{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        .hero-banner {
+            background: linear-gradient(135deg, #0a140e 0%, #16a34a 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 24px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h2 class="section-title">Nos Sponsors</h2>
+    <div class="hero-banner">
+        <h1 style="font-size: 48px; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">NOS PARTENAIRES</h1>
+        <p style="font-size: 18px; opacity: 0.9; max-width: 600px; line-height: 1.6;">Découvrez les entreprises et marques qui soutiennent Sport Insight et nous accompagnent vers le succès national et international.</p>
+    </div>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="front-card text-center">
-                <div class="card-icon" style="margin:0 auto 16px"><i class="lucide-building-2"></i></div>
-                <h3>Tunisie Telecom</h3>
-                <p>Sponsor maillot principal</p>
-                <span class="badge-success">Partenaire officiel</span>
+    {# STATS (From sayda-annonces) #}
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="front-card">
+                <div style="color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase;">Partenaires</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--pitch-600);">{{ sponsors|length }}</div>
+                <div style="font-size: 12px; color: var(--muted);">Entreprises engagées</div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="front-card text-center">
-                <div class="card-icon" style="margin:0 auto 16px"><i class="lucide-landmark"></i></div>
-                <h3>BIAT</h3>
-                <p>Sponsor stade</p>
-                <span class="badge-success">Partenaire officiel</span>
+        <div class="col-md-3">
+            <div class="front-card">
+                <div style="color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase;">Investissement</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--pitch-600);">{{ (sponsors|reduce((carry, sponsor) => carry + (sponsor.budget|default(0)), 0) / 1000)|round(0) }}K DT</div>
+                <div style="font-size: 12px; color: var(--muted);">Budget global annuel</div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="front-card text-center">
-                <div class="card-icon" style="margin:0 auto 16px"><i class="lucide-cup-soda"></i></div>
-                <h3>Coca-Cola</h3>
-                <p>Boissons officiel</p>
-                <span class="badge-info">Partenaire</span>
+        <div class="col-md-3">
+            <div class="front-card">
+                <div style="color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase;">Contrats</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--pitch-600);">{{ contrats|length }}</div>
+                <div style="font-size: 12px; color: var(--muted);">Partenariats actifs</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="front-card">
+                <div style="color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase;">Valeur Moy.</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--pitch-600);">{% if contrats|length > 0 %}{{ (contrats|reduce((carry, contrat) => carry + (contrat.montant|default(0)), 0) / contrats|length / 1000)|round(0) }}K{% else %}0{% endif %} DT</div>
+                <div style="font-size: 12px; color: var(--muted);">Par convention</div>
             </div>
         </div>
     </div>
+
+    {# SEARCH FORM #}
+    <form method="GET" class="front-card" style="margin-bottom: 48px; padding: 24px; border: 1px solid var(--border-color);">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label" style="font-weight: 600; color: var(--ink);">Rechercher un Sponsor</label>
+                <input type="text" name="sponsor_nom" placeholder="Nom de l'entreprise..." value="{{ sponsor_nom ?? '' }}" class="form-control" style="border-radius: 8px; padding: 12px;">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600; color: var(--ink);">Depuis la date</label>
+                <input type="date" name="date_debut" value="{{ date_debut ?? '' }}" class="form-control" style="border-radius: 8px; padding: 12px;">
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 12px;">🔍 Rechercher</button>
+                    <a href="{{ path('front_sponsoring_index') }}" class="btn btn-secondary w-100 text-center" style="padding: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none;">Réinitialiser</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {# PARTNERS GRID #}
+    {% if contrats|length > 0 %}
+        <div class="row g-4 mb-5">
+            {% for contrat in contrats %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="front-card h-100 d-flex flex-column" style="padding: 0; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s ease;">
+                        <div style="background: #f8fafc; padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 180px; border-bottom: 1px solid var(--border-color);">
+                            {% set logo = contrat.sponsor.logoName %}
+                            {% if logo %}
+                                <img src="{{ asset('uploads/logos/' ~ logo) }}" 
+                                     alt="{{ contrat.sponsor.nom }}" 
+                                     style="max-width: 100%; max-height: 130px; object-fit: contain;"
+                                     onerror="this.onerror=null;this.src='{{ asset('uploads/sponsors/' ~ logo) }}';">
+                            {% else %}
+                                <div style="width: 100px; height: 100px; background: rgba(22, 163, 74, 0.1); color: #16a34a; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800;">
+                                    {{ (contrat.sponsor.nom|default('S'))[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-4 flex-grow-1">
+                            <h3 style="margin: 0 0 10px; font-size: 26px; font-weight: 800;">{{ contrat.sponsor.nom }}</h3>
+                            <div style="font-size: 14px; color: var(--muted); margin-bottom: 16px;">
+                                📅 {{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '-' }} — {{ contrat.dateFin ? contrat.dateFin|date('d/m/Y') : '-' }}
+                            </div>
+                            <p style="margin-bottom: 8px;"><strong>Équipe :</strong> {{ contrat.equipe.nom ?? '-' }}</p>
+                            {% if contrat.description %}
+                                <p style="font-size: 14px; color: var(--muted); line-height: 1.5;">{{ contrat.description|slice(0, 100) }}...</p>
+                            {% endif %}
+                        </div>
+
+                        <div style="padding: 16px 24px; border-top: 1px solid var(--border-color); background: #fdfdfd; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Investissement</span>
+                                <div style="font-weight: 900; color: #16a34a; font-size: 20px;">{{ contrat.montant }} DT</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_contrat_sponsor_show', {'id': contrat.id}) }}" class="btn btn-secondary btn-sm" style="font-weight: 700;">Détails</a>
+                                <a href="{{ path('app_contrat_sponsor_pdf', {'id': contrat.id}) }}" class="btn btn-primary btn-sm" target="_blank" style="font-weight: 700;">PDF</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="d-flex justify-content-center mt-5 mb-5">
+            {% if knp_pagination_render is defined %}
+                {{ knp_pagination_render(contrats) }}
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="front-card text-center" style="padding: 80px 20px; border: 1px dashed var(--border-color);">
+            <h4 style="font-size: 26px; margin-bottom: 10px;">Aucun sponsor trouvé</h4>
+            <p style="color: var(--muted);">Affinez vos filtres de recherche pour trouver nos partenaires.</p>
+        </div>
+    {% endif %}
+
+    {# HUB INTEGRATION: ACCESS BUTTONS (Admin only hint or general) #}
+    <div style="text-align: center; margin-bottom: 60px;">
+        <p style="color: var(--muted); margin-bottom: 16px;">Vous souhaitez devenir partenaire ?</p>
+        <a href="{{ path('app_sponsor_new') }}" class="btn btn-outline-primary" style="padding: 12px 30px; border-radius: 99px;">Soumettre une demande</a>
+    </div>
+
+    {# MAP CONTAINER #}
+    <div style="margin-top: 80px; padding-bottom: 80px;">
+        <h3 style="font-size: 32px; font-weight: 800; margin-bottom: 10px; font-family: 'Barlow Condensed', sans-serif;">🌍 NOS PARTENAIRES SUR LA CARTE</h3>
+        <p style="color: var(--muted); margin-bottom: 32px;">Retrouvez le siège social de chaque partenaire à travers le territoire tunisien.</p>
+        <div id="sponsorsMap" style="height: 500px; width: 100%; border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 20px 50px rgba(0,0,0,0.05); z-index: 1;"></div>
+    </div>
+    
+    {% set sponsors_array = [] %}
+    {% for sponsor in sponsors %}
+        {% set sponsors_array = sponsors_array|merge([{
+            'nom': sponsor.nom,
+            'adresse': sponsor.adresse|default(''),
+            'logo': sponsor.logoName ? asset('uploads/logos/' ~ sponsor.logoName) : ''
+        }]) %}
+    {% endfor %}
+    <script id="sponsors-data" type="application/json">
+        {{ sponsors_array|json_encode|raw }}
+    </script>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var mapElement = document.getElementById('sponsorsMap');
+            if (!mapElement) return;
+
+            var map = L.map('sponsorsMap').setView([33.8869, 9.5375], 6);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            var sponsors = [];
+            try {
+                sponsors = JSON.parse(document.getElementById('sponsors-data').textContent);
+            } catch(e) { console.error(e); }
+            
+            var customIcon = L.divIcon({
+                className: 'custom-map-marker',
+                html: '<div style="background:#16a34a; color:white; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.2); font-weight:900;">S</div>',
+                iconSize: [34, 34],
+                iconAnchor: [17, 17],
+                popupAnchor: [0, -17]
+            });
+
+            async function geocodeSponsors() {
+                for (let i = 0; i < sponsors.length; i++) {
+                    let sponsor = sponsors[i];
+                    if (sponsor.adresse && sponsor.adresse.trim() !== '') {
+                        try {
+                            let response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(sponsor.adresse + ', Tunisia'));
+                            let data = await response.json();
+                            
+                            if (data && data.length > 0) {
+                                let lat = data[0].lat;
+                                let lon = data[0].lon;
+                                let popupHtml = `
+                                    <div style="text-align:center; min-width:140px; padding: 10px;">
+                                        ${sponsor.logo ? `<img src="${sponsor.logo}" style="max-height:50px; object-fit:contain; margin-bottom:10px;">` : ''}
+                                        <h4 style="margin:0 0 5px; font-size:15px; font-weight:800;">${sponsor.nom}</h4>
+                                        <p style="margin:0; font-size:12px; color:#64748b;">${sponsor.adresse}</p>
+                                    </div>
+                                `;
+                                L.marker([lat, lon], {icon: customIcon}).addTo(map).bindPopup(popupHtml);
+                            }
+                            await new Promise(r => setTimeout(r, 1200));
+                        } catch (e) { console.error(e); }
+                    }
+                }
+            }
+            geocodeSponsors();
+        });
+    </script>
 {% endblock %}

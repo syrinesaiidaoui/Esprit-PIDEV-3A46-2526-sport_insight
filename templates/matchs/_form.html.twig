@@ -1,0 +1,311 @@
+{{ form_start(form, {'attr': {'id': 'match-form', 'data-match-id': match.id|default('new')}}) }}
+    <div class="mb-3">
+        {{ form_label(form.dateMatch, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.dateMatch, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.dateMatch) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.heureDebut, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.heureDebut, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.heureDebut) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.lieu, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.lieu, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.lieu) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.type) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.statut) }}
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.equipeDomicile, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.equipeDomicile, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.equipeDomicile) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.equipeExterieur, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.equipeExterieur, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.equipeExterieur) }}
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.scoreEquipeDomicile, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.scoreEquipeDomicile, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.scoreEquipeDomicile) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.scoreEquipeExterieur, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.scoreEquipeExterieur, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.scoreEquipeExterieur) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Composition Équipe Domicile -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5>Composition Équipe Domicile</h5>
+        </div>
+        <div class="card-body">
+            <div id="joueurs_domicile_container">
+                <div class="mb-3">
+                    <label for="joueurs_domicile_select" class="form-label">Sélectionnez les joueurs (max 11)</label>
+                    <select id="joueurs_domicile_select" class="form-select" multiple size="10">
+                        <option value="">Chargez l'équipe d'abord...</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        Équipe domicile sélectionnée: <strong id="equipe_domicile_name">-</strong>
+                    </small>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addJoueurDomicile()">Ajouter ce joueur</button>
+            </div>
+            <div id="joueurs_domicile_list" class="mt-3">
+                <h6>Joueurs sélectionnés:</h6>
+                <div id="joueurs_domicile_selected" class="list-group">
+                    {% if match is defined and match.matchLineups is defined %}
+                        {% for lineup in match.matchLineups %}
+                            {% if lineup.type == 'domicile' %}
+                                <div class="list-group-item joueur-item-domicile" data-joueur-id="{{ lineup.joueur.id }}">
+                                    <span class="badge bg-info">{{ lineup.joueur.numero }}</span>
+                                    {{ lineup.joueur.nom }} {{ lineup.joueur.prenom }}
+                                    <button type="button" class="btn btn-sm btn-danger float-end" onclick="removeJoueurDomicile(this)">Retirer</button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Composition Équipe Extérieure -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5>Composition Équipe Extérieure</h5>
+        </div>
+        <div class="card-body">
+            <div id="joueurs_exterieur_container">
+                <div class="mb-3">
+                    <label for="joueurs_exterieur_select" class="form-label">Sélectionnez les joueurs (max 11)</label>
+                    <select id="joueurs_exterieur_select" class="form-select" multiple size="10">
+                        <option value="">Chargez l'équipe d'abord...</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        Équipe extérieure sélectionnée: <strong id="equipe_exterieur_name">-</strong>
+                    </small>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addJoueurExterieur()">Ajouter ce joueur</button>
+            </div>
+            <div id="joueurs_exterieur_list" class="mt-3">
+                <h6>Joueurs sélectionnés:</h6>
+                <div id="joueurs_exterieur_selected" class="list-group">
+                    {% if match is defined and match.matchLineups is defined %}
+                        {% for lineup in match.matchLineups %}
+                            {% if lineup.type == 'exterieur' %}
+                                <div class="list-group-item joueur-item-exterieur" data-joueur-id="{{ lineup.joueur.id }}">
+                                    <span class="badge bg-info">{{ lineup.joueur.numero }}</span>
+                                    {{ lineup.joueur.nom }} {{ lineup.joueur.prenom }}
+                                    <button type="button" class="btn btn-sm btn-danger float-end" onclick="removeJoueurExterieur(this)">Retirer</button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-success" style="margin-bottom: 20px;">{{ button_label|default('Enregistrer') }}</button>
+
+    <script>
+        const MAX_JOUEURS = 11;
+        const JOUEURS_DOMICILE_EXISTANTS = {{ joueurs_domicile_json|default('[]')|raw }};
+        const JOUEURS_EXTERIEUR_EXISTANTS = {{ joueurs_exterieur_json|default('[]')|raw }};
+
+        function loadJoueursDomicile(equipeId) {
+            if (!equipeId) {
+                document.getElementById('joueurs_domicile_select').innerHTML = '<option>Sélectionnez une équipe</option>';
+                document.getElementById('equipe_domicile_name').textContent = '-';
+                return;
+            }
+
+            const url = `/api/joueurs/${equipeId}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(joueurs => {
+                    const select = document.getElementById('joueurs_domicile_select');
+                    select.innerHTML = '';
+                    if (!joueurs || joueurs.length === 0) {
+                        select.innerHTML = '<option>Aucun joueur disponible</option>';
+                        document.getElementById('equipe_domicile_name').textContent = 'Aucun joueur';
+                        return;
+                    }
+                    joueurs.forEach(joueur => {
+                        const option = document.createElement('option');
+                        option.value = joueur.id;
+                        option.textContent = joueur.label;
+                        select.appendChild(option);
+                    });
+                    const equipeSelect = document.querySelector('select[name*="[equipeDomicile]"]');
+                    document.getElementById('equipe_domicile_name').textContent = equipeSelect.options[equipeSelect.selectedIndex].text;
+                });
+        }
+
+        function loadJoueursExterieur(equipeId) {
+            if (!equipeId) {
+                document.getElementById('joueurs_exterieur_select').innerHTML = '<option>Sélectionnez une équipe</option>';
+                document.getElementById('equipe_exterieur_name').textContent = '-';
+                return;
+            }
+
+            const url = `/api/joueurs/${equipeId}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(joueurs => {
+                    const select = document.getElementById('joueurs_exterieur_select');
+                    select.innerHTML = '';
+                    if (!joueurs || joueurs.length === 0) {
+                        select.innerHTML = '<option>Aucun joueur disponible</option>';
+                        document.getElementById('equipe_exterieur_name').textContent = 'Aucun joueur';
+                        return;
+                    }
+                    joueurs.forEach(joueur => {
+                        const option = document.createElement('option');
+                        option.value = joueur.id;
+                        option.textContent = joueur.label;
+                        select.appendChild(option);
+                    });
+                    const equipeSelect = document.querySelector('select[name*="[equipeExterieur]"]');
+                    document.getElementById('equipe_exterieur_name').textContent = equipeSelect.options[equipeSelect.selectedIndex].text;
+                });
+        }
+
+        function displayJoueurInList(type, joueurId, joueurLabel) {
+            const containerId = type === 'domicile' ? 'joueurs_domicile_selected' : 'joueurs_exterieur_selected';
+            const itemClass = type === 'domicile' ? 'joueur-item-domicile' : 'joueur-item-exterieur';
+            const removeFunction = type === 'domicile' ? 'removeJoueurDomicile' : 'removeJoueurExterieur';
+            const badgeColor = type === 'domicile' ? 'bg-info' : 'bg-success';
+            
+            const container = document.getElementById(containerId);
+            if (!container || document.querySelector(`[data-joueur-id="${joueurId}"].${itemClass}`)) return;
+            if (container.children.length >= MAX_JOUEURS) return;
+
+            const div = document.createElement('div');
+            div.className = `list-group-item ${itemClass}`;
+            div.setAttribute('data-joueur-id', joueurId);
+            div.innerHTML = `
+                <span class="badge ${badgeColor}">${joueurLabel.split(' - ')[0]}</span>
+                ${joueurLabel}
+                <button type="button" class="btn btn-sm btn-danger float-end" onclick="${removeFunction}(this)">Retirer</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addJoueurDomicile() {
+            const select = document.getElementById('joueurs_domicile_select');
+            const selectedOptions = Array.from(select.options).filter(o => o.selected && o.value);
+            if (selectedOptions.length === 0) return;
+            
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
+            if (matchId === 'new') {
+                selectedOptions.forEach(option => displayJoueurInList('domicile', option.value, option.text));
+            } else {
+                selectedOptions.forEach(option => {
+                    fetch(`/matchs/${matchId}/add-joueur`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({joueur_id: option.value, type: 'domicile'})
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) displayJoueurInList('domicile', option.value, option.text);
+                    });
+                });
+            }
+            select.selectedIndex = -1;
+        }
+
+        function addJoueurExterieur() {
+            const select = document.getElementById('joueurs_exterieur_select');
+            const selectedOptions = Array.from(select.options).filter(o => o.selected && o.value);
+            if (selectedOptions.length === 0) return;
+            
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
+            if (matchId === 'new') {
+                selectedOptions.forEach(option => displayJoueurInList('exterieur', option.value, option.text));
+            } else {
+                selectedOptions.forEach(option => {
+                    fetch(`/matchs/${matchId}/add-joueur`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({joueur_id: option.value, type: 'exterieur'})
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) displayJoueurInList('exterieur', option.value, option.text);
+                    });
+                });
+            }
+            select.selectedIndex = -1;
+        }
+
+        function removeJoueurDomicile(button) {
+            const div = button.closest('.joueur-item-domicile');
+            const joueurId = div.getAttribute('data-joueur-id');
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
+            if (matchId === 'new') {
+                div.remove();
+            } else {
+                fetch(`/matchs/${matchId}/remove-joueur/${joueurId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type: 'domicile'})
+                }).then(() => div.remove());
+            }
+        }
+
+        function removeJoueurExterieur(button) {
+            const div = button.closest('.joueur-item-exterieur');
+            const joueurId = div.getAttribute('data-joueur-id');
+            const matchId = document.getElementById('match-form').getAttribute('data-match-id');
+            if (matchId === 'new') {
+                div.remove();
+            } else {
+                fetch(`/matchs/${matchId}/remove-joueur/${joueurId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type: 'exterieur'})
+                }).then(() => div.remove());
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (JOUEURS_DOMICILE_EXISTANTS.length) {
+                JOUEURS_DOMICILE_EXISTANTS.forEach(j => displayJoueurInList('domicile', j.id, `${j.numero} - ${j.prenom} ${j.nom}`));
+            }
+            if (JOUEURS_EXTERIEUR_EXISTANTS.length) {
+                JOUEURS_EXTERIEUR_EXISTANTS.forEach(j => displayJoueurInList('exterieur', j.id, `${j.numero} - ${j.prenom} ${j.nom}`));
+            }
+
+            const domSelect = document.querySelector('select[name*="[equipeDomicile]"]');
+            const extSelect = document.querySelector('select[name*="[equipeExterieur]"]');
+
+            if (domSelect) {
+                domSelect.addEventListener('change', function() { loadJoueursDomicile(this.value); });
+                if (domSelect.value) loadJoueursDomicile(domSelect.value);
+            }
+            if (extSelect) {
+                extSelect.addEventListener('change', function() { loadJoueursExterieur(this.value); });
+                if (extSelect.value) loadJoueursExterieur(extSelect.value);
+            }
+        });
+    </script>
+{{ form_end(form) }}

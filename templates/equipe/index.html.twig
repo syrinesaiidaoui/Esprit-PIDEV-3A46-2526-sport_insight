@@ -1,0 +1,71 @@
+{% extends 'equipe/base.html.twig' %}
+
+{% block content %}
+    <h1>Equipe index</h1>
+
+    <!-- Formulaire de recherche simple -->
+    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <form method="GET" action="{{ path('app_equipe_index') }}" class="search-form">
+            <div style="display: flex; gap: 12px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label for="search" style="font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block;">Recherche</label>
+                    <input type="text" name="search" id="search" value="{{ search|default('') }}" placeholder="Rechercher par nom..." class="form-control" style="padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding: 8px 16px;">🔍 Rechercher</button>
+                <a href="{{ path('app_equipe_index') }}" class="btn btn-secondary" style="padding: 8px 16px; text-decoration: none;">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Logo</th>
+                <th>Id</th>
+                <th>Id Equipe</th>
+                <th>Nom</th>
+                <th>Coach</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for equipe in equipes %}
+            <tr>
+                <td>
+                    {% if equipe.image %}
+                        <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}" style="max-height: 40px; max-width: 40px;">
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>{{ equipe.id }}</td>
+                <td>{{ equipe.idEquipe }}</td>
+                <td>{{ equipe.nom }}</td>
+                <td>{{ equipe.coach }}</td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="btn btn-primary btn-sm">Show</a>
+                        <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-warning btn-sm">Edit</a>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">No records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-start mb-3">
+        <form method="get" action="{{ path('app_equipe_index') }}">
+            <button type="submit" name="sort" value="id" class="btn btn-outline-primary me-2">Sort by Id</button>
+            <button type="submit" name="sort" value="idEquipe" class="btn btn-outline-primary me-2">Sort by Id_equipe</button>
+            <button type="submit" name="sort" value="nom" class="btn btn-outline-primary me-2">Sort by Nom</button>
+            <button type="submit" name="sort" value="coach" class="btn btn-outline-primary">Sort by Coach</button>
+            <input type="hidden" name="order" value="{{ currentOrder|default('asc') == 'asc' ? 'desc' : 'asc' }}">
+        </form>
+    </div>
+
+    <a href="{{ path('app_equipe_new') }}" class="btn btn-success">Create new</a>
+{% endblock %}

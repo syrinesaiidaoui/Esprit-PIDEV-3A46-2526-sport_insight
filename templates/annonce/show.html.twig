@@ -1,0 +1,129 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}{{ annonce.titre }} - Annonces FC Club{% endblock %}
+
+{% block body %}
+    <div style="max-width: 800px; margin: 0 auto;">
+        <a href="{{ path('app_annonce_index') }}" style="color: var(--primary); text-decoration: none; margin-bottom: 24px; display: inline-block;">← Retour aux annonces</a>
+
+        <div class="front-card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px;">
+                <div>
+                    <h1 class="section-title" style="margin-bottom: 8px;">{{ annonce.titre }}</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Publié le {{ annonce.datePublication ? annonce.datePublication|date('d/m/Y') : 'N/A' }}</p>
+                </div>
+                <div style="white-space: nowrap;">
+                    {% if annonce.statut == 'active' %}
+                        <span class="badge-success">Actif</span>
+                    {% elseif annonce.statut == 'inactive' %}
+                        <span class="badge-warning">Inactif</span>
+                    {% elseif annonce.statut == 'archivée' %}
+                        <span class="badge-secondary">Archivée</span>
+                    {% else %}
+                        <span class="badge-warning">{{ annonce.statut }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-color);">
+                <h3 style="color: var(--text-dark); font-weight: 600; margin-bottom: 8px;">Description</h3>
+                <p id="annonce-description" style="color: var(--text-dark); line-height: 1.6;">{{ annonce.description }}</p>
+                
+                <!-- AI Result Container for Announcement -->
+                <div id="ai-result-annonce" style="display:none; margin-top: 12px; padding: 12px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border: 1px dashed var(--primary); font-size: 14px; position: relative;">
+                    <button type="button" onclick="this.parentElement.style.display='none'" style="position: absolute; top: 4px; right: 4px; background: none; border: none; font-size: 16px; cursor: pointer;">&times;</button>
+                    <div class="ai-content" style="color: var(--text-dark);"></div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button type="button" 
+                            onclick="processAI('ai-result-annonce', 'annonce-description', 'translate', 'ar')"
+                            class="btn-ai" title="Translate description to Arabic">
+                        <span style="font-size: 12px;">TR (AR)</span>
+                    </button>
+                    <button type="button" 
+                            onclick="processAI('ai-result-annonce', 'annonce-description', 'translate', 'en')"
+                            class="btn-ai" title="Translate description to English">
+                        <span style="font-size: 12px;">TR (EN)</span>
+                    </button>
+                    <button type="button" 
+                            onclick="processAI('ai-result-annonce', 'annonce-description', 'summarize')"
+                            class="btn-ai-outline" title="Summarize description">
+                        <span style="font-size: 12px;">Résumer</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div>
+                    <h4 style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Poste Recherché</h4>
+                    <p style="color: var(--text-dark); font-weight: 600;">{{ annonce.posteRecherche }}</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Niveau Requis</h4>
+                    <p style="color: var(--text-dark); font-weight: 600;">{{ annonce.niveauRequis }}</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                <a href="{{ path('app_annonce_edit', {'id': annonce.id}) }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px; text-decoration: none;">Éditer</a>
+                
+                <form method="post" action="{{ path('app_annonce_delete', {'id': annonce.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous vraiment sûr?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ annonce.id) }}">
+                    <button type="submit" class="btn btn-danger" style="padding: 8px 16px; font-size: 14px; background: #ef4444; border: none; color: white; border-radius: 8px; cursor: pointer;">Supprimer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- BOUTON CHAT ENTRAÎNEUR -->
+        <div style="margin-top: 40px;">
+            <a href="{{ path('front_annonce_chat', {id: annonce.id}) }}" class="btn btn-success" style="margin-bottom: 24px;">Contacter l'entraîneur</a>
+        </div>
+
+        <!-- SECTION COMMENTAIRES -->
+        <div style="margin-top: 40px;">
+            {{ include('commentaire/_comments_list.html.twig') }}
+        </div>
+
+        <!-- FORMULAIRE COMMENTAIRE -->
+        <div style="margin-top: 40px;">
+            {{ include('commentaire/_form.html.twig') }}
+        </div>
+    </div>
+
+    <script>
+        function processAI(resultContainerId, textSourceId, actionType, targetLang = null) {
+            const container = document.getElementById(resultContainerId);
+            const content = container.querySelector('.ai-content');
+            const textSource = document.getElementById(textSourceId);
+            const text = textSource.innerText || textSource.value;
+
+            if (!text.trim()) return alert('Contenu vide');
+
+            container.style.display = 'block';
+            content.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">Processing...</span>';
+
+            const endpoint = actionType === 'translate' ? '{{ path('app_api_traduire_texte') }}' : '{{ path('app_api_resumer_texte') }}';
+            const body = { text: text };
+            if (targetLang) body.target = targetLang;
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    content.innerHTML = '<span style="color: #ef4444;">Error: ' + data.error + '</span>';
+                } else {
+                    const result = actionType === 'translate' ? data.text : data.summary;
+                    content.innerHTML = '<strong>' + (actionType === 'translate' ? 'Traduction (' + targetLang.toUpperCase() + ')' : 'Résumé IA') + ' :</strong><br>' + result;
+                }
+            })
+            .catch(err => {
+                content.innerHTML = '<span style="color: #ef4444;">Technical error occurred</span>';
+            });
+        }
+    </script>
+{% endblock %}

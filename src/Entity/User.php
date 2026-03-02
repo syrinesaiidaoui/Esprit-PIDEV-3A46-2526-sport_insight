@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Entity\ProductOrder\Order;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -11,9 +12,14 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
+
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'Un compte existe déjà avec cet email.')]
+#[Vich\Uploadable]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -56,12 +62,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
+    #[Vich\UploadableField(mapping: 'photos', fileNameProperty: 'photo')]
+    private ?File $photoFile = null;
+
     #[ORM\Column(length: 20)]
     #[Assert\Choice(choices: ['actif', 'bloque'], message: "Statut invalide")]
     private string $statut = 'actif';
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateInscription = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cvName = null;
+
+    #[Vich\UploadableField(mapping: 'cvs', fileNameProperty: 'cvName')]
+    private ?File $cvFile = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
+
 
     /**
      * @var Collection<int, Annonce>
@@ -79,7 +98,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Entrainement>
      */
     #[ORM\OneToMany(targetEntity: Entrainement::class, mappedBy: 'entraineur')]
-    private Collection $entrainements;
+    private Collection $entrainementsCoaches;
+
+    /**
+     * @var Collection<int, Entrainement>
+     */
+    #[ORM\ManyToMany(targetEntity: Entrainement::class, mappedBy: 'joueurs')]
+    private Collection $entrainementsParticipes;
 
     /**
      * @var Collection<int, Participation>
@@ -99,6 +124,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'entraineur')]
     private Collection $orders;
 
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
     public function __construct()
     {
         $this->dateInscription = new \DateTime();
@@ -106,10 +137,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->statut = 'actif';
         $this->annonces = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
-        $this->entrainements = new ArrayCollection();
+        $this->entrainementsCoaches = new ArrayCollection();
+        $this->entrainementsParticipes = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->evaluations = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     #[Assert\Callback]
@@ -123,33 +156,139 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = trim(strtolower($email)); return $this; }
-    public function getUserIdentifier(): string { return (string) $this->email; }
-    public function getRoles(): array { $roles = $this->roles; $roles[] = 'ROLE_USER'; return array_unique($roles); }
-    public function setRoles(array $roles): static { $this->roles = $roles; return $this; }
-    public function getPassword(): string { return $this->password; }
-    public function setPassword(string $password): static { $this->password = $password; return $this; }
-    public function eraseCredentials(): void {}
-    public function getNom(): ?string { return $this->nom; }
-    public function setNom(string $nom): static { $this->nom = ucwords(strtolower(trim($nom))); return $this; }
-    public function getPrenom(): ?string { return $this->prenom; }
-    public function setPrenom(string $prenom): static { $this->prenom = ucwords(strtolower(trim($prenom))); return $this; }
-    public function getNomComplet(): string { return $this->prenom . ' ' . $this->nom; }
-    public function getTelephone(): ?string { return $this->telephone; }
-    public function setTelephone(?string $telephone): static { $this->telephone = $telephone; return $this; }
-    public function getDateNaissance(): ?\DateTimeInterface { return $this->dateNaissance; }
-    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static { $this->dateNaissance = $dateNaissance; return $this; }
-    public function getAge(): ?int { return $this->dateNaissance ? $this->dateNaissance->diff(new \DateTime())->y : null; }
-    public function getPhoto(): ?string { return $this->photo; }
-    public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
-    public function getStatut(): string { return $this->statut; }
-    public function setStatut(string $statut): static { $this->statut = $statut; return $this; }
-    public function getDateInscription(): ?\DateTimeInterface { return $this->dateInscription; }
-    public function setDateInscription(\DateTimeInterface $dateInscription): static { $this->dateInscription = $dateInscription; return $this; }
-    public function isActif(): bool { return $this->statut === 'actif'; }
-    public function isAdmin(): bool { return in_array('ROLE_ADMIN', $this->roles); }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+    public function setEmail(string $email): static
+    {
+        $this->email = trim(strtolower($email));
+        return $this;
+    }
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
+    }
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
+    public function eraseCredentials(): void
+    {
+    }
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+    public function setNom(string $nom): static
+    {
+        $this->nom = ucwords(strtolower(trim($nom)));
+        return $this;
+    }
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+    public function setPrenom(string $prenom): static
+    {
+        $this->prenom = ucwords(strtolower(trim($prenom)));
+        return $this;
+    }
+    public function getNomComplet(): string
+    {
+        return $this->prenom . ' ' . $this->nom;
+    }
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+        return $this;
+    }
+    public function getDateNaissance(): ?\DateTimeInterface
+    {
+        return $this->dateNaissance;
+    }
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
+    {
+        $this->dateNaissance = $dateNaissance;
+        return $this;
+    }
+    public function getAge(): ?int
+    {
+        return $this->dateNaissance ? $this->dateNaissance->diff(new \DateTime())->y : null;
+    }
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+    public function setPhoto(?string $photo): static
+    {
+        $this->photo = $photo;
+        return $this;
+    }
+
+    public function getPhotoFile(): ?File
+    {
+        return $this->photoFile;
+    }
+
+    public function setPhotoFile(?File $photoFile = null): void
+    {
+        $this->photoFile = $photoFile;
+
+        if (null !== $photoFile) {
+            $this->updatedAt = new \DateTime();
+        }
+    }
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+    public function getDateInscription(): ?\DateTimeInterface
+    {
+        return $this->dateInscription;
+    }
+    public function setDateInscription(\DateTimeInterface $dateInscription): static
+    {
+        $this->dateInscription = $dateInscription;
+        return $this;
+    }
+    public function isActif(): bool
+    {
+        return $this->statut === 'actif';
+    }
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->roles);
+    }
 
     /**
      * @return Collection<int, Annonce>
@@ -175,6 +314,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($annonce->getEntraineur() === $this) {
                 $annonce->setEntraineur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
             }
         }
 
@@ -214,28 +383,55 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Entrainement>
      */
-    public function getEntrainements(): Collection
+    public function getEntrainementsCoaches(): Collection
     {
-        return $this->entrainements;
+        return $this->entrainementsCoaches;
     }
 
-    public function addEntrainement(Entrainement $entrainement): static
+    public function addEntrainementCoach(Entrainement $entrainement): static
     {
-        if (!$this->entrainements->contains($entrainement)) {
-            $this->entrainements->add($entrainement);
+        if (!$this->entrainementsCoaches->contains($entrainement)) {
+            $this->entrainementsCoaches->add($entrainement);
             $entrainement->setEntraineur($this);
         }
 
         return $this;
     }
 
-    public function removeEntrainement(Entrainement $entrainement): static
+    public function removeEntrainementCoach(Entrainement $entrainement): static
     {
-        if ($this->entrainements->removeElement($entrainement)) {
+        if ($this->entrainementsCoaches->removeElement($entrainement)) {
             // set the owning side to null (unless already changed)
             if ($entrainement->getEntraineur() === $this) {
                 $entrainement->setEntraineur(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Entrainement>
+     */
+    public function getEntrainementsParticipes(): Collection
+    {
+        return $this->entrainementsParticipes;
+    }
+
+    public function addEntrainementParticipe(Entrainement $entrainement): static
+    {
+        if (!$this->entrainementsParticipes->contains($entrainement)) {
+            $this->entrainementsParticipes->add($entrainement);
+            $entrainement->addJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntrainementParticipe(Entrainement $entrainement): static
+    {
+        if ($this->entrainementsParticipes->removeElement($entrainement)) {
+            $entrainement->removeJoueur($this);
         }
 
         return $this;
@@ -329,5 +525,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getCvName(): ?string
+    {
+        return $this->cvName;
+    }
+
+    public function setCvName(?string $cvName): self
+    {
+        $this->cvName = $cvName;
+        return $this;
+    }
+
+    public function getCvFile(): ?File
+    {
+        return $this->cvFile;
+    }
+
+    public function setCvFile(?File $cvFile = null): void
+    {
+        $this->cvFile = $cvFile;
+
+        if (null !== $cvFile) {
+            $this->updatedAt = new \DateTime();
+        }
+    }
+
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function __serialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'password' => $this->password,
+            'roles' => $this->roles,
+            'nom' => $this->nom,
+            'prenom' => $this->prenom,
+            'statut' => $this->statut,
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->id = $data['id'] ?? null;
+        $this->email = $data['email'] ?? null;
+        $this->password = $data['password'] ?? null;
+        $this->roles = $data['roles'] ?? [];
+        $this->nom = $data['nom'] ?? null;
+        $this->prenom = $data['prenom'] ?? null;
+        $this->statut = $data['statut'] ?? 'actif';
     }
 }

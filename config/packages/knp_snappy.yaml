@@ -1,0 +1,10 @@
+knp_snappy:
+    pdf:
+        enabled: true
+        binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
+        options:
+            page-size: 'A4'
+            margin-top: 10
+            margin-right: 10
+            margin-bottom: 10
+            margin-left: 10

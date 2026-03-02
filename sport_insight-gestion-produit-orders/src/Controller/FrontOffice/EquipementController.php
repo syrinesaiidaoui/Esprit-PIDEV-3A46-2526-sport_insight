@@ -86,10 +86,7 @@ class EquipementController extends AbstractController
     public function checkout(Request $request, EntityManagerInterface $em, ProductRepository $repo, MailerInterface $mailer, CsrfTokenManagerInterface $csrfManager): Response
     {
         $user = $this->getUser();
-        if (!$user) {
-            $this->addFlash('warning', 'Please log in to complete your purchase.');
-            return $this->redirectToRoute('app_login');
-        }
+        // Allow anonymous checkout: if no user, proceed without setting a user on orders and skip email
 
         $token = new CsrfToken('checkout', $request->request->get('_token'));
         if (!$csrfManager->isTokenValid($token)) {
@@ -118,7 +115,9 @@ class EquipementController extends AbstractController
             $order->setQuantity($qty);
             $order->setOrderDate(new \DateTime());
             $order->setStatus('confirmed');
-            $order->setEntraineur($user);
+            if ($user) {
+                $order->setEntraineur($user);
+            }
 
             $product->setStock($product->getStock() - $qty);
 
@@ -131,24 +130,22 @@ class EquipementController extends AbstractController
         $em->flush();
 
         // Send confirmation email
-        $body = $this->renderView('emails/order_confirmation.html.twig', ['user' => $user, 'orders' => $orders]);
-        
-        $userEmail = $user->getEmail();
-        if (!$userEmail) {
-            $userEmail = $user->getUserIdentifier();
-        }
-        
-        if ($userEmail) {
-            $email = (new Email())
-                ->from('no-reply@sport-insight.local')
-                ->to($userEmail)
-                ->subject('Thank you for your purchase - Sport Insight')
-                ->html($body);
+        // Send confirmation email only when we have a user with an email
+        if ($user) {
+            $body = $this->renderView('emails/order_confirmation.html.twig', ['user' => $user, 'orders' => $orders]);
+            $userEmail = $user->getEmail() ?: $user->getUserIdentifier();
+            if ($userEmail) {
+                $email = (new Email())
+                    ->from('no-reply@sport-insight.local')
+                    ->to($userEmail)
+                    ->subject('Thank you for your purchase - Sport Insight')
+                    ->html($body);
 
-            try {
-                $mailer->send($email);
-            } catch (\Throwable $e) {
-                // Log error but continue
+                try {
+                    $mailer->send($email);
+                } catch (\Throwable $e) {
+                    // ignore email errors
+                }
             }
         }
 
@@ -169,8 +166,8 @@ class EquipementController extends AbstractController
     {
         $user = $this->getUser();
         if (!$user) {
-            $this->addFlash('warning', 'Veuillez vous connecter.');
-            return $this->redirectToRoute('app_login');
+            $this->addFlash('warning', 'Veuillez vous connecter pour voir vos commandes.');
+            return $this->redirectToRoute('front_equipement_index');
         }
 
         return $this->render('front_office/equipement/orders.html.twig', [

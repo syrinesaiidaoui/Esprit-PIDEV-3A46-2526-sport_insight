@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 
 #[Route('/product')]
 class ProductController extends AbstractController
@@ -18,7 +19,7 @@ class ProductController extends AbstractController
     #[Route('/', name: 'app_product_index', methods: ['GET'])]
     public function index(Request $request, ProductRepository $productRepository): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         // Search functionality
         $searchTerm = $request->query->get('search', '');
@@ -53,7 +54,7 @@ class ProductController extends AbstractController
     #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         $product = new Product();
         $form = $this->createForm(ProductType::class, $product);
@@ -88,7 +89,7 @@ class ProductController extends AbstractController
     #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
     public function show(Product $product): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         return $this->render('product/show.html.twig', [
             'product' => $product,
@@ -98,7 +99,7 @@ class ProductController extends AbstractController
     #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
@@ -131,11 +132,18 @@ class ProductController extends AbstractController
     #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // removed auth check for public access
         
         if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($product);
-            $entityManager->flush();
+            try {
+                $entityManager->remove($product);
+                $entityManager->flush();
+                $this->addFlash('success', 'Product deleted successfully.');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('danger', 'Cannot delete product: existing orders reference this product. Delete related orders first or archive the product.');
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while deleting the product.');
+            }
         }
 
         return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);

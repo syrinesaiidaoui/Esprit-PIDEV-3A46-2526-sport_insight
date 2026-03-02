@@ -308,57 +308,6 @@
         </symbol>
     </svg>
 
-    <!-- NAVBAR -->
-    <nav class="top-navbar">
-        <a href="{{ path('front_home') }}" class="nav-brand">
-            <div class="nav-brand-icon"><svg class="icon" aria-hidden="true"><use href="#icon-brand"/></svg></div>
-            <span class="nav-brand-text">Sport Insight</span>
-        </a>
-
-        <ul class="nav-links">
-            <li>
-                <a href="{{ path('front_entrainement_index') }}"
-                   class="{{ app.request.get('_route') starts with 'front_entrainement' ? 'active' : '' }}">
-                    Entrainement
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('front_offre_index') }}"
-                   class="{{ app.request.get('_route') starts with 'front_offre' ? 'active' : '' }}">
-                    Offres
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('front_match_index') }}"
-                   class="{{ app.request.get('_route') starts with 'front_match' ? 'active' : '' }}">
-                    Matchs
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('front_sponsoring_index') }}"
-                   class="{{ app.request.get('_route') starts with 'front_sponsoring' ? 'active' : '' }}">
-                    Sponsoring
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('front_equipement_index') }}"
-                   class="{{ app.request.get('_route') starts with 'front_equipement' ? 'active' : '' }}">
-                    Equipement
-                </a>
-            </li>
-        </ul>
-
-        <div class="nav-actions">
-            {% if app.user %}
-                <span style="color: #9ca3af; font-size: 14px; padding: 0 12px;"><svg class="icon" aria-hidden="true"><use href="#icon-user"/></svg>{{ app.user.email }}</span>
-                <a href="{{ path('app_logout') }}" class="btn-admin" style="color: #ef4444;"><svg class="icon" aria-hidden="true"><use href="#icon-sign-out"/></svg>Sign Out</a>
-            {% else %}
-                <a href="{{ path('app_login') }}" class="btn-admin"><svg class="icon" aria-hidden="true"><use href="#icon-user"/></svg>Sign In</a>
-            {% endif %}
-            <a href="{{ path('back_entrainement_index') }}" class="btn-admin"><svg class="icon" aria-hidden="true"><use href="#icon-admin"/></svg>Admin</a>
-        </div>
-    </nav>
-
     {% block hero %}{% endblock %}
 
     <div class="page-container">
