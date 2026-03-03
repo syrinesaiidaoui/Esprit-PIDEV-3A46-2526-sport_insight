@@ -5,10 +5,8 @@ namespace App\Entity;
 use App\Repository\EntrainementRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EntrainementRepository::class)]
 class Entrainement
@@ -18,37 +16,22 @@ class Entrainement
     #[ORM\Column]
     private ?int $id = null;
 
-
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\NotNull(message: 'La date de l\'entrainement est obligatoire.')]
-    #[Assert\GreaterThanOrEqual('today', message: 'La date doit être aujourd\'hui ou dans le futur.')]
     private ?\DateTime $dateEntrainement = null;
 
-
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Assert\NotNull(message: 'L\'heure de début est obligatoire.')]
     private ?\DateTime $heureDebut = null;
 
-
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Assert\NotNull(message: 'L\'heure de fin est obligatoire.')]
     private ?\DateTime $heureFin = null;
 
-
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le type d\'entrainement est obligatoire.')]
-    #[Assert\Length(max: 255, maxMessage: 'Le type ne doit pas dépasser 255 caractères.')]
     private ?string $type = null;
 
-
     #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: 'L\'objectif est obligatoire.')]
     private ?string $objectif = null;
 
-
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le lieu est obligatoire.')]
-    #[Assert\Length(max: 255, maxMessage: 'Le lieu ne doit pas dépasser 255 caractères.')]
     private ?string $lieu = null;
 
     #[ORM\ManyToOne(inversedBy: 'entrainements')]
@@ -61,12 +44,17 @@ class Entrainement
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'entrainements')]
     private Collection $joueurs;
 
-    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
-private Collection $participations;
+    /**
+     * @var Collection<int, Participation>
+     */
+    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'entrainement')]
+    private Collection $participations;
 
-#[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
-private Collection $evaluations;
-
+    /**
+     * @var Collection<int, Evaluation>
+     */
+    #[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'entrainement')]
+    private Collection $evaluations;
 
     public function __construct()
     {

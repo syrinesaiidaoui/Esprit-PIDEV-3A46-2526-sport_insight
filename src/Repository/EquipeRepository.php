@@ -40,15 +40,4 @@ class EquipeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    /**
-     * @return Equipe[] Returns an array of Equipe objects sorted by ID
-     */
-    public function findAllSortedById(): array
-    {
-        return $this->createQueryBuilder('e')
-            ->orderBy('e.id', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
 }
