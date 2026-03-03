@@ -1,0 +1,35 @@
+<h2>Thank you for your order - Sport Insight</h2>
+<p>Hello {{ customerName|default('Customer') }},</p>
+<p>Your order has been created successfully. Here is your summary:</p>
+
+<table style="width:100%; border-collapse:collapse;">
+    <thead>
+        <tr>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Order #</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Product</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Quantity</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Amount</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set total = 0 %}
+        {% for order in orders %}
+            {% set total = total + order.computedTotal %}
+            <tr>
+                <td style="padding:6px;">{{ order.id }}</td>
+                <td style="padding:6px;">{{ order.product ? order.product.name : 'N/A' }}</td>
+                <td style="padding:6px;">{{ order.quantity }}</td>
+                <td style="padding:6px;">${{ order.computedTotal|number_format(2, '.', ',') }}</td>
+                <td style="padding:6px;">{{ order.status|upper }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3" style="padding:6px; font-weight:700;">Total</td>
+            <td style="padding:6px; font-weight:700;">${{ total|number_format(2, '.', ',') }}</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>We will notify you again once your package is shipped.</p>

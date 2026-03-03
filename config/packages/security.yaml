@@ -9,10 +9,12 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
             provider: app_user_provider
@@ -27,20 +29,22 @@ security:
                 path: app_logout
                 target: front_home
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
     access_control:
-        # Annonces et commentaires: public (pas d'authentification requise)
+        # Allow anonymous access
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/sign-up, roles: PUBLIC_ACCESS }
+        - { path: ^/_trending, roles: PUBLIC_ACCESS }
         - { path: ^/annonce, roles: PUBLIC_ACCESS }
         - { path: ^/commentaire, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: PUBLIC_ACCESS }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-        # Admin routes: public access (no login required)
-        - { path: ^/back, roles: PUBLIC_ACCESS }
 
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Admin routes
+        - { path: ^/back, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+
+        # Everything else requires authentication
+        - { path: ^/, roles: ROLE_USER }
 
 when@test:
     security:

@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\MatchsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MatchsRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Matchs
 {
     #[ORM\Id]
@@ -24,27 +28,51 @@ class Matchs
     private ?\DateTime $heureDebut = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Le lieu du match est obligatoire')]
+    #[Assert\Length(min: 3, max: 100, minMessage: 'Le lieu doit contenir au moins 3 caractères', maxMessage: 'Le lieu ne peut pas dépasser 100 caractères')]
     private ?string $lieu = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le type de match est obligatoire')]
+    #[Assert\Length(min: 3, max: 50, minMessage: 'Le type doit contenir au moins 3 caractères', maxMessage: 'Le type ne peut pas dépasser 50 caractères')]
     private ?string $type = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le statut du match est obligatoire')]
+    #[Assert\Length(min: 3, max: 50, minMessage: 'Le statut doit contenir au moins 3 caractères', maxMessage: 'Le statut ne peut pas dépasser 50 caractères')]
     private ?string $statut = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(min: 3, minMessage: 'La composition doit contenir au moins 3 caractères')]
     private ?string $lineup_domicile = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(min: 3, minMessage: 'La composition doit contenir au moins 3 caractères')]
     private ?string $lineup_exterieur = null;
 
     #[ORM\ManyToOne(inversedBy: 'matchs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Equipe $equipeDomicile = null;
 
-    #[ORM\ManyToOne(inversedBy: 'matchs')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Equipe $equipeExterieur = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\GreaterThanOrEqual(0, message: 'Le score doit être un nombre positif')]
+    private ?int $scoreEquipeDomicile = 0;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\GreaterThanOrEqual(0, message: 'Le score doit être un nombre positif')]
+    private ?int $scoreEquipeExterieur = 0;
+
+    #[ORM\OneToMany(mappedBy: 'matchs', targetEntity: MatchLineup::class, cascade: ['remove'])]
+    private Collection $matchLineups;
+
+    public function __construct()
+    {
+        $this->matchLineups = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -61,6 +89,14 @@ class Matchs
         $this->id_match = $id_match;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureIdMatch(): void
+    {
+        if (null === $this->id_match || '' === trim($this->id_match)) {
+            $this->id_match = strtoupper(str_replace('.', '', uniqid('MATCH-', true)));
+        }
     }
 
     public function getDateMatch(): ?\DateTime
@@ -128,7 +164,7 @@ class Matchs
         return $this->lineup_domicile;
     }
 
-    public function setLineupDomicile(string $lineup_domicile): static
+    public function setLineupDomicile(?string $lineup_domicile): static
     {
         $this->lineup_domicile = $lineup_domicile;
 
@@ -167,6 +203,60 @@ class Matchs
     public function setEquipeExterieur(?Equipe $equipeExterieur): static
     {
         $this->equipeExterieur = $equipeExterieur;
+
+        return $this;
+    }
+
+    public function getScoreEquipeDomicile(): ?int
+    {
+        return $this->scoreEquipeDomicile;
+    }
+
+    public function setScoreEquipeDomicile(?int $scoreEquipeDomicile): static
+    {
+        $this->scoreEquipeDomicile = $scoreEquipeDomicile;
+
+        return $this;
+    }
+
+    public function getScoreEquipeExterieur(): ?int
+    {
+        return $this->scoreEquipeExterieur;
+    }
+
+    public function setScoreEquipeExterieur(?int $scoreEquipeExterieur): static
+    {
+        $this->scoreEquipeExterieur = $scoreEquipeExterieur;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MatchLineup>
+     */
+    public function getMatchLineups(): Collection
+    {
+        return $this->matchLineups;
+    }
+
+    public function addMatchLineup(MatchLineup $matchLineup): static
+    {
+        if (!$this->matchLineups->contains($matchLineup)) {
+            $this->matchLineups->add($matchLineup);
+            $matchLineup->setMatchs($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatchLineup(MatchLineup $matchLineup): static
+    {
+        if ($this->matchLineups->removeElement($matchLineup)) {
+            // set the owning side to null (unless already changed)
+            if ($matchLineup->getMatchs() === $this) {
+                $matchLineup->setMatchs(null);
+            }
+        }
 
         return $this;
     }

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Entity\ProductOrder\Order;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -99,6 +100,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $entrainements;
 
     /**
+     * @var Collection<int, Entrainement>
+     */
+    #[ORM\ManyToMany(targetEntity: Entrainement::class, mappedBy: 'joueurs')]
+    private Collection $entrainementsJoueurs;
+
+    /**
      * @var Collection<int, Participation>
      */
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'joueur')]
@@ -116,6 +123,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'entraineur')]
     private Collection $orders;
 
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
     public function __construct()
     {
         $this->dateInscription = new \DateTime();
@@ -124,9 +137,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->annonces = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
         $this->entrainements = new ArrayCollection();
+        $this->entrainementsJoueurs = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->evaluations = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     #[Assert\Callback]
@@ -305,6 +320,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection<int, Commentaire>
      */
     public function getCommentaires(): Collection
@@ -359,6 +404,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($entrainement->getEntraineur() === $this) {
                 $entrainement->setEntraineur(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Entrainement>
+     */
+    public function getEntrainementsJoueurs(): Collection
+    {
+        return $this->entrainementsJoueurs;
+    }
+
+    public function addEntrainementsJoueur(Entrainement $entrainement): static
+    {
+        if (!$this->entrainementsJoueurs->contains($entrainement)) {
+            $this->entrainementsJoueurs->add($entrainement);
+            $entrainement->addJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntrainementsJoueur(Entrainement $entrainement): static
+    {
+        if ($this->entrainementsJoueurs->removeElement($entrainement)) {
+            $entrainement->removeJoueur($this);
         }
 
         return $this;
@@ -454,6 +526,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
     public function getCvName(): ?string
     {
         return $this->cvName;
@@ -515,4 +588,3 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->statut = $data['statut'] ?? 'actif';
     }
 }
-

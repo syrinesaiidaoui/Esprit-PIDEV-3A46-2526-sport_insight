@@ -1,0 +1,55 @@
+{% if entrainements is not empty %}
+  <div class="cards-grid">
+    {% for entrainement in entrainements %}
+      {% set status = participation_map[entrainement.id]|default(null) %}
+      
+      <div class="train-card {% if status == 'present' %}present{% elseif status == 'absent' %}absent{% endif %}">
+        <div class="train-card-img">
+          <div class="train-card-img-overlay"></div>
+          <span class="train-card-type">{{ entrainement.type }}</span>
+          <span class="train-card-date">📅 {{ entrainement.dateEntrainement|date('d/m/Y') }}</span>
+        </div>
+
+        <div class="train-card-body">
+          <div class="train-card-location">{{ entrainement.lieu }}</div>
+          <div class="train-card-time">
+            <span class="time-icon">⏱️</span>
+            <span class="time-txt">
+              {{ entrainement.heureDebut|date('H:i') }}
+              <span class="time-sep">→</span>
+              {{ entrainement.heureFin|date('H:i') }}
+            </span>
+          </div>
+
+          {# ZONE IA ET NOTES #}
+          {% set myEval = evaluation_map[entrainement.id]|default(null) %}
+          {% if myEval %}
+            <div class="train-card-notes">
+              <div class="train-card-score-row">
+                <span class="train-score-pill train-score-pill--phys">Phys: <b>{{ myEval.notePhysique }}</b></span>
+                <span class="train-score-pill train-score-pill--tech">Tech: <b>{{ myEval.noteTechnique }}</b></span>
+                <span class="train-score-pill train-score-pill--tact">Tact: <b>{{ myEval.noteTactique }}</b></span>
+              </div>
+              
+              <button type="button" 
+                      class="btn-action btn-ai-advice" 
+                      onclick="getAiAdvice({{ myEval.notePhysique }}, {{ myEval.noteTechnique }}, {{ myEval.noteTactique }}, '{{ entrainement.type|e('js') }}')">
+                ✨ Conseils du Coach IA
+              </button>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="train-card-footer">
+          <a href="{{ path('front_entrainement_show', {id: entrainement.id}) }}" class="btn-action btn-view">Voir</a>
+          <button type="button" class="btn-action btn-delete" onclick="openDeleteModal({{ entrainement.id }}, '{{ csrf_token('delete' ~ entrainement.id) }}')">Supprimer</button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🏋️</div>
+    <p>Aucun entrainement pour le moment.</p>
+  </div>
+{% endif %}

@@ -1,0 +1,245 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}Équipes - Sport Insight{% endblock %}
+
+{% block body %}
+    <style>
+        .equipes-section {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .equipes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .equipes-header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .sort-link {
+            padding: 10px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .sort-link:hover {
+            border-color: var(--primary);
+            background: var(--body-bg);
+        }
+
+        .equipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+
+        .equipe-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .equipe-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.2);
+            transform: translateY(-8px);
+        }
+
+        .equipe-logo-section {
+            background: transparent;
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .equipe-logo {
+            width: 140px;
+            height: 140px;
+            background: transparent;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: none;
+        }
+
+        .equipe-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .equipe-logo-placeholder {
+            font-size: 60px;
+            opacity: 0.5;
+        }
+
+        .equipe-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .equipe-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .equipe-coach {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .equipe-footer {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+        }
+
+        .equipe-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+    </style>
+
+    <div class="equipes-section">
+        <div class="equipes-header">
+            <h1>👥 Équipes</h1>
+            <div style="display: flex; gap: 12px;">
+                <a href="{{ path('app_front_equipes_index', { sort: currentSort, order: currentOrder == 'asc' ? 'desc' : 'asc' }) }}" class="sort-link">
+                    {{ currentOrder == 'asc' ? '↑ Ordre croissant' : '↓ Ordre décroissant' }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Formulaire de recherche -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <form method="GET" class="search-form">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div style="max-width: 400px;">
+                        <label for="search" style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">Recherche</label>
+                        <input type="text" name="search" id="search" value="{{ search }}" placeholder="Nom de l'équipe..." class="form-control" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button type="submit" class="btn btn-primary" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">🔍 Rechercher</button>
+                    <a href="{{ path('app_front_equipes_index') }}" class="btn btn-secondary" style="padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block;">Réinitialiser</a>
+                </div>
+            </form>
+        </div>
+
+        {% if equipes %}
+            <div class="equipes-grid">
+                {% for equipe in equipes %}
+                    <div class="equipe-card">
+                        <div class="equipe-logo-section">
+                            <div class="equipe-logo">
+                                {% if equipe.image %}
+                                    <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
+                                {% else %}
+                                    <span class="equipe-logo-placeholder">🏆</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="equipe-info">
+                            <div class="equipe-name">{{ equipe.nom }}</div>
+                            {% if equipe.coach %}
+                                <div class="equipe-coach">
+                                    👨‍💼 {{ equipe.coach }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="equipe-footer" style="margin-top: auto;">
+                                <a href="{{ path('app_front_equipes_show', {'id': equipe.id}) }}" class="equipe-btn btn-primary">
+                                    📋 Détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h2>Aucune équipe trouvée</h2>
+                <p>Il n'y a actuellement aucune équipe enregistrée.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

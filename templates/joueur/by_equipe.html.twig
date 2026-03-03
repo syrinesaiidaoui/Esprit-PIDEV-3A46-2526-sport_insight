@@ -1,0 +1,319 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}{{ equipe.nom }} - Effectif - Sport Insight{% endblock %}
+
+{% block body %}
+    <style>
+        .equipe-section {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .equipe-header {
+            background: linear-gradient(135deg, var(--body-bg) 0%, #f0f9ff 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 24px;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .equipe-logo-container {
+            flex-shrink: 0;
+        }
+
+        .equipe-logo-large {
+            width: 140px;
+            height: 140px;
+            background: transparent;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .equipe-logo-large img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .equipe-logo-placeholder {
+            font-size: 60px;
+            opacity: 0.5;
+        }
+
+        .equipe-header-info h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0 0 12px 0;
+        }
+
+        .equipe-header-info p {
+            color: var(--text-muted);
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        .equipe-header-info strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .breadcrumb-custom {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .breadcrumb-custom a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-custom a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+
+        .joueurs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .joueur-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .joueur-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.2);
+            transform: translateY(-8px);
+        }
+
+        .joueur-image-section {
+            position: relative;
+            background: transparent;
+            padding: 16px;
+            min-height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .joueur-image {
+            width: 100%;
+            height: 240px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: transparent;
+        }
+
+        .joueur-placeholder {
+            font-size: 60px;
+            opacity: 0.5;
+        }
+
+        .numero-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--primary);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .joueur-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .joueur-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .joueur-stats {
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .joueur-btn {
+            padding: 10px 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .joueur-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            opacity: 0.5;
+            margin-bottom: 16px;
+        }
+
+        .back-button {
+            margin-top: 40px;
+            padding: 14px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+
+    <div class="equipe-section">
+        <div class="breadcrumb-custom">
+            <a href="{{ path('app_joueurs_index') }}">Joueurs</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>{{ equipe.nom }}</span>
+        </div>
+
+        <div class="equipe-header">
+            {% if equipe.image %}
+                <div class="equipe-logo-container">
+                    <div class="equipe-logo-large">
+                        <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
+                    </div>
+                </div>
+            {% endif %}
+            <div class="equipe-header-info">
+                <h1>{{ equipe.nom }}</h1>
+                {% if equipe.coach %}
+                    <p>Entraîneur: <strong>{{ equipe.coach }}</strong></p>
+                {% endif %}
+                <p>Effectif: <strong>{{ equipe.joueurs|length }} joueur{{ equipe.joueurs|length > 1 ? 's' : '' }}</strong></p>
+            </div>
+        </div>
+
+        {% if equipe.joueurs is not empty %}
+            <div class="joueurs-grid">
+                {% for joueur in equipe.joueurs|sort((a, b) => a.numero <=> b.numero) %}
+                    <div class="joueur-card">
+                        <div class="joueur-image-section">
+                            {% if joueur.image %}
+                                <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="joueur-image">
+                            {% else %}
+                                <div class="joueur-placeholder">👤</div>
+                            {% endif %}
+                            <div class="numero-badge">{{ joueur.numero }}</div>
+                        </div>
+
+                        <div class="joueur-info">
+                            <div class="joueur-name">{{ joueur.prenom }} {{ joueur.nom }}</div>
+
+                            <div class="joueur-stats">
+                                <div class="stat-row">
+                                    <span class="stat-label"></span>
+                                    <span class="stat-value">#{{ joueur.numero }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Âge</span>
+                                    <span class="stat-value">{{ (now|date('Y')) - (joueur.dateNaissance|date('Y')) }} ans</span>
+                                </div>
+                            </div>
+
+                            <a href="{{ path('app_joueur_show', {'id': joueur.id}) }}" class="joueur-btn">
+                                Voir le profil
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h3>Aucun joueur dans cette équipe</h3>
+                <p>L'effectif sera bientôt complété</p>
+            </div>
+        {% endif %}
+
+        <a href="{{ path('app_joueurs_index') }}" class="back-button">
+            ← Voir tous les joueurs
+        </a>
+    </div>
+{% endblock %}

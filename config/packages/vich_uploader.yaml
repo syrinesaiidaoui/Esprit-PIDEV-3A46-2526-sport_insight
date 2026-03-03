@@ -9,3 +9,7 @@ vich_uploader:
             uri_prefix: /uploads/photos
             upload_destination: '%kernel.project_dir%/public/uploads/photos'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        sponsor_logo:
+            uri_prefix: /uploads/logos
+            upload_destination: '%kernel.project_dir%/public/uploads/logos'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
