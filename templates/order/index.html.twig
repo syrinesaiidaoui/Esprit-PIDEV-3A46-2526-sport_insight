@@ -7,6 +7,87 @@
     <a href="{{ path('app_order_new') }}" class="btn btn-primary btn-add-product">Nouvelle commande</a>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .orders-bi-grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 14px;
+            margin: 16px 0 18px;
+        }
+
+        .orders-bi-card {
+            grid-column: span 4;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: var(--card-shadow);
+            min-height: 210px;
+        }
+
+        .orders-bi-card--wide {
+            grid-column: span 8;
+        }
+
+        .orders-bi-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .orders-bi-head h3,
+        .orders-bi-head h4 {
+            margin: 0;
+            font-size: 19px;
+            color: var(--text-primary);
+        }
+
+        .orders-bi-head p {
+            margin: 3px 0 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .orders-bi-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        .orders-bi-chip {
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 4px 9px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .orders-bi-canvas {
+            position: relative;
+            height: 240px;
+        }
+
+        .orders-bi-canvas--short {
+            height: 220px;
+        }
+
+        @media (max-width: 1200px) {
+            .orders-bi-card,
+            .orders-bi-card--wide {
+                grid-column: span 12;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 {% set stats = stats|default({
     total: orders|length,
@@ -20,6 +101,13 @@
 {% set page = page|default(1) %}
 {% set totalPages = totalPages|default(1) %}
 {% set allowedTransitions = allowedTransitions|default({}) %}
+{% set orderDashboard = orderDashboard|default({
+    trend: {labels: [], orders: [], revenue: []},
+    status: {labels: [], values: []},
+    paymentMethods: {labels: [], values: []},
+    topProducts: {labels: [], qtyValues: [], revenueValues: []},
+    totals: {orders: 0, revenue: 0, avgBasket: 0, deliveryRate: 0}
+}) %}
 
 <div class="admin-kpis">
     <div class="stat-card">
@@ -42,6 +130,62 @@
         <div class="stat-card-value">{{ stats.rejected }}</div>
         <div class="stat-card-sub">Demandes refusees</div>
     </div>
+</div>
+
+<div class="orders-bi-grid">
+    <section class="orders-bi-card orders-bi-card--wide">
+        <div class="orders-bi-head">
+            <div>
+                <h3>Dashboard commandes</h3>
+                <p>Vue synthétique sur les 6 derniers mois</p>
+            </div>
+            <div class="orders-bi-meta">
+                <span class="orders-bi-chip">{{ orderDashboard.totals.orders }} cmd</span>
+                <span class="orders-bi-chip">{{ orderDashboard.totals.revenue|number_format(2, ',', ' ') }} USD</span>
+                <span class="orders-bi-chip">Panier: {{ orderDashboard.totals.avgBasket|number_format(2, ',', ' ') }} USD</span>
+                <span class="orders-bi-chip">Livraisons: {{ orderDashboard.totals.deliveryRate|number_format(1, ',', ' ') }}%</span>
+            </div>
+        </div>
+        <div class="orders-bi-canvas">
+            <canvas id="ordersTrendChart"></canvas>
+        </div>
+    </section>
+
+    <section class="orders-bi-card">
+        <div class="orders-bi-head">
+            <div>
+                <h4>Statuts commandes</h4>
+                <p>Répartition globale</p>
+            </div>
+        </div>
+        <div class="orders-bi-canvas orders-bi-canvas--short">
+            <canvas id="ordersStatusChart"></canvas>
+        </div>
+    </section>
+
+    <section class="orders-bi-card">
+        <div class="orders-bi-head">
+            <div>
+                <h4>Modes de paiement</h4>
+                <p>Online vs livraison</p>
+            </div>
+        </div>
+        <div class="orders-bi-canvas orders-bi-canvas--short">
+            <canvas id="ordersPaymentChart"></canvas>
+        </div>
+    </section>
+
+    <section class="orders-bi-card orders-bi-card--wide">
+        <div class="orders-bi-head">
+            <div>
+                <h4>Top produits commandés</h4>
+                <p>Volumes et revenus associés</p>
+            </div>
+        </div>
+        <div class="orders-bi-canvas orders-bi-canvas--short">
+            <canvas id="ordersTopProductsChart"></canvas>
+        </div>
+    </section>
 </div>
 
 <div class="data-table">
@@ -171,6 +315,190 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const dashboardData = {{ orderDashboard|json_encode|raw }};
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#e2e8f0' : '#0f172a';
+            const mutedColor = isDark ? '#94a3b8' : '#475569';
+            const gridColor = isDark ? 'rgba(148, 163, 184, 0.16)' : 'rgba(148, 163, 184, 0.25)';
+
+            const formatMoney = (amount) => {
+                const num = Number(amount || 0);
+                return num.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+            };
+
+            if (typeof Chart !== 'undefined') {
+                const commonLegend = {
+                    labels: {
+                        color: textColor,
+                        boxWidth: 12,
+                        boxHeight: 12,
+                    },
+                };
+
+                const trendCanvas = document.getElementById('ordersTrendChart');
+                if (trendCanvas) {
+                    new Chart(trendCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: dashboardData.trend.labels,
+                            datasets: [
+                                {
+                                    type: 'bar',
+                                    label: 'Commandes',
+                                    data: dashboardData.trend.orders,
+                                    backgroundColor: 'rgba(34, 197, 94, 0.55)',
+                                    borderColor: '#22c55e',
+                                    borderWidth: 1.2,
+                                    yAxisID: 'y',
+                                    borderRadius: 6,
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'Chiffre d\'affaires',
+                                    data: dashboardData.trend.revenue,
+                                    borderColor: '#38bdf8',
+                                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 4,
+                                    tension: 0.35,
+                                    yAxisID: 'y1',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: commonLegend,
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            if (context.dataset.yAxisID === 'y1') {
+                                                return context.dataset.label + ': ' + formatMoney(context.parsed.y);
+                                            }
+                                            return context.dataset.label + ': ' + context.parsed.y;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: { color: mutedColor },
+                                    grid: { color: gridColor }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { color: mutedColor, precision: 0 },
+                                    grid: { color: gridColor }
+                                },
+                                y1: {
+                                    beginAtZero: true,
+                                    position: 'right',
+                                    ticks: {
+                                        color: mutedColor,
+                                        callback: (value) => Number(value).toLocaleString('fr-FR') + ' USD'
+                                    },
+                                    grid: { drawOnChartArea: false }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                const statusCanvas = document.getElementById('ordersStatusChart');
+                if (statusCanvas) {
+                    new Chart(statusCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: dashboardData.status.labels,
+                            datasets: [{
+                                data: dashboardData.status.values,
+                                backgroundColor: ['#f59e0b', '#38bdf8', '#6366f1', '#22c55e', '#ef4444'],
+                                borderColor: isDark ? '#0f172a' : '#ffffff',
+                                borderWidth: 2,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { ...commonLegend, position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+
+                const paymentCanvas = document.getElementById('ordersPaymentChart');
+                if (paymentCanvas) {
+                    new Chart(paymentCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: dashboardData.paymentMethods.labels,
+                            datasets: [{
+                                data: dashboardData.paymentMethods.values,
+                                backgroundColor: ['#22d3ee', '#f59e0b', '#94a3b8'],
+                                borderColor: isDark ? '#0f172a' : '#ffffff',
+                                borderWidth: 2,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { ...commonLegend, position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+
+                const topProductsCanvas = document.getElementById('ordersTopProductsChart');
+                if (topProductsCanvas) {
+                    new Chart(topProductsCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: dashboardData.topProducts.labels,
+                            datasets: [{
+                                label: 'Quantité commandée',
+                                data: dashboardData.topProducts.qtyValues,
+                                backgroundColor: 'rgba(59, 130, 246, 0.62)',
+                                borderColor: '#3b82f6',
+                                borderWidth: 1.2,
+                                borderRadius: 6,
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: commonLegend,
+                                tooltip: {
+                                    callbacks: {
+                                        afterLabel: function (context) {
+                                            const idx = context.dataIndex;
+                                            const revenue = dashboardData.topProducts.revenueValues[idx] ?? 0;
+                                            return 'CA: ' + formatMoney(revenue);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: { color: mutedColor, precision: 0 },
+                                    grid: { color: gridColor }
+                                },
+                                y: {
+                                    ticks: { color: mutedColor },
+                                    grid: { color: 'transparent' }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
             document.querySelectorAll('.js-status-form').forEach(function (form) {
                 const select = form.querySelector('.js-status-select');
                 const template = form.dataset.actionTemplate || '';

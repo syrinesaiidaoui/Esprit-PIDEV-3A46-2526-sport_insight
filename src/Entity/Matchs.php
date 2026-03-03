@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MatchsRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Matchs
 {
     #[ORM\Id]
@@ -88,6 +89,14 @@ class Matchs
         $this->id_match = $id_match;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureIdMatch(): void
+    {
+        if (null === $this->id_match || '' === trim($this->id_match)) {
+            $this->id_match = strtoupper(str_replace('.', '', uniqid('MATCH-', true)));
+        }
     }
 
     public function getDateMatch(): ?\DateTime

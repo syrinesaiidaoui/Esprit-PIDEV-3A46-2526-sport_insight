@@ -8,16 +8,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #f0f7f2;
-    --surface:   #ffffff;
-    --card:      #f8fdf9;
-    --border:    #d1e8d8;
+    --bg:        var(--bg-main);
+    --surface:   rgba(255,255,255,.78);
+    --card:      rgba(255,255,255,.9);
+    --border:    rgba(148,163,184,.28);
     --accent:    #16a34a;
-    --text:      #1a2e22;
-    --muted:     #6b8f77;
+    --text:      var(--text-main);
+    --muted:     var(--text-soft);
   }
 
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+  [data-theme="dark"] {
+    --bg:        #020617;
+    --surface:   rgba(15,23,42,.78);
+    --card:      rgba(15,23,42,.88);
+    --border:    rgba(148,163,184,.32);
+    --accent:    #34d399;
+    --text:      #e2e8f0;
+    --muted:     #94a3b8;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
 
   /* HERO BANNER */
   .hero-banner {
@@ -178,6 +192,75 @@
     padding: 10px;
     box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
   }
+
+  .matchmaking-intro {
+    margin-bottom: 30px;
+    text-align: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ai-advice-block {
+    border: 1px solid var(--group-color);
+    border-left: 4px solid var(--group-color);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: var(--text);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    background: var(--surface);
+  }
+
+  .ai-advice-text {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-soft);
+    line-height: 1.5;
+  }
+
+  [data-theme="dark"] .group-section,
+  [data-theme="dark"] .empty-state,
+  [data-theme="dark"] .player-card,
+  [data-theme="dark"] .chart-container,
+  [data-theme="dark"] .ai-advice-block {
+    background: var(--surface);
+    border-color: var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  [data-theme="dark"] .empty-icon {
+    background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(30,64,175,.2));
+    border-color: rgba(148,163,184,.35);
+  }
+  [data-theme="dark"] .group-header {
+    border-bottom-color: rgba(148,163,184,.24);
+  }
+  [data-theme="dark"] .player-card {
+    border-color: rgba(148,163,184,.28);
+  }
+  [data-theme="dark"] .player-card:hover {
+    border-color: rgba(74,222,128,.45);
+    box-shadow: 0 14px 36px rgba(2,6,23,.55);
+  }
+  [data-theme="dark"] .player-card-bg {
+    background: radial-gradient(circle, rgba(52,211,153,.18) 0%, transparent 70%);
+  }
+  [data-theme="dark"] .player-avatar {
+    background: rgba(16,185,129,.22);
+    color: #6ee7b7;
+    border-color: rgba(148,163,184,.28);
+  }
+  [data-theme="dark"] .player-score-badge {
+    background: rgba(15,23,42,.86);
+    border-color: rgba(148,163,184,.32);
+    color: #6ee7b7;
+  }
+  [data-theme="dark"] .chart-container {
+    background: rgba(2,6,23,.55);
+    box-shadow: inset 0 2px 10px rgba(2,6,23,.45);
+  }
+  [data-theme="dark"] .ai-advice-text { color: #cbd5e1; }
 </style>
 {% endblock %}
 
@@ -194,7 +277,7 @@
 </div>
 
 <div class="page-inner">
-  <div style="margin-bottom: 30px; text-align:center; max-width: 700px; margin-left:auto; margin-right:auto;">
+  <div class="matchmaking-intro">
     <p style="color:var(--muted); font-size:15px; line-height:1.6;">L'algorithme analyse l'historique des évaluations de chaque joueur (Physique, Technique, Tactique) pour générer des <b>groupes d'entraînement homogènes</b>. Cela vous permet d'adapter l'intensité et la difficulté de vos séances selon le niveau réel du groupe.</p>
   </div>
 
@@ -221,12 +304,12 @@
       {% for groupName, groupData in groups %}
         <!-- Explication de la formation pour l'entraîneur (Généré par IA Gemini) -->
         {% if aiAdvices[groupName] is defined and aiAdvices[groupName] %}
-          <div style="background:#f8faf9; border:1px solid {{ groupData.color }}; border-left:4px solid {{ groupData.color }}; padding:16px; border-radius:8px; margin-bottom:20px; color:var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+          <div class="ai-advice-block" style="--group-color: {{ groupData.color }};">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
               <span style="font-size:18px;">💡</span>
               <strong style="color:{{ groupData.color }};">Coach IA :</strong>
             </div>
-            <p style="margin:0; font-size:15px; color:#334155; line-height:1.5;">{{ aiAdvices[groupName] }}</p>
+            <p class="ai-advice-text">{{ aiAdvices[groupName] }}</p>
           </div>
         {% endif %}
 
@@ -288,6 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
     }
 
+    const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDarkTheme ? 'rgba(148,163,184,0.22)' : 'rgba(0,0,0,0.05)';
+    const tickColor = isDarkTheme ? '#cbd5e1' : '#334155';
+
     const canvases = document.querySelectorAll('canvas[id^="chart-"]');
     
     canvases.forEach(canvas => {
@@ -334,10 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         max: 20,
                         grid: {
                           drawBorder: false,
-                          color: 'rgba(0,0,0,0.05)'
+                          color: gridColor
                         },
                         ticks: {
-                          stepSize: 5
+                          stepSize: 5,
+                          color: tickColor
                         }
                     },
                     x: {
@@ -345,6 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                           display: false
                         },
                         ticks: {
+                          color: tickColor,
                           font: {
                             family: 'DM Sans',
                             weight: '600'
@@ -408,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   responsive: true,
                   maintainAspectRatio: false,
                   plugins: {
-                      legend: { position: 'top', labels: { font: { family: 'DM Sans', weight: '600' } } },
+                      legend: { position: 'top', labels: { color: tickColor, font: { family: 'DM Sans', weight: '600' } } },
                       tooltip: {
                           mode: 'index',
                           intersect: false
@@ -418,11 +507,12 @@ document.addEventListener('DOMContentLoaded', () => {
                       y: {
                           beginAtZero: true,
                           max: 20,
-                          grid: { color: 'rgba(0,0,0,0.05)' }
+                          grid: { color: gridColor },
+                          ticks: { color: tickColor }
                       },
                       x: {
                           grid: { display: false },
-                          ticks: { font: { family: 'DM Sans', weight: '500' } }
+                          ticks: { color: tickColor, font: { family: 'DM Sans', weight: '500' } }
                       }
                   },
                   interaction: {

@@ -80,7 +80,7 @@ Or manually:
 Add to your `docker-compose.yml`:
 ```yaml
 cron:
-  image: php:8.1-alpine
+  image: php:8.2-alpine
   working_dir: /app
   volumes:
     - .:/app

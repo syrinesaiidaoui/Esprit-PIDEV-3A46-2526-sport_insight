@@ -83,6 +83,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $entrainements;
 
     /**
+     * @var Collection<int, Entrainement>
+     */
+    #[ORM\ManyToMany(targetEntity: Entrainement::class, mappedBy: 'joueurs')]
+    private Collection $entrainementsJoueurs;
+
+    /**
      * @var Collection<int, Participation>
      */
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'joueur')]
@@ -114,6 +120,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->annonces = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
         $this->entrainements = new ArrayCollection();
+        $this->entrainementsJoueurs = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->evaluations = new ArrayCollection();
         $this->orders = new ArrayCollection();
@@ -274,6 +281,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($entrainement->getEntraineur() === $this) {
                 $entrainement->setEntraineur(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Entrainement>
+     */
+    public function getEntrainementsJoueurs(): Collection
+    {
+        return $this->entrainementsJoueurs;
+    }
+
+    public function addEntrainementsJoueur(Entrainement $entrainement): static
+    {
+        if (!$this->entrainementsJoueurs->contains($entrainement)) {
+            $this->entrainementsJoueurs->add($entrainement);
+            $entrainement->addJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntrainementsJoueur(Entrainement $entrainement): static
+    {
+        if ($this->entrainementsJoueurs->removeElement($entrainement)) {
+            $entrainement->removeJoueur($this);
         }
 
         return $this;

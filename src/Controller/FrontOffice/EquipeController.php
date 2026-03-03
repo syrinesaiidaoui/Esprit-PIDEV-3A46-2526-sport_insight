@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/equipe')]
 class EquipeController extends AbstractController
 {
-    #[Route('/{id}', name: 'front_equipe_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'front_equipe_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(
         Equipe $equipe,
         ContratSponsorRepository $contratSponsorRepository
@@ -35,7 +35,7 @@ class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/sponsors', name: 'front_equipe_sponsors', methods: ['GET'])]
+    #[Route('/{id}/sponsors', name: 'front_equipe_sponsors', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function sponsors(
         Equipe $equipe,
         ContratSponsorRepository $contratSponsorRepository

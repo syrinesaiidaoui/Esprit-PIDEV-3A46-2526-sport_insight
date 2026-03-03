@@ -8,21 +8,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #f0f7f2;
-    --surface:   #ffffff;
-    --card:      #f8fdf9;
-    --border:    #d1e8d8;
+    --bg:        var(--bg-main);
+    --surface:   rgba(255,255,255,.78);
+    --card:      rgba(255,255,255,.9);
+    --border:    rgba(148,163,184,.28);
     --accent:    #16a34a;
     --accent-lt: #22c55e;
     --accent-dk: #14532d;
     --accent2:   #ef4444;
     --gold:      #f59e0b;
-    --text:      #1a2e22;
-    --muted:     #6b8f77;
+    --text:      var(--text-main);
+    --muted:     var(--text-soft);
     --radius:    12px;
   }
 
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; margin: 0; }
+  [data-theme="dark"] {
+    --bg:        #020617;
+    --surface:   rgba(15,23,42,.78);
+    --card:      rgba(15,23,42,.88);
+    --border:    rgba(148,163,184,.32);
+    --accent:    #34d399;
+    --accent-lt: #4ade80;
+    --accent-dk: #bbf7d0;
+    --text:      #e2e8f0;
+    --muted:     #94a3b8;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    margin: 0;
+  }
 
   /* ─── HERO BANNER ────────────────────────────────────────── */
   .hero-banner {
@@ -279,6 +296,71 @@
   .btn-cancel:hover { border-color: var(--text); color: var(--text); }
   .btn-confirm-delete { padding: 10px 24px; background: var(--accent2); border: none; color: white; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 16px rgba(239,68,68,.25); transition: box-shadow .15s, transform .15s; }
   .btn-confirm-delete:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(239,68,68,.4); }
+
+  [data-theme="dark"] .filter-wrap,
+  [data-theme="dark"] .part-card,
+  [data-theme="dark"] .empty-state,
+  [data-theme="dark"] .modal-box {
+    background: var(--surface);
+    border-color: var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  [data-theme="dark"] .filter-wrap select {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  [data-theme="dark"] .part-card-header,
+  [data-theme="dark"] .part-card-footer {
+    border-color: rgba(148,163,184,.2);
+  }
+  [data-theme="dark"] .part-avatar.av-present {
+    background: linear-gradient(135deg, rgba(16,185,129,.3), rgba(74,222,128,.16));
+    color: #bbf7d0;
+    border-color: rgba(74,222,128,.55);
+  }
+  [data-theme="dark"] .part-avatar.av-absent {
+    background: linear-gradient(135deg, rgba(239,68,68,.32), rgba(248,113,113,.16));
+    color: #fecaca;
+    border-color: rgba(248,113,113,.45);
+  }
+  [data-theme="dark"] .part-avatar.av-undefined {
+    background: linear-gradient(135deg, rgba(51,65,85,.85), rgba(30,41,59,.8));
+    color: #cbd5e1;
+    border-color: rgba(148,163,184,.4);
+  }
+  [data-theme="dark"] .part-avatar::after {
+    border-color: rgba(15,23,42,.9);
+  }
+  [data-theme="dark"] .pres-present {
+    background: rgba(34,197,94,.18);
+    color: #86efac;
+    border-color: rgba(74,222,128,.3);
+  }
+  [data-theme="dark"] .pres-absent {
+    background: rgba(239,68,68,.18);
+    color: #fca5a5;
+    border-color: rgba(248,113,113,.34);
+  }
+  [data-theme="dark"] .pres-undefined {
+    background: rgba(148,163,184,.14);
+    color: #cbd5e1;
+    border-color: rgba(148,163,184,.3);
+  }
+  [data-theme="dark"] .justif-block {
+    background: rgba(245,158,11,.14);
+    border-color: rgba(245,158,11,.35);
+    color: #fcd34d;
+  }
+  [data-theme="dark"] .btn-view:hover { background: rgba(52,211,153,.18); }
+  [data-theme="dark"] .btn-edit:hover { background: rgba(251,191,36,.18); color: #fcd34d; }
+  [data-theme="dark"] .btn-delete:hover { background: rgba(239,68,68,.18); }
+  [data-theme="dark"] .empty-icon {
+    background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(30,64,175,.2));
+    border-color: rgba(148,163,184,.35);
+  }
+  [data-theme="dark"] .modal-overlay { background: rgba(2,6,23,.55); }
 
   @media (max-width: 700px) {
     .hero-content { flex-direction: column; align-items: flex-start; padding: 20px; }

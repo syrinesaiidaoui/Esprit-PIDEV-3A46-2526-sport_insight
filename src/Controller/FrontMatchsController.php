@@ -128,6 +128,10 @@ final class FrontMatchsController extends AbstractController
             }
         }
 
+        if ($stadiumGeo['nom'] === 'Stade inconnu' && $match->getLieu()) {
+            $stadiumGeo['nom'] = (string) $match->getLieu();
+        }
+
         return $this->render('front_office/matchs/show.html.twig', [
             'match' => $match,
             'delete_form' => $deleteForm->createView(),
@@ -286,6 +290,10 @@ final class FrontMatchsController extends AbstractController
                 $stadiumGeo['nom'] = $nomStade;
                 break;
             }
+        }
+
+        if ($stadiumGeo['nom'] === 'Stade inconnu' && $match->getLieu()) {
+            $stadiumGeo['nom'] = (string) $match->getLieu();
         }
 
         // Générer le HTML du PDF

@@ -1015,10 +1015,10 @@
 
             <div class="modern-glass-card" id="stadiumGeoCard">
                 <div class="location-title"><span style="font-size:18px;">🏟️</span>Stade le plus proche</div>
-                <div class="location-badge"><svg width="16" height="16" style="vertical-align:middle;" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#10b981"/></svg> {{ stadiumGeo.nom ?? 'Santiago Bernabéu' }}</div>
-                <div class="location-distance">Distance : 4.2 km</div>
+                <div class="location-badge" id="stadiumNameBadge"><svg width="16" height="16" style="vertical-align:middle;" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#10b981"/></svg> {{ stadiumGeo.nom ?? match.lieu ?? 'Stade inconnu' }}</div>
+                <div class="location-distance" id="stadiumGeoContent">Distance : 4.2 km</div>
                 <div class="location-badge">📍 {{ match.lieu ?? 'Lieu inconnu' }}</div>
-                <button class="location-map-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query={{ (stadiumGeo.nom ?? 'Santiago Bernabéu')|url_encode }}','_blank')">Voir sur la carte</button>
+                <button class="location-map-btn" id="stadiumMapBtn" onclick="openStadiumMap()">Voir sur la carte</button>
             </div>
         </div>
 
@@ -1264,34 +1264,63 @@
             return best;
         }
 
-        function showStadiumNearMatch() {
-            const lieu = '{{ match.lieu|e('js') }}';
-            if (!lieu) {
-                document.getElementById('stadiumGeoContent').textContent = 'Lieu du match non renseigné.';
+        let selectedStadiumName = '{{ (stadiumGeo.nom ?? match.lieu ?? "Stade inconnu")|e("js") }}';
+
+        function openStadiumMap() {
+            if (!selectedStadiumName) {
                 return;
             }
-            // Géocoder le lieu du match (OpenStreetMap Nominatim)
+
+            window.open(
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedStadiumName)}`,
+                '_blank'
+            );
+        }
+
+        function showStadiumNearMatch() {
+            const lieu = '{{ match.lieu|e('js') }}';
+            const contentEl = document.getElementById('stadiumGeoContent');
+            const badgeEl = document.getElementById('stadiumNameBadge');
+
+            if (!contentEl) {
+                return;
+            }
+
+            if (!lieu) {
+                contentEl.textContent = 'Lieu du match non renseigne.';
+                return;
+            }
+
+            // Geocoder le lieu du match (OpenStreetMap Nominatim)
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(lieu)}`)
                 .then(r => r.json())
                 .then(results => {
                     if (!results || results.length === 0) {
-                        document.getElementById('stadiumGeoContent').textContent = 'Lieu du match introuvable sur la carte.';
+                        contentEl.textContent = 'Lieu du match introuvable sur la carte.';
                         return;
                     }
+
                     const lat = parseFloat(results[0].lat);
                     const lng = parseFloat(results[0].lon);
                     const best = findClosestStadium(lat, lng);
-                    if (best) {
-                        document.getElementById('stadiumGeoContent').innerHTML =
-                            `🏟️ <b>${best.name}</b><br>Distance : ${best.dist.toFixed(1)} km du lieu du match`;
-                    } else {
-                        document.getElementById('stadiumGeoContent').textContent = 'Aucun stade trouvé.';
+
+                    if (!best) {
+                        contentEl.textContent = 'Aucun stade trouve.';
+                        return;
+                    }
+
+                    selectedStadiumName = best.name;
+                    contentEl.textContent = `Distance : ${best.dist.toFixed(1)} km`;
+
+                    if (badgeEl) {
+                        badgeEl.innerHTML = `<svg width="16" height="16" style="vertical-align:middle;" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#10b981"/></svg> ${best.name}`;
                     }
                 })
                 .catch(() => {
-                    document.getElementById('stadiumGeoContent').textContent = 'Erreur lors de la recherche du lieu.';
+                    contentEl.textContent = 'Erreur lors de la recherche du lieu.';
                 });
         }
+
         document.addEventListener('DOMContentLoaded', showStadiumNearMatch);
     </script>
 

@@ -85,6 +85,153 @@ class OrderController extends AbstractController
             }
         }
 
+        $now = new \DateTimeImmutable('first day of this month');
+        $monthlySeries = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = $now->modify(sprintf('-%d month', $i));
+            $key = $month->format('Y-m');
+            $monthlySeries[$key] = [
+                'label' => $month->format('M Y'),
+                'orders' => 0,
+                'revenue' => 0.0,
+            ];
+        }
+
+        $statusCounts = [
+            'pending' => 0,
+            'confirmed' => 0,
+            'shipped' => 0,
+            'delivered' => 0,
+            'rejected' => 0,
+        ];
+
+        $paymentMethodCounts = [
+            'online' => 0,
+            'cod' => 0,
+            'other' => 0,
+        ];
+
+        $paymentStatusCounts = [
+            'paid' => 0,
+            'pending' => 0,
+            'failed' => 0,
+            'other' => 0,
+        ];
+
+        $productVolume = [];
+        $productRevenue = [];
+
+        foreach ($allOrders as $order) {
+            $status = (string) ($order->getStatus() ?? 'pending');
+            if (isset($statusCounts[$status])) {
+                $statusCounts[$status]++;
+            }
+
+            $paymentMethod = (string) ($order->getPaymentMethod() ?? 'cod');
+            if (!isset($paymentMethodCounts[$paymentMethod])) {
+                $paymentMethod = 'other';
+            }
+            $paymentMethodCounts[$paymentMethod]++;
+
+            $paymentStatus = (string) ($order->getPaymentStatus() ?? 'pending');
+            if (!isset($paymentStatusCounts[$paymentStatus])) {
+                $paymentStatus = 'other';
+            }
+            $paymentStatusCounts[$paymentStatus]++;
+
+            $orderDate = $order->getOrderDate();
+            if ($orderDate instanceof \DateTimeInterface) {
+                $monthKey = $orderDate->format('Y-m');
+                if (isset($monthlySeries[$monthKey])) {
+                    $monthlySeries[$monthKey]['orders']++;
+                    if (in_array($status, ['confirmed', 'shipped', 'delivered'], true)) {
+                        $monthlySeries[$monthKey]['revenue'] += $order->getComputedTotal();
+                    }
+                }
+            }
+
+            if (!$order->getItems()->isEmpty()) {
+                foreach ($order->getItems() as $item) {
+                    $name = trim((string) ($item->getProduct()?->getName() ?? 'Produit'));
+                    if ($name === '') {
+                        $name = 'Produit';
+                    }
+
+                    $quantity = (int) ($item->getQuantity() ?? 0);
+                    $lineTotal = $item->getLineTotal();
+
+                    $productVolume[$name] = ($productVolume[$name] ?? 0) + $quantity;
+                    $productRevenue[$name] = ($productRevenue[$name] ?? 0.0) + $lineTotal;
+                }
+
+                continue;
+            }
+
+            $name = trim((string) ($order->getProduct()?->getName() ?? 'Produit'));
+            if ($name === '') {
+                $name = 'Produit';
+            }
+
+            $quantity = (int) ($order->getQuantity() ?? 0);
+            $lineTotal = $order->getComputedTotal();
+
+            $productVolume[$name] = ($productVolume[$name] ?? 0) + $quantity;
+            $productRevenue[$name] = ($productRevenue[$name] ?? 0.0) + $lineTotal;
+        }
+
+        arsort($productVolume);
+        $productVolume = array_slice($productVolume, 0, 7, true);
+
+        if ($productVolume === []) {
+            $productVolume = ['Aucun produit' => 0];
+        }
+
+        $topProductRevenue = [];
+        foreach ($productVolume as $name => $qty) {
+            $topProductRevenue[] = round((float) ($productRevenue[$name] ?? 0.0), 2);
+        }
+
+        $revenueOrdersCount = $stats['confirmed'] + $stats['shipped'] + $stats['delivered'];
+        $avgBasket = $revenueOrdersCount > 0 ? $stats['revenue'] / $revenueOrdersCount : 0.0;
+        $deliveryRate = $stats['total'] > 0 ? ($stats['delivered'] / $stats['total']) * 100 : 0.0;
+
+        $orderDashboard = [
+            'trend' => [
+                'labels' => array_column($monthlySeries, 'label'),
+                'orders' => array_column($monthlySeries, 'orders'),
+                'revenue' => array_map(static fn (float $value): float => round($value, 2), array_column($monthlySeries, 'revenue')),
+            ],
+            'status' => [
+                'labels' => ['En attente', 'Confirmees', 'Expediees', 'Livrees', 'Rejetees'],
+                'values' => [
+                    $statusCounts['pending'],
+                    $statusCounts['confirmed'],
+                    $statusCounts['shipped'],
+                    $statusCounts['delivered'],
+                    $statusCounts['rejected'],
+                ],
+            ],
+            'paymentMethods' => [
+                'labels' => ['En ligne', 'Livraison', 'Autre'],
+                'values' => [
+                    $paymentMethodCounts['online'],
+                    $paymentMethodCounts['cod'],
+                    $paymentMethodCounts['other'],
+                ],
+            ],
+            'topProducts' => [
+                'labels' => array_keys($productVolume),
+                'qtyValues' => array_values($productVolume),
+                'revenueValues' => $topProductRevenue,
+            ],
+            'totals' => [
+                'orders' => $stats['total'],
+                'revenue' => round($stats['revenue'], 2),
+                'avgBasket' => round($avgBasket, 2),
+                'deliveryRate' => round($deliveryRate, 1),
+            ],
+        ];
+
         $transitionToStatus = [
             'pay' => 'confirmed',
             'ship' => 'shipped',
@@ -108,6 +255,7 @@ class OrderController extends AbstractController
             'totalPages' => $totalPages,
             'stats' => $stats,
             'allowedTransitions' => $allowedTransitions,
+            'orderDashboard' => $orderDashboard,
         ]);
     }
 
