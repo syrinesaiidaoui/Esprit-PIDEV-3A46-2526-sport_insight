@@ -19,6 +19,7 @@
 }) %}
 {% set page = page|default(1) %}
 {% set totalPages = totalPages|default(1) %}
+{% set allowedTransitions = allowedTransitions|default({}) %}
 
 <div class="admin-kpis">
     <div class="stat-card">
@@ -67,6 +68,12 @@
     </div>
 
     <div style="overflow-x:auto;">
+        {% set statusLabels = {
+            'confirmed': 'Confirmer',
+            'shipped': 'Expédier',
+            'delivered': 'Livrer',
+            'rejected': 'Rejeter'
+        } %}
         <table>
             <thead>
                 <tr>
@@ -131,24 +138,29 @@
                             {% endif %}
                         </td>
                         <td>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                                 <a href="{{ path('app_order_show', {id: order.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
-                                <form method="POST" action="{{ path('app_order_change_status', {id: order.id, status: 'confirmed'}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
-                                    <button class="btn btn-sm btn-success" type="submit">Confirmer</button>
-                                </form>
-                                <form method="POST" action="{{ path('app_order_change_status', {id: order.id, status: 'rejected'}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
-                                    <button class="btn btn-sm btn-danger" type="submit">Rejeter</button>
-                                </form>
-                                <form method="POST" action="{{ path('app_order_change_status', {id: order.id, status: 'shipped'}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
-                                    <button class="btn btn-sm btn-primary" type="submit">Expedier</button>
-                                </form>
-                                <form method="POST" action="{{ path('app_order_change_status', {id: order.id, status: 'delivered'}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
-                                    <button class="btn btn-sm btn-outline-secondary" type="submit">Livrer</button>
-                                </form>
+                                {% set allowed = allowedTransitions[order.id]|default([]) %}
+                                {% if allowed|length > 0 %}
+                                {% for status in allowed %}
+                                    <form method="POST"
+                                          action="{{ path('app_order_change_status', {id: order.id, status: status}) }}"
+                                          class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
+                                        <button class="btn btn-sm
+                                            {% if status == 'confirmed' %}btn-success
+                                            {% elseif status == 'shipped' %}btn-info
+                                            {% elseif status == 'delivered' %}btn-primary
+                                            {% elseif status == 'rejected' %}btn-danger
+                                            {% else %}btn-secondary{% endif %}"
+                                            type="submit">
+                                            {{ statusLabels[status]|default(status) }}
+                                        </button>
+                                    </form>
+                                {% endfor %}
+{% else %}
+    <span class=\"muted-soft\">Aucune action disponible</span>
+{% endif %}
                             </div>
                         </td>
                     </tr>
@@ -178,3 +190,4 @@
     {% endif %}
 </div>
 {% endblock %}
+

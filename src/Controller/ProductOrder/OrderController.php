@@ -85,6 +85,21 @@ class OrderController extends AbstractController
             }
         }
 
+        $transitionToStatus = [
+            'pay' => 'confirmed',
+            'ship' => 'shipped',
+            'deliver' => 'delivered',
+            'reject' => 'rejected',
+        ];
+
+        $allowedTransitions = [];
+        foreach ($orders as $order) {
+            $allowedTransitions[$order->getId()] = array_values(array_filter(array_map(
+                static fn($transition) => $transitionToStatus[$transition->getName()] ?? null,
+                $this->orderWorkflow->getEnabledTransitions($order)
+            )));
+        }
+
         return $this->render('order/index.html.twig', [
             'orders' => $orders,
             'searchTerm' => $searchTerm,
@@ -92,6 +107,7 @@ class OrderController extends AbstractController
             'page' => $page,
             'totalPages' => $totalPages,
             'stats' => $stats,
+            'allowedTransitions' => $allowedTransitions,
         ]);
     }
 
@@ -231,7 +247,13 @@ class OrderController extends AbstractController
         }
 
         $this->addFlash('success', sprintf('Commande #%d mise a jour: %s', (int) $order->getId(), $status));
-        return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
+
+        $redirectUrl = $request->headers->get('referer');
+        if (!$redirectUrl) {
+            $redirectUrl = $this->generateUrl('app_order_index');
+        }
+
+        return $this->redirect($redirectUrl);
     }
 
     #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
