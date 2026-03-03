@@ -1,0 +1,3 @@
+[submodule "public/models/face-api.js-models"]
+	path = public/models/face-api.js-models
+	url = https://github.com/syrinesaiidaoui/sport_insight.git
