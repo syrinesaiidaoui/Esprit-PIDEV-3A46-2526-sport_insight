@@ -1,0 +1,26 @@
+  ERROR  in templates\front_office\equipe\sponsors.html.twig (line 48)
+      46                         </div>
+      47                     </div>
+  >>  48                 {% endfor %}
+  >> Unexpected "endfor" tag (expecting closing tag for the "if" tag defined near line 19). 
+      49             </div>
+      50         {% endif %}
+  ERROR  in templates\order\index_admin.html.twig (line 122)
+      120            </div>
+      121        {% endif %}
+  >>  122    
+  >> Unexpected token "end of template" ("end of statement block" expected). 
+  ERROR  in templates\security\login.html.twig (line 44)
+      42         </div>
+      43     {% endblock %}
+  >>  44     {% endblock %}
+  >> Unknown "endblock" tag. 
+      45     
+
+ [WARNING] 154 Twig    
+           files have  
+           valid syntax
+           and 3       
+           contain     
+           errors.     
+
