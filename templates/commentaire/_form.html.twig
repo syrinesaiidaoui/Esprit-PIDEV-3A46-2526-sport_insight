@@ -1,0 +1,358 @@
+<div class="comment-form" style="margin: 0; padding: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+        ✍️ Ajouter un commentaire
+    </h3>
+    
+    <style>
+        .comment-textarea-group { margin-bottom: 20px; }
+        .comment-textarea-group label { 
+            display: block; 
+            margin-bottom: 10px; 
+            color: #334155; 
+            font-weight: 600; 
+            font-size: 15px; 
+        }
+        .comment-textarea-group input,
+        .comment-textarea-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 15px;
+            background: #fff;
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+        .comment-textarea-group textarea { min-height: 120px; }
+        .comment-textarea-group input:focus,
+        .comment-textarea-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        .btn-publish {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .btn-publish:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-like-stat {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+    
+    <form method="post" action="{{ path('app_commentaire_new', {'annonce_id': annonce.id}) }}" enctype="multipart/form-data">
+
+        <div class="comment-textarea-group">
+            <label for="auteur_anonyme">Votre nom</label>
+            {% if app.user %}
+                <input type="text" id="auteur_anonyme" name="auteur_anonyme" value="{{ app.user.prenom }} {{ app.user.nom }}" readonly style="background: #f1f5f9;">
+            {% else %}
+                <input type="text" id="auteur_anonyme" name="auteur_anonyme" placeholder="Syrine Saidaoui">
+            {% endif %}
+        </div>
+
+        <div class="comment-textarea-group">
+            <textarea 
+                id="contenu_{{ annonce.id }}"
+                name="contenu" 
+                required 
+                placeholder="Écrivez votre commentaire ici... Soyez constructif et respectueux 😊"
+                oninput="debouncedCheck('{{ annonce.id }}')"
+            ></textarea>
+            
+            <div id="mod_feedback_{{ annonce.id }}" style="margin-top: 16px;">
+                {# Status: Approved (Real-time) #}
+                <div id="mod_approved_{{ annonce.id }}" style="display: none; padding: 12px 16px; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2); color: #059669; font-size: 14px; font-weight: 500; align-items: center; gap: 12px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.05);">
+                    <div style="background: #10b981; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 800;">✓</div>
+                    <div>Votre message respecte les règles de la communauté.</div>
+                </div>
+
+                {# Status: Blocked (Real-time) #}
+                <div id="mod_blocked_{{ annonce.id }}" style="display: none; padding: 16px; background: #fff1f2; border-radius: 12px; border: 2px solid #fecaca; color: #dc2626; font-size: 14px; font-weight: 500; align-items: start; gap: 12px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
+                    <div style="background: #ef4444; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; font-weight: 900;">!</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Ce type de message doit être bloqué</div>
+                        <div id="mod_reason_{{ annonce.id }}" style="line-height: 1.5; color: #991b1b; background: white; padding: 10px; border-radius: 8px; border: 1px solid #fecaca; margin-top: 8px;"></div>
+                    </div>
+                </div>
+
+                {# Server-side moderation errors (Flash) #}
+                {% for message in app.flashes('moderation_error') %}
+                    <div class="server-mod-error" style="padding: 16px; background: rgba(239, 68, 68, 0.05); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2); color: #dc2626; font-size: 14px; font-weight: 500; display: flex; align-items: start; gap: 12px; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.05);">
+                        <div style="background: #ef4444; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: 800;">!</div>
+                        <div style="line-height: 1.5;">{{ message }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if app.user %}
+            <div class="comment-textarea-group" style="margin-bottom: 24px; padding: 15px; background: #f1f5f9; border-radius: 10px;">
+                <label for="cv_file" style="margin-bottom: 8px;">📄 Déposer ou mettre à jour votre CV (PDF, Max 2Mo)</label>
+                <input type="file" id="cv_file" name="cv_file" accept=".pdf" style="padding: 8px; border: 1px dashed #cbd5e1; background: #fff; width: 100%;">
+                
+                {% if app.user.cvName %}
+                    <div style="margin-top: 8px; font-size: 13px;">
+                        <span style="color: #64748b;">CV actuel :</span> 
+                        <a href="{{ asset('uploads/cvs/' ~ app.user.cvName) }}" target="_blank" style="color: #10b981; font-weight: 600; text-decoration: none;">Voir mon CV</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Facial Recognition Section -->
+            <div class="face-verification-group" style="margin-bottom: 24px; padding: 20px; background: #fff; border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center;">
+                <h4 style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="lucide-scan-face"></i> Vérification d'identité par reconnaissance faciale
+                </h4>
+                
+                <div id="camera_container" style="display: none; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <video id="webcam_preview" autoplay playsinline style="width: 100%; max-width: 320px; border-radius: 12px; background: #000;"></video>
+                    <canvas id="face_canvas" style="display: none;"></canvas>
+                    <button type="button" onclick="captureAndVerify('{{ annonce.id }}')" class="btn" style="background: var(--primary); color: #fff; font-weight: 700; border-radius: 30px; padding: 8px 20px;">
+                        📸 Capturer et Vérifier
+                    </button>
+                </div>
+
+                <div id="face_status_{{ annonce.id }}" style="margin-bottom: 12px;">
+                    <div id="face_loading_{{ annonce.id }}" style="display: none;">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <span style="font-size: 14px; margin-left: 8px;">Analyse en cours...</span>
+                    </div>
+                    
+                    <div id="face_success_{{ annonce.id }}" style="display: none; color: #059669; font-weight: 700; font-size: 14px; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        ✅ Identité vérifiée avec succès ! Vous pouvez publier.
+                    </div>
+
+                    <div id="face_error_{{ annonce.id }}" style="display: none; color: #dc2626; font-weight: 700; font-size: 14px; background: #fff1f2; padding: 10px; border-radius: 8px; border: 1px solid #fecaca;">
+                        ❌ Échec de la vérification. Veuillez réessayer.
+                    </div>
+                </div>
+
+                <button type="button" id="start_camera_btn" onclick="startCamera()" class="btn btn-outline-primary" style="font-weight: 600; border-radius: 10px; display: flex; align-items: center; gap: 8px; margin: 0 auto; padding: 10px 20px;">
+                    👤 Scanner mon visage
+                </button>
+                
+                <input type="hidden" name="face_verified" id="face_verified_{{ annonce.id }}" value="0">
+            </div>
+        {% endif %}
+
+
+        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+            <button type="submit" id="submit_{{ annonce.id }}" class="btn-publish" style="flex: 2; {% if app.user %}opacity: 0.5; cursor: not-allowed;{% endif %}" {% if app.user %}disabled{% endif %}>
+                <span>📖</span> Publier
+            </button>
+            <div class="btn-like-stat" style="flex: 1; justify-content: center;">
+                <span>👍</span> 0
+            </div>
+        </div>
+
+        <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">{% if app.user %}Veuillez vérifier votre identité avant de publier.{% else %}Les commentaires sont visibles immédiatement{% endif %}</p>
+    </form>
+
+    <script>
+        let timeout = null;
+        let moderationStatus = 'PENDING';
+        let videoStream = null;
+
+        function startCamera() {
+            const container = document.getElementById('camera_container');
+            const video = document.getElementById('webcam_preview');
+            const startBtn = document.getElementById('start_camera_btn');
+
+            container.style.display = 'flex';
+            startBtn.style.display = 'none';
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    videoStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error("Camera access denied:", err);
+                    alert("Accès à la caméra refusé. Vous ne pourrez pas vérifier votre identité.");
+                });
+        }
+
+        function captureAndVerify(annonceId) {
+            const video = document.getElementById('webcam_preview');
+            const canvas = document.getElementById('face_canvas');
+            const loading = document.getElementById('face_loading_' + annonceId);
+            const success = document.getElementById('face_success_' + annonceId);
+            const errorView = document.getElementById('face_error_' + annonceId);
+            const submitBtn = document.getElementById('submit_' + annonceId);
+            const verifiedInput = document.getElementById('face_verified_' + annonceId);
+
+            // Hide previous results
+            success.style.display = 'none';
+            errorView.style.display = 'none';
+            loading.style.display = 'block';
+
+            // Capture the image from video
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            const fetchUrl = '{{ path('app_commentaire_verify_face') }}';
+            console.log("Fetching Face Verification from:", fetchUrl);
+
+            fetch(fetchUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        console.error("Server Error Response:", text);
+                        throw new Error(`Server returned ${res.status}: ${text.substring(0, 100)}`);
+                    });
+                }
+                return res.json();
+            })
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.verified) {
+                    success.style.display = 'block';
+                    if (data.message) {
+                        success.innerHTML = `✅ ${data.message}`;
+                    } else {
+                        success.innerHTML = `✅ Identité vérifiée avec succès ! Vous pouvez publier.`;
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                    verifiedInput.value = "1";
+                    if (videoStream) {
+                        videoStream.getTracks().forEach(track => track.stop());
+                    }
+                    document.getElementById('camera_container').style.display = 'none';
+                } else {
+                    errorView.style.display = 'block';
+                    if (data.error && (data.error.includes('127.0.0.1:8001') || data.error.includes('Face++'))) {
+                        errorView.innerHTML = `❌ Erreur: ${data.error}`;
+                    } else {
+                        errorView.innerHTML = `❌ Échec: ${data.error || 'Visage non reconnu'}`;
+                    }
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                errorView.style.display = 'block';
+                
+                let errorMsg = err.message || 'Connexion impossible';
+                if (errorMsg.includes('Photo de profil absente') || errorMsg.includes('profil n\'a pas de photo')) {
+                    errorView.innerHTML = `❌ ${errorMsg.split(':')[1] || errorMsg} <br><br> <a href="{{ path('app_profile_edit') }}" class="btn btn-sm btn-primary" style="color:white; text-decoration:none; margin-top:8px; display:inline-block;">Go to my Profile 👤</a>`;
+                } else if (err.message && err.message.includes('{')) {
+                    try {
+                        const jsonErr = JSON.parse(err.message.substring(err.message.indexOf('{')));
+                        errorView.innerHTML = `❌ Erreur: ${jsonErr.error || 'Erreur inconnue'}`;
+                        if (jsonErr.error && (jsonErr.error.includes('profil') || jsonErr.error.includes('Photo'))) {
+                             errorView.innerHTML += `<br><br> <a href="{{ path('app_profile_edit') }}" class="btn btn-sm btn-primary" style="color:white; text-decoration:none; margin-top:8px; display:inline-block;">Go to my Profile 👤</a>`;
+                        }
+                    } catch(e) {
+                        errorView.innerHTML = `❌ Erreur technique: ${err.message}`;
+                    }
+                } else {
+                    errorView.innerHTML = `❌ Erreur technique: ${err.message}`;
+                }
+            });
+        }
+
+        function debouncedCheck(annonceId) {
+            clearTimeout(timeout);
+            
+            // Hide everything when user starts typing new content
+            const serverErrors = document.querySelectorAll('.server-mod-error');
+            serverErrors.forEach(el => el.style.display = 'none');
+            document.getElementById('mod_approved_' + annonceId).style.display = 'none';
+            document.getElementById('mod_blocked_' + annonceId).style.display = 'none';
+            
+            moderationStatus = 'CHECKING';
+            timeout = setTimeout(() => checkModeration(annonceId), 600);
+        }
+
+        function checkModeration(annonceId) {
+            const text = document.getElementById('contenu_' + annonceId).value;
+            const statusApp = document.getElementById('mod_approved_' + annonceId);
+            const statusBlock = document.getElementById('mod_blocked_' + annonceId);
+            const reason = document.getElementById('mod_reason_' + annonceId);
+            const submit = document.getElementById('submit_' + annonceId);
+
+            if (!text.trim()) {
+                moderationStatus = 'PENDING';
+                statusApp.style.display = 'none';
+                statusBlock.style.display = 'none';
+                return;
+            }
+
+            fetch('{{ path('app_commentaire_check') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'BLOCKED') {
+                    moderationStatus = 'BLOCKED';
+                    statusApp.style.display = 'none';
+                    statusBlock.style.display = 'flex';
+                    reason.innerText = data.reason;
+                } else {
+                    moderationStatus = 'APPROVED';
+                    statusApp.style.display = 'flex';
+                    statusBlock.style.display = 'none';
+                }
+            });
+        }
+
+        // Prevent submission if blocked
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const textarea = this.querySelector('textarea');
+                if (!textarea) return;
+                
+                const annonceId = textarea.id.split('_')[1];
+                if (moderationStatus === 'BLOCKED') {
+                    e.preventDefault();
+                    const statusBlock = document.getElementById('mod_blocked_' + annonceId);
+                    statusBlock.style.display = 'flex';
+                    statusBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Shake effect
+                    statusBlock.style.animation = 'shake 0.5s';
+                    setTimeout(() => statusBlock.style.animation = '', 500);
+                }
+            });
+        });
+    </script>
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</div>
+
+
+

@@ -1,0 +1,636 @@
+[
+    {
+        "file": "templates\\annonce\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\annonce\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\annonce\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\annonce\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\annonce\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\annonce\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\annonce\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\annonce\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\base.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\pdf.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\contrat_sponsor\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\dashboard\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\dashboard.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\entrainement\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\entrainement\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\entrainement\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\entrainement\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\entrainement\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\entrainement\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\equipement\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\evaluation\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\evaluation\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\evaluation\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\evaluation\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\evaluation\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\evaluation\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\joueur\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\joueur\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\joueur\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\joueur\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\joueur\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\match\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\offre\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\order\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\participation\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\participation\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\participation\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\participation\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\participation\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\participation\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\product\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\product\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\product\\new_admin.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\product\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\product\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsor\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsor\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsor\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsor\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsor\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsor\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\back_office\\sponsoring\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\base.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\chat\\chat.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\commentaire\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\commentaire\\_comments_list.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\commentaire\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\dashboard\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\emails\\order_confirmation.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\emails\\payment_confirmation.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\emails\\shipping_notification.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\base.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\equipe\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\ai_coach\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\base.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\cart\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\chat.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\checkout\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\checkout\\success.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\coach_dashboard.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\exercices.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\_cards.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\entrainement\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipe\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipe\\sponsors.html.twig",
+        "line": 48,
+        "valid": false,
+        "message": "Unexpected \"endfor\" tag (expecting closing tag for the \"if\" tag defined near line 19) in \"templates\\front_office\\equipe\\sponsors.html.twig\" at line 48."
+    },
+    {
+        "file": "templates\\front_office\\equipement\\cart.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipement\\checkout.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipement\\checkout_success.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipement\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipement\\orders.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipement\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipes\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\equipes\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\evaluation\\_rows.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\home\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\match\\formation_editor.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\match\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchmaking\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\export_pdf.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\matchs\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\offre\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\_cards.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\participation\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\shop\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\shop\\product_detail.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\sponsoring\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\front_office\\_trending_banner.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\joueur\\by_equipe.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\joueur\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\joueur\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\formation_editor.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\matchs\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\order\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\order\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\order\\index_admin.html.twig",
+        "line": 122,
+        "valid": false,
+        "message": "Unexpected token \"end of template\" (\"end of statement block\" expected) in \"templates\\order\\index_admin.html.twig\" at line 122."
+    },
+    {
+        "file": "templates\\order\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\order\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\order\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\order\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\new.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\new_admin.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\show.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\_delete_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\product\\_form.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\profile\\edit.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\security\\login.html.twig",
+        "line": 44,
+        "valid": false,
+        "message": "Unknown \"endblock\" tag in \"templates\\security\\login.html.twig\" at line 44."
+    },
+    {
+        "file": "templates\\security\\register.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\statistics\\index.html.twig",
+        "valid": true
+    },
+    {
+        "file": "templates\\_partials\\global_form_ux.html.twig",
+        "valid": true
+    }
+]

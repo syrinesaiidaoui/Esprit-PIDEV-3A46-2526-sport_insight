@@ -607,6 +607,24 @@
                 Equipement
             </a>
 
+            <a href="{{ path('back_office_invitation_index') }}"
+               class="sidebar-link {{ app.request.get('_route') starts with 'back_office_invitation' ? 'active' : '' }}">
+                <i class="lucide-mail"></i>
+                Invitations
+            </a>
+
+            <a href="{{ path('back_annonce_index') }}"
+               class="sidebar-link {{ app.request.get('_route') starts with 'back_annonce' ? 'active' : '' }}">
+                <i class="lucide-message-square"></i>
+                Annonces
+            </a>
+
+            <a href="{{ path('back_commentaire_index') }}"
+               class="sidebar-link {{ app.request.get('_route') starts with 'back_commentaire' ? 'active' : '' }}">
+                <i class="lucide-message-circle"></i>
+                Commentaires
+            </a>
+
             <a href="{{ path('app_order_index') }}"
                class="sidebar-link {{ app.request.get('_route') starts with 'app_order' ? 'active' : '' }}">
                 <i class="lucide-cart"></i>
