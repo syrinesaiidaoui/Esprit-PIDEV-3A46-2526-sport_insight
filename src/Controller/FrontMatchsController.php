@@ -18,68 +18,53 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/front/matchs')]
 final class FrontMatchsController extends AbstractController
 {
+    private const MIN_TEAM_SEARCH_LENGTH = 2;
+    private const AJAX_RESULTS_LIMIT = 80;
+
     #[Route(name: 'app_front_matchs_index', methods: ['GET'])]
     public function index(MatchsRepository $matchsRepository, Request $request): Response
     {
-        $sortOrder = $request->query->get('order', 'asc');
-        $search = $request->query->get('search', '');
-        $type = $request->query->get('type', '');
-        $statut = $request->query->get('statut', '');
-        $dateFrom = $request->query->get('dateFrom', '');
-        $dateTo = $request->query->get('dateTo', '');
+        $team = trim((string) $request->query->get('team', $request->query->get('search', '')));
+        $dateFrom = trim((string) $request->query->get('dateFrom', ''));
+        $dateTo = trim((string) $request->query->get('dateTo', ''));
 
-        $qb = $matchsRepository->createQueryBuilder('m');
-
-        // Recherche textuelle : lieu, type, statut
-        if ($search) {
-            $qb->andWhere('LOWER(m.lieu) LIKE LOWER(:search) OR LOWER(m.type) LIKE LOWER(:search)')
-                ->setParameter('search', '%' . $search . '%');
-        }
-
-        // Filtre par type
-        if ($type) {
-            $qb->andWhere('m.type = :type')
-                ->setParameter('type', $type);
-        }
-
-        // Filtre par statut
-        if ($statut) {
-            $qb->andWhere('m.statut = :statut')
-                ->setParameter('statut', $statut);
-        }
-
-        // Filtre par date
-        if ($dateFrom) {
-            $qb->andWhere('m.dateMatch >= :dateFrom')
-                ->setParameter('dateFrom', new \DateTime($dateFrom));
-        }
-        if ($dateTo) {
-            $qb->andWhere('m.dateMatch <= :dateTo')
-                ->setParameter('dateTo', new \DateTime($dateTo . ' 23:59:59'));
-        }
-
-        $matchs = $qb->orderBy('m.id', $sortOrder)
-            ->getQuery()
-            ->getResult();
-
-        $deleteForms = [];
-        foreach ($matchs as $match) {
-            $deleteForms[$match->getId()] = $this->createFormBuilder()
-                ->setAction($this->generateUrl('app_front_matchs_delete', ['id' => $match->getId()]))
-                ->setMethod('POST')
-                ->getForm()
-                ->createView();
-        }
+        $matchs = $this->findFilteredMatchs(
+            $matchsRepository,
+            $team,
+            $dateFrom,
+            $dateTo
+        );
 
         return $this->render('front_office/matchs/index.html.twig', [
             'matchs' => $matchs,
-            'currentOrder' => $sortOrder,
-            'delete_forms' => $deleteForms,
-            'search' => $search,
-            'type' => $type,
-            'statut' => $statut,
+            'team' => $team,
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
+        ]);
+    }
+
+    #[Route('/search', name: 'app_front_matchs_search', methods: ['GET'])]
+    public function search(Request $request, MatchsRepository $matchsRepository): JsonResponse
+    {
+        $team = trim((string) $request->query->get('team', $request->query->get('search', '')));
+        $dateFrom = trim((string) $request->query->get('dateFrom', ''));
+        $dateTo = trim((string) $request->query->get('dateTo', ''));
+
+        $matchs = $this->findFilteredMatchs(
+            $matchsRepository,
+            $team,
+            $dateFrom,
+            $dateTo,
+            self::AJAX_RESULTS_LIMIT
+        );
+
+        $html = $this->renderView('front_office/matchs/_cards.html.twig', [
+            'matchs' => $matchs,
+        ]);
+
+        return new JsonResponse([
+            'html' => $html,
+            'count' => count($matchs),
         ]);
     }
 
@@ -358,5 +343,76 @@ final class FrontMatchsController extends AbstractController
             @unlink($tempFile);
             throw $e;
         }
+    }
+
+    private function findFilteredMatchs(
+        MatchsRepository $matchsRepository,
+        string $team,
+        string $dateFrom,
+        string $dateTo,
+        ?int $limit = null
+    ): array {
+        $normalizedTeam = $this->normalizeTeamTerm($team);
+        $qb = $matchsRepository->createQueryBuilder('m')
+            ->leftJoin('m.equipeDomicile', 'dom')
+            ->addSelect('dom')
+            ->leftJoin('m.equipeExterieur', 'ext')
+            ->addSelect('ext');
+
+        if ($normalizedTeam !== '') {
+            $qb->andWhere('dom.nom LIKE :teamPrefix OR ext.nom LIKE :teamPrefix')
+                ->setParameter('teamPrefix', $normalizedTeam . '%');
+        }
+
+        $fromDate = $this->parseDateInput($dateFrom);
+        if ($fromDate instanceof \DateTimeImmutable) {
+            $qb->andWhere('m.dateMatch >= :dateFrom')
+                ->setParameter('dateFrom', $fromDate->setTime(0, 0, 0));
+        }
+
+        $toDate = $this->parseDateInput($dateTo);
+        if ($toDate instanceof \DateTimeImmutable) {
+            $qb->andWhere('m.dateMatch <= :dateTo')
+                ->setParameter('dateTo', $toDate->setTime(23, 59, 59));
+        }
+
+        $qb->orderBy('m.dateMatch', 'DESC')
+            ->addOrderBy('m.heureDebut', 'DESC')
+            ->addOrderBy('m.id', 'DESC');
+
+        if (is_int($limit) && $limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    private function parseDateInput(string $value): ?\DateTimeImmutable
+    {
+        if ($value === '') {
+            return null;
+        }
+
+        $date = \DateTimeImmutable::createFromFormat('Y-m-d', $value);
+        if (!$date instanceof \DateTimeImmutable) {
+            return null;
+        }
+
+        $errors = \DateTimeImmutable::getLastErrors();
+        if (is_array($errors) && (($errors['warning_count'] ?? 0) > 0 || ($errors['error_count'] ?? 0) > 0)) {
+            return null;
+        }
+
+        return $date;
+    }
+
+    private function normalizeTeamTerm(string $team): string
+    {
+        $value = trim($team);
+        if ($value === '' || mb_strlen($value) < self::MIN_TEAM_SEARCH_LENGTH) {
+            return '';
+        }
+
+        return $value;
     }
 }

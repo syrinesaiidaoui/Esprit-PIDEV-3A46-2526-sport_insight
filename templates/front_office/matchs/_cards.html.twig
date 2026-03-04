@@ -1,0 +1,78 @@
+{% if matchs is not empty %}
+    <div class="fixtures-grid">
+        {% for match in matchs %}
+            {% set statusText = (match.statut ?? 'Programme') %}
+            {% set normalizedStatus = statusText|lower %}
+            {% set statusClass = 'status-scheduled' %}
+            {% if 'cours' in normalizedStatus %}
+                {% set statusClass = 'status-ongoing' %}
+            {% elseif 'termin' in normalizedStatus %}
+                {% set statusClass = 'status-finished' %}
+            {% elseif 'annul' in normalizedStatus %}
+                {% set statusClass = 'status-cancelled' %}
+            {% endif %}
+
+            <article class="fixture-card">
+                <header class="fixture-card__head">
+                    <span class="fixture-status {{ statusClass }}">{{ statusText }}</span>
+                    <span class="fixture-date">
+                        {% if match.dateMatch and match.heureDebut %}
+                            {{ match.dateMatch|date('d/m/Y') }} - {{ match.heureDebut|date('H:i') }}
+                        {% elseif match.dateMatch %}
+                            {{ match.dateMatch|date('d/m/Y') }}
+                        {% else %}
+                            Date a definir
+                        {% endif %}
+                    </span>
+                </header>
+
+                <div class="fixture-card__teams">
+                    <div class="fixture-team">
+                        <div class="fixture-team__logo">
+                            {% if match.equipeDomicile and match.equipeDomicile.image %}
+                                <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}">
+                            {% else %}
+                                <span class="fixture-team__fallback">{{ (match.equipeDomicile.nom ?? 'D')|slice(0, 1)|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <strong class="fixture-team__name">{{ match.equipeDomicile.nom ?? 'Equipe domicile' }}</strong>
+                    </div>
+
+                    <div class="fixture-score">
+                        <span>{{ match.scoreEquipeDomicile is not null ? match.scoreEquipeDomicile : 0 }}</span>
+                        <small>-</small>
+                        <span>{{ match.scoreEquipeExterieur is not null ? match.scoreEquipeExterieur : 0 }}</span>
+                    </div>
+
+                    <div class="fixture-team">
+                        <div class="fixture-team__logo">
+                            {% if match.equipeExterieur and match.equipeExterieur.image %}
+                                <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}">
+                            {% else %}
+                                <span class="fixture-team__fallback">{{ (match.equipeExterieur.nom ?? 'E')|slice(0, 1)|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <strong class="fixture-team__name">{{ match.equipeExterieur.nom ?? 'Equipe exterieure' }}</strong>
+                    </div>
+                </div>
+
+                <div class="fixture-card__meta">
+                    <span><i class="lucide-map-pin"></i> {{ match.lieu ?? 'Lieu non renseigne' }}</span>
+                    <span><i class="lucide-clock-3"></i> {{ match.heureDebut ? match.heureDebut|date('H:i') : '--:--' }}</span>
+                </div>
+
+                <footer class="fixture-card__footer">
+                    <a href="{{ path('app_front_matchs_show', {'id': match.id}) }}" class="fixture-card__link">
+                        Voir les details
+                    </a>
+                </footer>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="match-empty-state">
+        <div class="match-empty-state__icon"><i class="lucide-trophy"></i></div>
+        <h2>Aucun match trouve</h2>
+        <p>Aucun resultat ne correspond a votre recherche actuelle.</p>
+    </div>
+{% endif %}

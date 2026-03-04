@@ -1,0 +1,43 @@
+{% if equipes is not empty %}
+    <div class="teams-grid">
+        {% for equipe in equipes %}
+            <article class="team-card">
+                <div class="team-card__logo-wrap">
+                    <div class="team-card__logo">
+                        {% if equipe.image %}
+                            <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
+                        {% else %}
+                            <span class="team-card__fallback">{{ equipe.nom|slice(0, 1)|upper }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="team-card__content">
+                    <h3 class="team-card__name">{{ equipe.nom }}</h3>
+
+                    {% if equipe.coach %}
+                        <p class="team-card__coach">
+                            <i class="lucide-user-round"></i>
+                            Coach: {{ equipe.coach }}
+                        </p>
+                    {% else %}
+                        <p class="team-card__coach team-card__coach--muted">
+                            <i class="lucide-user-round-minus"></i>
+                            Coach non renseigne
+                        </p>
+                    {% endif %}
+
+                    <div class="team-card__footer">
+                        <a href="{{ path('app_front_equipes_show', {'id': equipe.id}) }}" class="team-card__link">Voir l'equipe</a>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="teams-empty-state">
+        <div class="teams-empty-state__icon"><i class="lucide-users"></i></div>
+        <h2>Aucune equipe trouvee</h2>
+        <p>Aucun resultat ne correspond au nom saisi.</p>
+    </div>
+{% endif %}

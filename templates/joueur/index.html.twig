@@ -2,343 +2,734 @@
 
 {% block title %}Joueurs - Sport Insight{% endblock %}
 
-{% block body %}
-
-
-    <!-- ...existing HTML content for joueurs... (all joueurs-section, search, grid, etc.) ... -->
-<style>
-        .joueurs-section {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-        /* ...existing styles... */
-    </style>
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-
-        .filter-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 40px;
-        }
-
-        .filter-btn {
-            padding: 10px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.15s;
-            cursor: pointer;
-        }
-
-        .filter-btn:hover,
-        .filter-btn.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-
-        .joueurs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 24px;
-        }
-
-        .joueur-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .joueur-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.2);
-            transform: translateY(-8px);
-        }
-
-        .joueur-image-section {
+        .players-hero {
             position: relative;
-            background: transparent;
-            padding: 16px;
-            min-height: 240px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            max-width: 1320px;
+            margin: 16px auto 0;
+            padding: clamp(16px, 3vw, 24px);
+            border-radius: 28px;
+            background: radial-gradient(circle at 18% 22%, rgba(52, 211, 153, 0.22), rgba(2, 6, 23, 0) 46%),
+                        radial-gradient(circle at 80% 78%, rgba(96, 165, 250, 0.2), rgba(2, 6, 23, 0) 50%),
+                        var(--hero-grad);
             overflow: hidden;
         }
 
-        .joueur-image {
-            width: 100%;
-            height: 240px;
-            object-fit: contain;
-            border-radius: 8px;
-            background: transparent;
+        .players-hero__card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.26);
+            overflow: hidden;
+            padding: clamp(22px, 4vw, 34px);
+            color: #f8fafc;
+            isolation: isolate;
+            box-shadow: var(--soft-shadow);
         }
 
-        .joueur-placeholder {
-            font-size: 60px;
-            opacity: 0.5;
-        }
-
-        .numero-badge {
+        .players-hero__card::before {
+            content: "";
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: var(--primary);
-            color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
+            inset: 0;
+            background-image: url('{{ asset('images/players.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.04);
+            z-index: 0;
+        }
+
+        .players-hero__card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(2, 6, 23, 0.84) 0%, rgba(2, 6, 23, 0.72) 46%, rgba(5, 150, 105, 0.58) 100%);
+            z-index: 1;
+        }
+
+        .players-hero__card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .players-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.34);
+            background: rgba(2, 6, 23, 0.48);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .players-hero__card h1 {
+            margin: 14px 0 0;
+            font-size: clamp(30px, 5vw, 46px);
+            line-height: 1.15;
+            color: #f8fafc;
+        }
+
+        .players-hero__card p {
+            margin: 12px 0 0;
+            max-width: 760px;
+            color: #dbeafe;
+            font-size: 17px;
+        }
+
+        .players-shell {
+            display: grid;
+            gap: 18px;
+        }
+
+        .players-toolbar {
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 18px;
+            box-shadow: var(--soft-shadow);
+            display: grid;
+            gap: 14px;
+        }
+
+        .players-toolbar__head {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .joueur-info {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .joueur-name {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 4px;
-        }
-
-        .joueur-equipe {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-        }
-
-        .joueur-stats {
-            padding: 12px 0;
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 12px;
-            font-size: 13px;
-        }
-
-        .stat-row {
-            display: flex;
             justify-content: space-between;
-            padding: 6px 0;
+            gap: 14px;
+            flex-wrap: wrap;
         }
 
-        .stat-label {
-            color: var(--text-muted);
+        .players-toolbar__title {
+            margin: 0;
+            font-size: 28px;
+            color: var(--text-main);
         }
 
-        .stat-value {
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .joueur-btn {
-            padding: 10px 12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
+        .players-toolbar__meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 6px 12px;
             font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .joueur-btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-state-icon {
-            font-size: 60px;
-            opacity: 0.5;
-            margin-bottom: 16px;
-        }
-
-        .equipe-section {
-            margin-bottom: 48px;
-        }
-
-        .equipe-title {
-            font-size: 24px;
             font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--primary);
-            display: flex;
+            color: var(--text-soft);
+            flex-wrap: wrap;
+        }
+
+        .players-search-form {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.4fr) minmax(190px, 1fr) auto auto;
+            gap: 10px;
+            align-items: end;
+            margin: 0;
+            padding: 0;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .players-field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .players-field label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-soft);
+        }
+
+        .players-field input,
+        .players-field select {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--input-text);
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .players-field input:focus,
+        .players-field select:focus {
+            border-color: rgba(16, 185, 129, 0.75);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+
+        .players-actions {
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+        }
+
+        .players-btn {
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .equipe-title:hover {
-            opacity: 0.8;
-        }
-
-        .equipe-toggle-icon {
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease;
-            font-size: 20px;
+            transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+            white-space: nowrap;
         }
 
-        .equipe-title.collapsed .equipe-toggle-icon {
+        .players-btn--primary {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #f8fafc;
+            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.22);
+        }
+
+        .players-btn--primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 26px rgba(16, 185, 129, 0.3);
+            color: #f8fafc;
+        }
+
+        .players-btn--ghost {
+            border-color: var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        .players-btn--ghost:hover {
+            border-color: rgba(16, 185, 129, 0.55);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--text-main);
+        }
+
+        .players-loading {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .players-hint {
+            font-size: 12px;
+            color: #d97706;
+        }
+
+        .players-groups {
+            display: grid;
+            gap: 12px;
+        }
+
+        .players-group {
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            box-shadow: var(--soft-shadow);
+            overflow: hidden;
+        }
+
+        .players-group__summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid transparent;
+        }
+
+        .players-group__summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .players-group[open] .players-group__summary {
+            border-bottom-color: var(--border-color);
+        }
+
+        .players-group__left {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .players-group__caret {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-soft);
+            transition: transform .2s ease;
+            flex-shrink: 0;
+        }
+
+        .players-group:not([open]) .players-group__caret {
             transform: rotate(-90deg);
         }
 
-        .equipe-logo {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            object-fit: contain;
-            background: transparent;
-            padding: 0;
-        }
-
-        .joueurs-grid {
-            max-height: none;
+        .players-group__logo-wrap {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            opacity: 1;
+            flex-shrink: 0;
         }
 
-        .joueurs-grid.hidden {
-            max-height: 0;
-            opacity: 0;
+        .players-group__logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .players-group__logo-fallback {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-soft);
+        }
+
+        .players-group__name {
+            font-size: 19px;
+            line-height: 1.2;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .players-group__count {
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-soft);
+            flex-shrink: 0;
+        }
+
+        .players-group__body {
+            padding: 14px;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .player-card {
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            overflow: hidden;
+            display: grid;
+            box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08);
+            transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(16, 185, 129, 0.45);
+            box-shadow: 0 14px 26px rgba(2, 6, 23, 0.2);
+        }
+
+        .player-card__media {
+            position: relative;
+            min-height: 170px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(150deg, rgba(16, 185, 129, 0.13), rgba(59, 130, 246, 0.08));
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .player-card__image {
+            width: 100%;
+            max-height: 155px;
+            object-fit: contain;
+        }
+
+        .player-card__placeholder {
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+        }
+
+        .player-card__number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border-radius: 999px;
+            padding: 4px 9px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #f8fafc;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+        }
+
+        .player-card__content {
+            padding: 12px;
+            display: grid;
+            gap: 7px;
+        }
+
+        .player-card__name {
+            margin: 0;
+            font-size: 18px;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .player-card__team {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-soft);
+        }
+
+        .player-card__meta {
+            display: grid;
+            gap: 5px;
+            font-size: 12px;
+            color: var(--text-soft);
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+        }
+
+        .player-card__meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .player-card__meta i {
+            font-size: 13px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .player-card__link {
+            margin-top: 4px;
+            min-height: 36px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #f8fafc;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .2s ease, box-shadow .2s ease;
+            box-shadow: 0 10px 18px rgba(16, 185, 129, 0.2);
+        }
+
+        .player-card__link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 24px rgba(16, 185, 129, 0.28);
+            color: #f8fafc;
+        }
+
+        .players-empty-state {
+            border-radius: 20px;
+            border: 1px dashed var(--border-color);
+            background: var(--card-bg);
+            box-shadow: var(--soft-shadow);
+            padding: 44px 20px;
+            text-align: center;
+        }
+
+        .players-empty-state__icon {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 14px;
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(16, 185, 129, 0.22);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .players-empty-state h2 {
+            margin: 0;
+            font-size: 22px;
+            color: var(--text-main);
+        }
+
+        .players-empty-state p {
+            margin: 10px 0 0;
+            color: var(--text-soft);
+            font-size: 14px;
+        }
+
+        [data-theme="dark"] .players-toolbar__meta,
+        [data-theme="dark"] .players-group__count,
+        [data-theme="dark"] .players-group__caret,
+        [data-theme="dark"] .players-group__logo-wrap {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        [data-theme="dark"] .player-card {
+            background: rgba(15, 23, 42, 0.62);
+        }
+
+        [data-theme="dark"] .player-card__meta {
+            background: rgba(15, 23, 42, 0.74);
+        }
+
+        @media (max-width: 980px) {
+            .players-search-form {
+                grid-template-columns: minmax(200px, 1fr) minmax(160px, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .players-hero {
+                margin-top: 10px;
+                border-radius: 20px;
+                padding: 12px;
+            }
+
+            .players-hero__card {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .players-toolbar {
+                border-radius: 16px;
+            }
+
+            .players-search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .players-actions {
+                width: 100%;
+            }
+
+            .players-btn {
+                flex: 1;
+            }
+
+            .players-group__name {
+                font-size: 17px;
+            }
         }
     </style>
+{% endblock %}
 
-    <div class="joueurs-section">
-        <div class="joueurs-header">
-            <h1>Les Joueurs</h1>
+{% block hero %}
+    <section class="players-hero">
+        <div class="players-hero__card">
+            <span class="players-hero__eyebrow">Squad</span>
+            <h1>Trouvez un joueur par nom ou par equipe</h1>
+            <p>La recherche est instantanee: filtrez l'effectif sans recharger la page.</p>
         </div>
+    </section>
+{% endblock %}
 
-        <!-- Formulaire de recherche avancée -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <form method="GET" class="search-form">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                    <div>
-                        <label for="search" style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">Recherche (Nom/Prénom)</label>
-                        <input type="text" name="search" id="search" value="{{ search }}" placeholder="Ex: Mbappé..." class="form-control" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;">
-                    </div>
-                    <div>
-                        <label for="equipe" style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">Équipe</label>
-                        <select name="equipe" id="equipe" class="form-control" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;">
-                            <option value="">- Toutes les équipes -</option>
-                            {% for eq in equipes %}
-                                <option value="{{ eq.id }}" {% if equipe and equipe == eq.id %}selected{% endif %}>{{ eq.nom }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+{% block body %}
+    <section class="players-shell">
+        <div class="players-toolbar">
+            <div class="players-toolbar__head">
+                <h2 class="players-toolbar__title">Joueurs</h2>
+                <div class="players-toolbar__meta">
+                    <span><strong id="players-count">{{ totalPlayers }}</strong> joueur(s)</span>
+                    <span><strong id="players-teams-count">{{ totalTeams }}</strong> equipe(s)</span>
+                    <span id="players-loading" class="players-loading" hidden>Actualisation...</span>
+                    <span id="players-hint" class="players-hint" hidden></span>
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button type="submit" class="btn btn-primary" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">🔍 Rechercher</button>
-                    <a href="{{ path('app_joueurs_index') }}" class="btn btn-secondary" style="padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block;">Réinitialiser</a>
+            </div>
+
+            <form id="player-search-form" class="players-search-form" method="GET" action="{{ path('app_joueurs_index') }}" data-search-url="{{ path('app_joueurs_search') }}">
+                <div class="players-field">
+                    <label for="q">Nom du joueur ou equipe</label>
+                    <input type="text" id="q" name="q" value="{{ q }}" placeholder="Ex: Mbappe, Vinicius, Real Madrid">
+                </div>
+
+                <div class="players-field">
+                    <label for="equipe">Equipe</label>
+                    <select id="equipe" name="equipe">
+                        <option value="">Toutes les equipes</option>
+                        {% for eq in equipes %}
+                            <option value="{{ eq.id }}" {% if selectedEquipe is not null and selectedEquipe == eq.id %}selected{% endif %}>{{ eq.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="players-actions">
+                    <button type="submit" class="players-btn players-btn--primary">Rechercher</button>
+                </div>
+
+                <div class="players-actions">
+                    <a href="{{ path('app_joueurs_index') }}" class="players-btn players-btn--ghost">Reinitialiser</a>
                 </div>
             </form>
         </div>
 
-        {% if joueursGroupes is not empty %}
-            {% for equipeId, groupe in joueursGroupes %}
-                <div class="equipe-section">
-                    <div class="equipe-title collapsed" data-equipe-id="{{ equipeId }}">
-                        <span class="equipe-toggle-icon">▼</span>
-                        {% if groupe.equipe.image %}
-                            <img src="{{ asset('uploads/equipes/' ~ groupe.equipe.image) }}" alt="{{ groupe.equipe.nom }}" class="equipe-logo">
-                        {% endif %}
-                        {{ groupe.equipe.nom }}
-                    </div>
-                    <div class="joueurs-grid hidden" data-equipe-grid="{{ equipeId }}">
-                        {% for joueur in groupe.joueurs %}
-                            <div class="joueur-card">
-                                <div class="joueur-image-section">
-                                    {% if joueur.image %}
-                                        <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="joueur-image">
-                                    {% else %}
-                                        <div class="joueur-placeholder">👤</div>
-                                    {% endif %}
-                                    <div class="numero-badge">{{ joueur.numero }}</div>
-                                </div>
+        <div id="players-results">
+            {% include 'joueur/_groups.html.twig' with {'joueursGroupes': joueursGroupes} %}
+        </div>
+    </section>
+{% endblock %}
 
-                                <div class="joueur-info">
-                                    <div class="joueur-name">{{ joueur.prenom }} {{ joueur.nom }}</div>
-                                    <div class="joueur-equipe">{{ joueur.equipe.nom }}</div>
-
-                                    <div class="joueur-stats">
-                                        <div class="stat-row">
-                                            <span class="stat-label">Âge</span>
-                                            <span class="stat-value">{{ (now|date('Y')) - (joueur.dateNaissance|date('Y')) }} ans</span>
-                                        </div>
-                                        <div class="stat-row">
-                                            <span class="stat-label">Naissance</span>
-                                            <span class="stat-value">{{ joueur.dateNaissance|date('d/m/Y') }}</span>
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ path('app_joueur_show', {'id': joueur.id}) }}" class="joueur-btn">
-                                        Voir le profil
-                                    </a>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">👥</div>
-                <h3>Aucun joueur trouvé</h3>
-                <p>Les joueurs seront ajoutés bientôt</p>
-            </div>
-        {% endif %}
-    </div>
-
+{% block javascripts %}
+    {{ parent() }}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const titles = document.querySelectorAll('.equipe-title');
-            
-            titles.forEach(title => {
-                title.addEventListener('click', function() {
-                    const equipeId = this.getAttribute('data-equipe-id');
-                    const grid = document.querySelector(`[data-equipe-grid="${equipeId}"]`);
-                    
-                    if (grid) {
-                        this.classList.toggle('collapsed');
-                        grid.classList.toggle('hidden');
-                    }
-                });
+        (() => {
+            const form = document.getElementById('player-search-form');
+            const searchInput = document.getElementById('q');
+            const teamSelect = document.getElementById('equipe');
+            const results = document.getElementById('players-results');
+            const counter = document.getElementById('players-count');
+            const teamCounter = document.getElementById('players-teams-count');
+            const loading = document.getElementById('players-loading');
+            const hint = document.getElementById('players-hint');
+
+            if (!form || !results || !searchInput || !teamSelect) {
+                return;
+            }
+
+            const MIN_QUERY_LENGTH = 2;
+            const INPUT_DEBOUNCE_MS = 350;
+            const endpoint = form.dataset.searchUrl;
+
+            let debounceTimer = null;
+            let requestController = null;
+            let requestVersion = 0;
+            let lastSignature = '';
+
+            const setLoading = (active) => {
+                if (loading) {
+                    loading.hidden = !active;
+                }
+                results.style.opacity = active ? '0.55' : '1';
+            };
+
+            const setHint = (message) => {
+                if (!hint) {
+                    return;
+                }
+                hint.textContent = message;
+                hint.hidden = message === '';
+            };
+
+            const refreshResults = () => {
+                if (!endpoint) {
+                    return;
+                }
+
+                const queryValue = searchInput.value.trim();
+                const params = new URLSearchParams(new FormData(form));
+                let hintMessage = '';
+
+                if (queryValue !== '' && queryValue.length < MIN_QUERY_LENGTH) {
+                    params.set('q', '');
+                    hintMessage = `Tapez au moins ${MIN_QUERY_LENGTH} caracteres pour filtrer par texte.`;
+                }
+
+                requestVersion += 1;
+                const localVersion = requestVersion;
+
+                if (requestController) {
+                    requestController.abort();
+                }
+
+                const signature = params.toString();
+                if (signature === lastSignature) {
+                    setHint(hintMessage);
+                    setLoading(false);
+                    return;
+                }
+                lastSignature = signature;
+
+                requestController = new AbortController();
+                setHint(hintMessage);
+                setLoading(true);
+
+                fetch(`${endpoint}?${params.toString()}`, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: requestController.signal
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Search request failed');
+                        }
+                        return response.json();
+                    })
+                    .then((payload) => {
+                        if (typeof payload.html === 'string') {
+                            results.innerHTML = payload.html;
+                        }
+                        if (counter && typeof payload.count === 'number') {
+                            counter.textContent = payload.count;
+                        }
+                        if (teamCounter && typeof payload.groupCount === 'number') {
+                            teamCounter.textContent = payload.groupCount;
+                        }
+                    })
+                    .catch((error) => {
+                        if (error.name !== 'AbortError') {
+                            console.error(error);
+                            setHint('Erreur reseau, reessayez.');
+                        }
+                    })
+                    .finally(() => {
+                        if (localVersion === requestVersion) {
+                            setLoading(false);
+                        }
+                    });
+            };
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                refreshResults();
             });
-        });
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(refreshResults, INPUT_DEBOUNCE_MS);
+            });
+
+            teamSelect.addEventListener('change', refreshResults);
+        })();
     </script>
 {% endblock %}

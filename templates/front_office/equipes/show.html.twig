@@ -2,253 +2,467 @@
 
 {% block title %}{{ equipe.nom }} - Sport Insight{% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-        .equipe-detail-section {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 24px;
+        .team-detail-hero {
+            position: relative;
+            max-width: 1320px;
+            margin: 16px auto 0;
+            padding: clamp(16px, 3vw, 24px);
+            border-radius: 28px;
+            background: radial-gradient(circle at 20% 24%, rgba(52, 211, 153, 0.22), rgba(2, 6, 23, 0) 46%),
+                        radial-gradient(circle at 78% 78%, rgba(96, 165, 250, 0.2), rgba(2, 6, 23, 0) 50%),
+                        var(--hero-grad);
+            overflow: hidden;
         }
 
-        .breadcrumb {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 32px;
-            font-size: 14px;
+        .team-detail-hero__card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.26);
+            overflow: hidden;
+            padding: clamp(22px, 4vw, 34px);
+            color: #f8fafc;
+            isolation: isolate;
+            box-shadow: var(--soft-shadow);
         }
 
-        .breadcrumb a {
-            color: var(--primary);
-            text-decoration: none;
-            transition: all 0.15s;
+        .team-detail-hero__card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url('{{ asset('images/equipe.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.04);
+            z-index: 0;
         }
 
-        .breadcrumb a:hover {
-            text-decoration: underline;
+        .team-detail-hero__card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(2, 6, 23, 0.84) 0%, rgba(2, 6, 23, 0.72) 46%, rgba(5, 150, 105, 0.58) 100%);
+            z-index: 1;
         }
 
-        .breadcrumb-separator {
-            color: var(--text-muted);
+        .team-detail-hero__card > * {
+            position: relative;
+            z-index: 2;
         }
 
-        .equipe-header {
+        .team-detail-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.34);
+            background: rgba(2, 6, 23, 0.48);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .team-detail-hero__card h1 {
+            margin: 14px 0 0;
+            font-size: clamp(30px, 5vw, 46px);
+            line-height: 1.15;
+            color: #f8fafc;
+        }
+
+        .team-detail-hero__card p {
+            margin: 12px 0 0;
+            max-width: 760px;
+            color: #dbeafe;
+            font-size: 16px;
+        }
+
+        .team-detail-shell {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: start;
-            margin-bottom: 40px;
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
+            gap: 18px;
         }
 
-        .equipe-logo-large {
-            background: linear-gradient(135deg, var(--body-bg) 0%, #f0f9ff 100%);
-            padding: 60px 40px;
-            border-radius: 12px;
+        .team-profile-card,
+        .team-related-card {
+            border-radius: 22px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            box-shadow: var(--soft-shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            overflow: hidden;
+        }
+
+        .team-profile-grid {
+            display: grid;
+            grid-template-columns: minmax(220px, 300px) 1fr;
+            gap: 24px;
+            padding: 22px;
+        }
+
+        .team-logo-panel {
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 400px;
+            min-height: 280px;
         }
 
-        .equipe-logo-container {
-            width: 280px;
-            height: 280px;
-            background: white;
-            border-radius: 16px;
+        .team-logo-panel__inner {
+            width: 210px;
+            height: 210px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
-        .equipe-logo-container img {
-            max-width: 100%;
-            max-height: 100%;
+        .team-logo-panel__inner img {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
         }
 
-        .equipe-logo-placeholder {
-            font-size: 100px;
-            opacity: 0.4;
+        .team-logo-fallback {
+            font-size: 76px;
+            color: var(--text-soft);
+            opacity: 0.55;
         }
 
-        .equipe-details {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        .team-info-panel {
+            display: grid;
+            align-content: start;
+            gap: 16px;
         }
 
-        .detail-title {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-        }
-
-        .equipe-name {
-            font-size: 42px;
-            font-weight: 800;
-            color: var(--text-dark);
+        .team-info-title {
             margin: 0;
+            font-size: 34px;
+            line-height: 1.2;
+            color: var(--text-main);
         }
 
-        .detail-item {
-            padding: 16px;
-            background: var(--body-bg);
-            border-radius: 8px;
-            display: flex;
-            gap: 12px;
+        .team-info-subtitle {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-soft);
         }
 
-        .detail-icon {
-            font-size: 24px;
-            min-width: 30px;
+        .team-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
         }
 
-        .detail-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .team-info-item {
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 12px 13px;
+            display: grid;
+            gap: 5px;
         }
 
-        .detail-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .detail-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .back-link {
+        .team-info-item span {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 10px 16px;
-            background: var(--card-bg);
-            color: var(--text-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            text-decoration: none;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .team-info-item strong {
+            font-size: 15px;
+            color: var(--text-main);
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .team-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .team-btn {
+            min-height: 42px;
+            padding: 0 14px;
+            border-radius: 12px;
             font-size: 14px;
-            font-weight: 600;
-            transition: all 0.15s;
-            cursor: pointer;
-            align-self: flex-start;
+            font-weight: 700;
+            border: 1px solid transparent;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
         }
 
-        .back-link:hover {
-            background: var(--body-bg);
-            border-color: var(--primary);
-            color: var(--primary);
+        .team-btn--primary {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #f8fafc;
+            border-color: rgba(16, 185, 129, 0.35);
+            box-shadow: 0 12px 22px rgba(16, 185, 129, 0.2);
         }
 
-        @media (max-width: 768px) {
-            .equipe-header {
+        .team-btn--primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 26px rgba(16, 185, 129, 0.3);
+            color: #f8fafc;
+        }
+
+        .team-btn--ghost {
+            border-color: var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        .team-btn--ghost:hover {
+            border-color: rgba(16, 185, 129, 0.55);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--text-main);
+        }
+
+        .team-related-card__head {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .team-related-card__head h2 {
+            margin: 0;
+            font-size: 25px;
+            color: var(--text-main);
+        }
+
+        .team-related-count {
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 5px 11px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .team-related-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .team-related-item {
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 12px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .team-related-item__date {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .team-related-item__vs {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.35;
+        }
+
+        .team-related-item__meta {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .team-related-item__link {
+            margin-top: 4px;
+            min-height: 34px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .team-related-item__link:hover {
+            border-color: rgba(16, 185, 129, 0.55);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--text-main);
+        }
+
+        @media (max-width: 980px) {
+            .team-profile-grid {
                 grid-template-columns: 1fr;
-                gap: 24px;
             }
 
-            .equipe-name {
+            .team-logo-panel {
+                min-height: 220px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .team-detail-hero {
+                margin-top: 10px;
+                border-radius: 20px;
+                padding: 12px;
+            }
+
+            .team-detail-hero__card {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .team-profile-grid,
+            .team-related-grid {
+                padding: 14px;
+            }
+
+            .team-info-title {
                 font-size: 28px;
-            }
-
-            .equipe-logo-large {
-                padding: 40px 20px;
-            }
-
-            .equipe-logo-container {
-                width: 200px;
-                height: 200px;
             }
         }
     </style>
+{% endblock %}
 
-    <div class="equipe-detail-section">
-        <div class="breadcrumb">
-            <a href="{{ path('app_front_equipes_index') }}">👥 Équipes</a>
-            <span class="breadcrumb-separator">/</span>
-            <span>{{ equipe.nom }}</span>
-        </div>
-
-        <div class="equipe-header">
-            <div class="equipe-logo-large">
-                <div class="equipe-logo-container">
-                    {% if equipe.image %}
-                        <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
-                    {% else %}
-                        <span class="equipe-logo-placeholder">🏆</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="equipe-details">
-                <div>
-                    <div class="detail-title">Équipe</div>
-                    <h1 class="equipe-name">{{ equipe.nom }}</h1>
-                </div>
-
+{% block hero %}
+    <section class="team-detail-hero">
+        <div class="team-detail-hero__card">
+            <span class="team-detail-hero__eyebrow">Team profile</span>
+            <h1>{{ equipe.nom }}</h1>
+            <p>
                 {% if equipe.coach %}
-                    <div class="detail-item">
-                        <span class="detail-icon">👨‍💼</span>
-                        <div class="detail-content">
-                            <span class="detail-label">Coach</span>
-                            <span class="detail-value">{{ equipe.coach }}</span>
-                        </div>
-                    </div>
+                    Coach principal: {{ equipe.coach }}.
+                {% else %}
+                    Profil d'equipe et historique des matchs.
                 {% endif %}
-
-                <div class="detail-item">
-                    <span class="detail-icon">📊</span>
-                    <div class="detail-content">
-                        <span class="detail-label">ID Interne</span>
-                        <span class="detail-value">#{{ equipe.id }}</span>
-                    </div>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-icon">⚽</span>
-                    <div class="detail-content">
-                        <span class="detail-label">Matchs joués</span>
-                        <span class="detail-value">{{ equipe.matchs|length }} matchs</span>
-                    </div>
-                </div>
-
-                <a href="{{ path('app_front_equipes_index') }}" class="back-link">
-                    ← Retour aux équipes
-                </a>
-            </div>
+            </p>
         </div>
+    </section>
+{% endblock %}
+
+{% block body %}
+    <section class="team-detail-shell">
+        <article class="team-profile-card">
+            <div class="team-profile-grid">
+                <div class="team-logo-panel">
+                    <div class="team-logo-panel__inner">
+                        {% if equipe.image %}
+                            <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
+                        {% else %}
+                            <span class="team-logo-fallback">
+                                <i class="lucide-shield"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="team-info-panel">
+                    <div>
+                        <h2 class="team-info-title">{{ equipe.nom }}</h2>
+                        <p class="team-info-subtitle">Fiche de l'equipe et informations principales.</p>
+                    </div>
+
+                    <div class="team-info-grid">
+                        <div class="team-info-item">
+                            <span><i class="lucide-hash"></i> ID</span>
+                            <strong>#{{ equipe.id }}</strong>
+                        </div>
+
+                        <div class="team-info-item">
+                            <span><i class="lucide-user-round"></i> Coach</span>
+                            <strong>{{ equipe.coach ?: 'Non renseigne' }}</strong>
+                        </div>
+
+                        <div class="team-info-item">
+                            <span><i class="lucide-trophy"></i> Matchs</span>
+                            <strong>{{ equipe.matchs|length }} match(s)</strong>
+                        </div>
+
+                        {% if equipe.telephone %}
+                            <div class="team-info-item">
+                                <span><i class="lucide-phone"></i> Telephone</span>
+                                <strong>{{ equipe.telephone }}</strong>
+                            </div>
+                        {% endif %}
+
+                        {% if equipe.email %}
+                            <div class="team-info-item">
+                                <span><i class="lucide-mail"></i> Email</span>
+                                <strong>{{ equipe.email }}</strong>
+                            </div>
+                        {% endif %}
+
+                        {% if equipe.adresse %}
+                            <div class="team-info-item">
+                                <span><i class="lucide-map-pin"></i> Adresse</span>
+                                <strong>{{ equipe.adresse }}</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="team-actions">
+                        <a href="{{ path('app_front_equipes_index') }}" class="team-btn team-btn--ghost">
+                            <i class="lucide-arrow-left"></i>
+                            Retour aux equipes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </article>
 
         {% if equipe.matchs %}
-            <div style="background: var(--card-bg); padding: 32px; border-radius: 16px; border: 1px solid var(--border-color);">
-                <h2 style="font-size: 24px; font-weight: 700; color: var(--text-dark); margin: 0 0 24px 0;">Matchs impliquant cette équipe</h2>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            <article class="team-related-card">
+                <header class="team-related-card__head">
+                    <h2>Matchs lies a cette equipe</h2>
+                    <span class="team-related-count">{{ equipe.matchs|length }} element(s)</span>
+                </header>
+
+                <div class="team-related-grid">
                     {% for match in equipe.matchs %}
-                        <div style="background: var(--body-bg); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
-                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
-                                {{ match.dateMatch ? match.dateMatch|date('d/m/Y à H:i') : 'N/A' }}
+                        <article class="team-related-item">
+                            <div class="team-related-item__date">
+                                {{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'Date N/A' }}
+                                {% if match.heureDebut %}- {{ match.heureDebut|date('H:i') }}{% endif %}
                             </div>
-                            <div style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 12px;">
+                            <div class="team-related-item__vs">
                                 {{ match.equipeDomicile.nom }} vs {{ match.equipeExterieur.nom }}
                             </div>
-                            <div style="font-size: 12px; color: var(--text-muted);">
-                                📍 {{ match.lieu }}
+                            <div class="team-related-item__meta">
+                                <i class="lucide-map-pin"></i> {{ match.lieu ?: 'Lieu non renseigne' }}
                             </div>
-                        </div>
+                            <a href="{{ path('app_front_matchs_show', {'id': match.id}) }}" class="team-related-item__link">
+                                Ouvrir le match
+                            </a>
+                        </article>
                     {% endfor %}
                 </div>
-            </div>
+            </article>
         {% endif %}
-    </div>
+    </section>
 {% endblock %}

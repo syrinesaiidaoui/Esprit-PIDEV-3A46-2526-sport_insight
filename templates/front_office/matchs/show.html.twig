@@ -2,7 +2,8 @@
 
 {% block title %}Détails du Match{% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+    {{ parent() }}
     <style>
                 /* Modern Weather & Location Card */
                 .modern-glass-card {
@@ -990,9 +991,435 @@
             border-color: #1f5f53;
             background: #0f172a;
         }
-    </style>
 
-    <div class="match-details">
+        .match-detail-hero {
+            position: relative;
+            max-width: 1320px;
+            margin: 16px auto 0;
+            padding: clamp(16px, 3vw, 24px);
+            border-radius: 28px;
+            background: radial-gradient(circle at 18% 22%, rgba(52, 211, 153, 0.22), rgba(2, 6, 23, 0) 45%),
+                        radial-gradient(circle at 78% 78%, rgba(59, 130, 246, 0.2), rgba(2, 6, 23, 0) 50%),
+                        var(--hero-grad);
+            overflow: hidden;
+        }
+
+        .match-detail-hero__card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.26);
+            overflow: hidden;
+            padding: clamp(22px, 4vw, 34px);
+            color: #f8fafc;
+            isolation: isolate;
+            box-shadow: var(--soft-shadow);
+        }
+
+        .match-detail-hero__card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url('{{ asset('images/match.webp') }}');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.04);
+            z-index: 0;
+        }
+
+        .match-detail-hero__card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(2, 6, 23, 0.84) 0%, rgba(2, 6, 23, 0.72) 46%, rgba(30, 58, 138, 0.58) 100%);
+            z-index: 1;
+        }
+
+        .match-detail-hero__card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .match-detail-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.34);
+            background: rgba(2, 6, 23, 0.48);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .match-detail-hero__card h1 {
+            margin: 14px 0 0;
+            font-size: clamp(30px, 5vw, 46px);
+            line-height: 1.15;
+            color: #f8fafc;
+        }
+
+        .match-detail-hero__card p {
+            margin: 12px 0 0;
+            max-width: 760px;
+            color: #dbeafe;
+            font-size: 16px;
+        }
+
+        .match-home-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0;
+            display: grid;
+            gap: 14px;
+        }
+
+        .match-home-shell .details-header {
+            display: none;
+        }
+
+        .match-home-shell .modern-cards-container {
+            max-width: none;
+            margin: 0;
+            gap: 10px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .match-home-shell .modern-glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--soft-shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 14px;
+        }
+
+        .match-home-shell .modern-glass-card .weather-title,
+        .match-home-shell .modern-glass-card .location-title {
+            color: var(--text-main);
+        }
+
+        .match-home-shell .modern-glass-card .weather-main {
+            color: var(--text-main);
+            font-size: 20px;
+        }
+
+        .match-home-shell .modern-glass-card .weather-badge,
+        .match-home-shell .modern-glass-card .location-badge {
+            background: var(--surface);
+            color: var(--text-soft);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+            font-size: 12px;
+            padding: 3px 9px;
+        }
+
+        .match-home-shell .modern-glass-card .weather-desc,
+        .match-home-shell .modern-glass-card .location-distance {
+            color: var(--text-soft);
+        }
+
+        .match-home-shell .modern-glass-card .location-map-btn {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #f8fafc;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 12px 22px rgba(16, 185, 129, 0.2);
+        }
+
+        .match-home-shell .modern-glass-card .location-map-btn:hover {
+            background: linear-gradient(135deg, #22c55e, #059669);
+        }
+
+        .match-home-shell .match-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            box-shadow: var(--soft-shadow);
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .match-home-shell .match-header {
+            background: linear-gradient(125deg, #0f172a 0%, #1e293b 52%, #0f766e 100%);
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .match-home-shell .match-title {
+            font-size: 21px;
+            line-height: 1.2;
+        }
+
+        .match-home-shell .match-id-badge {
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .match-home-shell .details-overview {
+            padding: 14px 16px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .match-home-shell .details-overview__group {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .match-home-shell .detail-chip {
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 10px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .match-home-shell .detail-chip__k {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .match-home-shell .detail-chip__v {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
+        .match-home-shell .details-overview__score {
+            min-width: 120px;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: linear-gradient(140deg, rgba(16, 185, 129, 0.17), rgba(15, 23, 42, 0.08));
+            display: grid;
+            align-content: center;
+            justify-items: center;
+            gap: 2px;
+            padding: 8px 10px;
+        }
+
+        .match-home-shell .details-overview__score span {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-soft);
+        }
+
+        .match-home-shell .details-overview__score strong {
+            font-size: 28px;
+            line-height: 1;
+            color: var(--text-main);
+        }
+
+        .match-home-shell .detail-item {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 13px;
+        }
+
+        .match-home-shell .detail-label {
+            color: var(--text-soft);
+        }
+
+        .match-home-shell .detail-value {
+            color: var(--text-main);
+        }
+
+        .match-export-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 8px 0 18px;
+        }
+
+        .match-export-btn {
+            min-height: 36px;
+            padding: 0 13px;
+            border-radius: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: #f8fafc;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 22px rgba(59, 130, 246, 0.2);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .match-export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(59, 130, 246, 0.3);
+            color: #f8fafc;
+        }
+
+        .match-home-shell .teams-section {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .match-home-shell .teams-section h3 {
+            color: var(--text-main);
+            font-size: 21px;
+            margin-bottom: 12px;
+        }
+
+        .match-home-shell .teams-formation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .match-home-shell .team-heading {
+            color: var(--text-main);
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            min-height: 58px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .match-home-shell .lineup-section {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--primary);
+            border-radius: 12px;
+        }
+
+        .match-home-shell .action-buttons {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .match-home-shell .action-btn {
+            min-height: 36px;
+            padding: 0 13px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+        }
+
+        .match-home-shell .btn-back {
+            border-color: var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        .match-home-shell .btn-back:hover {
+            border-color: rgba(16, 185, 129, 0.55);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--text-main);
+        }
+
+        .match-home-shell .btn-edit {
+            border-color: rgba(16, 185, 129, 0.35);
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #f8fafc;
+            box-shadow: 0 12px 22px rgba(16, 185, 129, 0.2);
+        }
+
+        .match-home-shell .btn-edit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(16, 185, 129, 0.3);
+            color: #f8fafc;
+        }
+
+        @media (max-width: 980px) {
+            .match-home-shell .modern-cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .match-home-shell .details-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .match-home-shell .details-overview__group {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .match-home-shell .teams-formation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .match-detail-hero {
+                margin-top: 10px;
+                border-radius: 20px;
+                padding: 12px;
+            }
+
+            .match-detail-hero__card {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .match-home-shell .match-title {
+                font-size: 19px;
+            }
+
+            .match-home-shell .teams-section,
+            .match-home-shell .action-buttons {
+                padding: 14px;
+            }
+
+            .match-home-shell .details-overview {
+                padding: 12px;
+            }
+
+            .match-home-shell .details-overview__group {
+                grid-template-columns: 1fr;
+            }
+
+            .match-home-shell .action-btn,
+            .match-export-btn {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block hero %}
+    <section class="match-detail-hero">
+        <div class="match-detail-hero__card">
+            <span class="match-detail-hero__eyebrow">Match center</span>
+            <h1>{{ match.equipeDomicile.nom }} vs {{ match.equipeExterieur.nom }}</h1>
+            <p>
+                {{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'Date a definir' }}
+                {% if match.heureDebut %} - {{ match.heureDebut|date('H:i') }}{% endif %}
+                {% if match.lieu %} - {{ match.lieu }}{% endif %}
+            </p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block body %}
+
+    <div class="match-details match-home-shell">
         <div class="details-header">
             <h1>⚽ Détails du Match</h1>
         </div>
@@ -1030,51 +1457,51 @@
                 </div>
                 <div class="match-id-badge">#{{ match.id }}</div>
             </div>
+            <div class="details-overview">
+                <div class="details-overview__group">
+                    <div class="detail-chip">
+                        <span class="detail-chip__k">Date</span>
+                        <span class="detail-chip__v">{{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'N/A' }}</span>
+                    </div>
 
-            <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-label">📅 Date</span>
-                    <span class="detail-value">{{ match.dateMatch ? match.dateMatch|date('d/m/Y') : 'N/A' }}</span>
+                    <div class="detail-chip">
+                        <span class="detail-chip__k">Heure</span>
+                        <span class="detail-chip__v">{{ match.heureDebut ? match.heureDebut|date('H:i') : 'N/A' }}</span>
+                    </div>
+
+                    <div class="detail-chip">
+                        <span class="detail-chip__k">Lieu</span>
+                        <span class="detail-chip__v">{{ match.lieu ?? 'N/A' }}</span>
+                    </div>
+
+                    <div class="detail-chip">
+                        <span class="detail-chip__k">Type</span>
+                        <span class="detail-chip__v">{{ match.type ?? 'N/A' }}</span>
+                    </div>
+
+                    <div class="detail-chip">
+                        <span class="detail-chip__k">Statut</span>
+                        <span class="detail-chip__v">{{ match.statut ?? 'N/A' }}</span>
+                    </div>
                 </div>
 
-                <div class="detail-item">
-                    <span class="detail-label">🕐 Heure</span>
-                    <span class="detail-value">{{ match.heureDebut ? match.heureDebut|date('H:i') : 'N/A' }}</span>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-label">📍 Lieu</span>
-                    <span class="detail-value">{{ match.lieu ?? 'N/A' }}</span>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-label">🎯 Type</span>
-                    <span class="detail-value">{{ match.type ?? 'N/A' }}</span>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-label">🔔 Statut</span>
-                    <span class="detail-value">{{ match.statut ?? 'N/A' }}</span>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-label">⚽ Score</span>
-                    <span class="detail-value">{{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}</span>
+                <div class="details-overview__score">
+                    <span>Score</span>
+                    <strong>{{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}</strong>
                 </div>
             </div>
-
-          <div style="display: flex; justify-content: center; margin-bottom: 32px;">
+          <div class="match-export-wrap">
           <a href="{{ path('app_front_matchs_export_pdf', {'id': match.id}) }}"
-          class="btn"
-          style="padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
-          📄 Exporter en PDf
+          class="match-export-btn"
+          >
+          📄 Exporter en PDF
           </a>
           </div>
 
 
             <div class="teams-section">
                 <h3>Équipes et Compositions</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                <div class="teams-formation-grid">
                     <!-- ÉQUIPE DOMICILE -->
                     <div style="text-align: center;">
                         <div class="team-heading">
@@ -1493,3 +1920,5 @@
         });
     </script>
 {% endblock %}
+
+

@@ -1,43 +1,427 @@
 {% extends 'front_office/base.html.twig' %}
 
-{% block title %}Login - Sport Insight{% endblock %}
+{% block title %}Sign In - Sport Insight{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .auth-hero {
+            position: relative;
+            max-width: 1320px;
+            margin: 16px auto 0;
+            padding: clamp(16px, 3vw, 24px);
+            border-radius: 28px;
+            background: radial-gradient(circle at 18% 22%, rgba(52, 211, 153, 0.24), rgba(2, 6, 23, 0) 45%),
+                        radial-gradient(circle at 82% 78%, rgba(59, 130, 246, 0.22), rgba(2, 6, 23, 0) 52%),
+                        var(--hero-grad);
+            overflow: hidden;
+        }
+
+        .auth-hero__card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.3);
+            overflow: hidden;
+            padding: clamp(22px, 4vw, 34px);
+            color: #f8fafc;
+            isolation: isolate;
+            box-shadow: var(--soft-shadow);
+        }
+
+        .auth-hero__card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url('{{ asset('images/bg.webp') }}');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.04);
+            z-index: 0;
+        }
+
+        .auth-hero__card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(2, 6, 23, 0.86) 0%, rgba(2, 6, 23, 0.72) 44%, rgba(16, 185, 129, 0.52) 100%);
+            z-index: 1;
+        }
+
+        .auth-hero__card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.34);
+            background: rgba(2, 6, 23, 0.44);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .auth-hero__card h1 {
+            margin: 14px 0 0;
+            font-size: clamp(30px, 5vw, 46px);
+            line-height: 1.1;
+            color: #f8fafc;
+        }
+
+        .auth-hero__card p {
+            margin: 12px 0 0;
+            max-width: 760px;
+            color: #dbeafe;
+            font-size: 17px;
+        }
+
+        .auth-shell {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+            display: grid;
+            gap: 18px;
+        }
+
+        .auth-panel {
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            box-shadow: var(--soft-shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: minmax(260px, 0.92fr) minmax(0, 1.08fr);
+        }
+
+        .auth-panel__aside {
+            padding: 24px;
+            position: relative;
+            border-right: 1px solid var(--border-color);
+            background: linear-gradient(170deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.08));
+            display: grid;
+            align-content: start;
+            gap: 16px;
+        }
+
+        .auth-panel__badge {
+            width: fit-content;
+            border-radius: 999px;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 6px 10px;
+        }
+
+        .auth-panel__aside h2 {
+            margin: 0;
+            font-size: 30px;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .auth-panel__aside p {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 14px;
+        }
+
+        .auth-points {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 8px;
+        }
+
+        .auth-points li {
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-points i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .auth-panel__form {
+            padding: 24px;
+            display: grid;
+            align-content: start;
+            gap: 14px;
+        }
+
+        .auth-panel__form h3 {
+            margin: 0;
+            font-size: 32px;
+            color: var(--text-main);
+        }
+
+        .auth-panel__form p {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 14px;
+        }
+
+        .auth-alert,
+        .auth-success {
+            border-radius: 12px;
+            border: 1px solid;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .auth-alert {
+            border-color: rgba(239, 68, 68, 0.36);
+            background: rgba(239, 68, 68, 0.12);
+            color: #dc2626;
+        }
+
+        .auth-success {
+            border-color: rgba(16, 185, 129, 0.36);
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+        }
+
+        .auth-form {
+            display: grid;
+            gap: 12px;
+        }
+
+        .auth-field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .auth-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-soft);
+        }
+
+        .auth-input {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--input-text);
+            padding: 11px 13px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .auth-input:focus {
+            border-color: rgba(16, 185, 129, 0.75);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+
+        .auth-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .auth-btn {
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+        }
+
+        .auth-btn--primary {
+            color: #f8fafc;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            border-color: rgba(16, 185, 129, 0.35);
+            box-shadow: 0 12px 22px rgba(16, 185, 129, 0.2);
+        }
+
+        .auth-btn--primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 26px rgba(16, 185, 129, 0.3);
+            color: #f8fafc;
+        }
+
+        .auth-btn--ghost {
+            border-color: var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        .auth-btn--ghost:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--text-main);
+        }
+
+        .auth-switch {
+            margin-top: 4px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            display: grid;
+            gap: 8px;
+        }
+
+        .auth-switch p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-soft);
+        }
+
+        .auth-switch .auth-btn {
+            width: 100%;
+        }
+
+        [data-theme="dark"] .auth-panel__aside,
+        [data-theme="dark"] .auth-points li,
+        [data-theme="dark"] .auth-btn--ghost {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        @media (max-width: 980px) {
+            .auth-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-panel__aside {
+                border-right: 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .auth-hero {
+                margin-top: 10px;
+                border-radius: 20px;
+                padding: 12px;
+            }
+
+            .auth-hero__card {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .auth-panel__aside,
+            .auth-panel__form {
+                padding: 16px;
+            }
+
+            .auth-panel__form h3 {
+                font-size: 28px;
+            }
+
+            .auth-actions {
+                flex-direction: column;
+            }
+
+            .auth-actions .auth-btn {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block hero %}
-    <div class="hero">
-        <h1>Sport Insight</h1>
-        <p>Sign in to access your account and complete purchases.</p>
-    </div>
+    <section class="auth-hero">
+        <div class="auth-hero__card">
+            <span class="auth-hero__eyebrow">Authentication</span>
+            <h1>Welcome back to Sport Insight</h1>
+            <p>Sign in to continue with matches, players, training sessions, and purchases.</p>
+        </div>
+    </section>
 {% endblock %}
 
 {% block body %}
-    <div class="page-container d-flex justify-content-center">
-        <div class="front-card" style="max-width:420px; width:100%">
-            <h3 class="mb-3">Sign in</h3>
+    <section class="auth-shell">
+        <article class="auth-panel">
+            <aside class="auth-panel__aside">
+                <span class="auth-panel__badge">Secure access</span>
+                <h2>Sign in fast and keep control.</h2>
+                <p>Use your account to sync your activity across the entire Sport Insight platform.</p>
 
-            {% if error %}
-                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-            {% endif %}
+                <ul class="auth-points">
+                    <li><i class="lucide-shield-check"></i> Protected authentication flow</li>
+                    <li><i class="lucide-shopping-cart"></i> Access your orders and cart</li>
+                    <li><i class="lucide-trophy"></i> Continue tracking matches and teams</li>
+                </ul>
+            </aside>
 
-            <form action="{{ path('app_login') }}" method="post">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Email</label>
-                    <input type="text" id="username" name="_username" value="{{ last_username }}" required class="form-control" />
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="_password" required class="form-control" />
-                </div>
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Sign in</button>
-                    <a href="{{ path('front_home') }}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
+            <div class="auth-panel__form">
+                <h3>Sign in</h3>
+                <p>Enter your credentials to access your account.</p>
 
-            <div class="mt-4 text-center">
-                <p class="mb-2" style="color: var(--muted);">Don't have an account yet?</p>
-                <a href="{{ path('app_sign_up') }}" class="btn btn-outline-primary w-100">Create account</a>
+                {% if error %}
+                    <div class="auth-alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                {% endif %}
+
+                {% if app.user %}
+                    <div class="auth-success">
+                        You are signed in as {{ app.user.userIdentifier }}.
+                    </div>
+                {% endif %}
+
+                <form action="{{ path('app_login') }}" method="post" class="auth-form">
+                    <div class="auth-field">
+                        <label for="username" class="auth-label">Email</label>
+                        <input type="email" id="username" name="_username" value="{{ last_username }}" required autocomplete="email" class="auth-input" placeholder="name@example.com" />
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="password" class="auth-label">Password</label>
+                        <input type="password" id="password" name="_password" required autocomplete="current-password" class="auth-input" placeholder="Enter your password" />
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div class="auth-actions">
+                        <button type="submit" class="auth-btn auth-btn--primary">
+                            <i class="lucide-log-in"></i>
+                            Sign in
+                        </button>
+                        <a href="{{ path('front_home') }}" class="auth-btn auth-btn--ghost">
+                            <i class="lucide-arrow-left"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+                <div class="auth-switch">
+                    <p>New here? Create your account.</p>
+                    <a href="{{ path('app_sign_up') }}" class="auth-btn auth-btn--ghost">
+                        <i class="lucide-user-round-plus"></i>
+                        Create account
+                    </a>
+                </div>
             </div>
-        </div>
-    </div>
+        </article>
+    </section>
 {% endblock %}
