@@ -55,6 +55,40 @@
     <body>
         {% block body %}{% endblock %}
         {% include '_partials/global_form_ux.html.twig' %}
+        {% if app.debug %}
+            <script>
+                (function () {
+                    var tries = 0;
+                    var timer = setInterval(function () {
+                        tries++;
+                        var toolbar = document.querySelector('.sf-toolbar.sf-display-none');
+                        if (!toolbar) {
+                            if (tries > 30) {
+                                clearInterval(timer);
+                            }
+                            return;
+                        }
+
+                        toolbar.classList.remove('sf-display-none');
+                        var main = toolbar.querySelector('[id^="sfToolbarMainContent-"]');
+                        var clearer = toolbar.querySelector('[id^="sfToolbarClearer-"]');
+                        var mini = toolbar.querySelector('[id^="sfMiniToolbar-"]');
+
+                        if (main && !main.style.display) {
+                            main.style.display = 'block';
+                        }
+                        if (clearer && !clearer.style.display) {
+                            clearer.style.display = 'block';
+                        }
+                        if (mini && !mini.style.display) {
+                            mini.style.display = 'none';
+                        }
+
+                        clearInterval(timer);
+                    }, 200);
+                })();
+            </script>
+        {% endif %}
     </body>
 </html>
 
