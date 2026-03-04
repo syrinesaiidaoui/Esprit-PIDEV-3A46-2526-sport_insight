@@ -149,8 +149,6 @@ Check:
 
 ## Contributors / Team
 
-Update this section as your team evolves.
-
 | Name | Role | Scope |
 | --- | --- | --- |
 | Elyes Chaouch | Full-stack development | Front office, back office, database, integrations |
