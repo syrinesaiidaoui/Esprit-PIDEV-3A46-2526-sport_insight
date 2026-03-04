@@ -2,8 +2,9 @@
 * { box-sizing: border-box; }
 
 body {
-    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
     min-height: 100vh;
+    background-color: var(--page-bg-color, var(--body-bg, #f8fafc));
+    background-image: var(--page-bg, linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%));
     background-attachment: fixed;
 }
 

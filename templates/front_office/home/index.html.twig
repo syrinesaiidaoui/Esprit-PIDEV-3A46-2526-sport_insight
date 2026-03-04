@@ -79,10 +79,39 @@
         border: 1px solid var(--glass-border);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
-        background: var(--glass-bg);
+        background: #0b1220;
         box-shadow: var(--soft-shadow);
         padding: clamp(24px, 4vw, 44px);
-        color: var(--text-main);
+        color: #f8fafc;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .home-landing__card::before,
+    .home-landing__card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .home-landing__card::before {
+        background-image: url('{{ asset('images/bg.webp') }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transform: scale(1.04);
+        z-index: 0;
+    }
+
+    .home-landing__card::after {
+        background: linear-gradient(120deg, rgba(2, 6, 23, 0.82) 0%, rgba(15, 23, 42, 0.72) 55%, rgba(30, 58, 138, 0.52) 100%);
+        z-index: 1;
+    }
+
+    .home-landing__card > * {
+        position: relative;
+        z-index: 2;
     }
 
     .home-eyebrow {
@@ -90,8 +119,9 @@
         align-items: center;
         padding: 6px 12px;
         border-radius: 999px;
-        background: rgba(15, 23, 42, 0.1);
-        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(2, 6, 23, 0.5);
+        border: 1px solid rgba(226, 232, 240, 0.3);
+        color: #e2e8f0;
         font-size: 12px;
         font-weight: 700;
         text-transform: uppercase;
@@ -107,14 +137,20 @@
         font-size: clamp(36px, 5vw, 52px);
         font-weight: 600;
         line-height: 1.2;
-        color: var(--text-main);
+        color: #f8fafc;
     }
 
     .home-landing__card p {
         margin: 14px 0 0;
         max-width: 760px;
-        color: var(--text-soft);
+        color: #dbeafe;
         font-size: 19px;
+    }
+
+    .home-landing__card .home-btn--ghost {
+        color: #f8fafc;
+        border-color: rgba(226, 232, 240, 0.34);
+        background: rgba(2, 6, 23, 0.45);
     }
 
     .home-cta {
@@ -177,17 +213,66 @@
         border-radius: 22px;
         padding: 20px;
         border: 1px solid var(--glass-border);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-        background: var(--glass-bg);
+        background: #0f172a;
         box-shadow: var(--soft-shadow);
         transition: all .3s cubic-bezier(0.23, 1, 0.320, 1);
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        min-height: 276px;
+    }
+
+    .home-card::before,
+    .home-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .home-card::before {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transform: scale(1);
+        transition: transform .45s cubic-bezier(0.23, 1, 0.320, 1);
+        z-index: 0;
+    }
+
+    .home-card::after {
+        background: linear-gradient(160deg, rgba(2, 6, 23, 0.78) 0%, rgba(2, 6, 23, 0.62) 45%, rgba(2, 6, 23, 0.84) 100%);
+        z-index: 1;
+    }
+
+    .home-card > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    .home-card--training::before {
+        background-image: url('{{ asset('images/entrainement.jpg') }}');
+    }
+
+    .home-card--teams::before {
+        background-image: url('{{ asset('images/equipe.jpg') }}');
+    }
+
+    .home-card--players::before {
+        background-image: url('{{ asset('images/players.jpg') }}');
+    }
+
+    .home-card--matches::before {
+        background-image: url('{{ asset('images/match.webp') }}');
     }
 
     .home-card:hover {
         transform: translateY(-6px);
-        border-color: rgba(16, 185, 129, 0.45);
-        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.12);
+        border-color: rgba(52, 211, 153, 0.45);
+        box-shadow: 0 16px 36px rgba(2, 6, 23, 0.32);
+    }
+
+    .home-card:hover::before {
+        transform: scale(1.06);
     }
 
     .home-card__icon {
@@ -197,27 +282,31 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(16, 185, 129, 0.15);
-        color: #059669;
+        background: rgba(2, 6, 23, 0.45);
+        border: 1px solid rgba(226, 232, 240, 0.32);
+        color: #f8fafc;
         font-size: 20px;
         margin-bottom: 10px;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     [data-theme="dark"] .home-card__icon {
-        background: rgba(52, 211, 153, 0.2);
-        color: #99f6e4;
+        background: rgba(2, 6, 23, 0.5);
+        border-color: rgba(148, 163, 184, 0.34);
+        color: #e2e8f0;
     }
 
     .home-card h3 {
         margin: 0;
         font-size: 30px;
         font-weight: 600;
-        color: var(--text-main);
+        color: #f8fafc;
     }
 
     .home-card p {
         margin: 8px 0 0;
-        color: var(--text-soft);
+        color: #dbeafe;
         font-size: 16px;
     }
 
@@ -319,8 +408,8 @@
 <section class="home-landing home-fade home-fade--hero">
     <div class="home-landing__card">
         <span class="home-eyebrow">Football platform</span>
-        <h1>Simple, fast and beautiful club experience</h1>
-        <p>Manage trainings, teams, players, matches and equipment through one premium interface inspired by modern iOS and SaaS product design.</p>
+        <h1>Welcome to Sport Insight</h1>
+        <p>Your all-in-one football platform to manage training sessions, teams, players, matches, and club announcements with ease.</p>
         <div class="home-cta home-fade home-fade--cta">
             <a href="{{ path('front_equipement_index') }}" class="home-btn">Shop equipment</a>
             <a href="{{ path('app_front_matchs_index') }}" class="home-btn home-btn--ghost">Open matches</a>
@@ -332,22 +421,22 @@
 {% block body %}
 <div class="home-main">
     <section class="home-grid home-fade home-fade--cards">
-        <a class="home-card" href="{{ path('front_entrainement_index') }}">
+        <a class="home-card home-card--training" href="{{ path('front_entrainement_index') }}">
             <span class="home-card__icon"><i class="lucide-dumbbell"></i></span>
             <h3>Training</h3>
             <p>Plan sessions, track participation and keep team preparation organized.</p>
         </a>
-        <a class="home-card" href="{{ path('app_front_equipes_index') }}">
+        <a class="home-card home-card--teams" href="{{ path('app_front_equipes_index') }}">
             <span class="home-card__icon"><i class="lucide-users"></i></span>
             <h3>Teams</h3>
             <p>Explore squads, coaches and performance details in one place.</p>
         </a>
-        <a class="home-card" href="{{ path('app_joueurs_index') }}">
+        <a class="home-card home-card--players" href="{{ path('app_joueurs_index') }}">
             <span class="home-card__icon"><i class="lucide-user-plus"></i></span>
             <h3>Players</h3>
             <p>Open player profiles, roles and progression insights instantly.</p>
         </a>
-        <a class="home-card" href="{{ path('app_front_matchs_index') }}">
+        <a class="home-card home-card--matches" href="{{ path('app_front_matchs_index') }}">
             <span class="home-card__icon"><i class="lucide-trophy"></i></span>
             <h3>Matches</h3>
             <p>Review fixtures, lineups and match outcomes from one dashboard.</p>

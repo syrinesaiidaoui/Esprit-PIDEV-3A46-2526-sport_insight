@@ -10,24 +10,25 @@
         align-items: center;
         margin-bottom: 40px;
         padding-bottom: 20px;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-color);
     }
 
     .page-title {
         font-size: 32px;
         font-weight: 800;
-        color: #0f172a;
+        color: var(--ink);
         margin: 0;
         letter-spacing: -0.02em;
     }
 
     /* Modern Filter Bar */
     .filter-section {
-        background: #f8fafc;
+        background: var(--card-bg);
         border-radius: 20px;
         padding: 24px;
         margin-bottom: 40px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--soft-shadow);
     }
 
     .filter-grid {
@@ -41,7 +42,7 @@
         display: block;
         font-size: 13px;
         font-weight: 700;
-        color: #64748b;
+        color: var(--text-muted);
         margin-bottom: 8px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -50,11 +51,11 @@
     .modern-input {
         width: 100%;
         padding: 12px 16px;
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
         font-size: 14px;
-        color: #1e293b;
+        color: var(--input-text);
         transition: all 0.2s;
     }
 
@@ -72,8 +73,8 @@
     }
 
     .annonce-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 24px;
         padding: 24px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -98,7 +99,7 @@
     .card-date {
         font-size: 12px;
         font-weight: 600;
-        color: #94a3b8;
+        color: var(--text-muted);
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -108,13 +109,13 @@
     .card-title {
         font-size: 20px;
         font-weight: 700;
-        color: #0f172a;
+        color: var(--ink);
         margin-bottom: 16px;
         line-height: 1.4;
     }
 
     .card-details {
-        background: #f1f5f9;
+        background: var(--surface);
         border-radius: 16px;
         padding: 16px;
         margin-bottom: 24px;
@@ -128,8 +129,8 @@
     }
 
     .detail-item:last-child { margin-bottom: 0; }
-    .detail-label { color: #64748b; font-weight: 500; }
-    .detail-value { color: #1e293b; font-weight: 700; }
+    .detail-label { color: var(--text-muted); font-weight: 500; }
+    .detail-value { color: var(--ink); font-weight: 700; }
 
     .card-actions {
         display: flex;
@@ -157,30 +158,34 @@
 
     .btn-edit {
         flex: 1;
-        background: #ffffff;
-        color: #475569;
+        background: var(--card-bg);
+        color: var(--muted);
         text-decoration: none;
         padding: 12px;
         border-radius: 12px;
         text-align: center;
         font-weight: 700;
         font-size: 14px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
         transition: all 0.2s;
     }
 
     .btn-edit:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
+        background: var(--surface);
+        border-color: var(--border-color);
     }
 
     /* Empty State */
     .empty-state {
         text-align: center;
         padding: 80px 40px;
-        background: #f8fafc;
+        background: var(--surface);
         border-radius: 24px;
-        border: 2px dashed #e2e8f0;
+        border: 2px dashed var(--border-color);
+    }
+
+    [data-theme="dark"] .annonce-card:hover {
+        box-shadow: 0 18px 30px rgba(2, 6, 23, 0.45), 0 8px 14px rgba(2, 6, 23, 0.35);
     }
 </style>
 
@@ -269,8 +274,8 @@
 {% else %}
     <div class="empty-state">
         <div style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
-        <h3 style="color: #0f172a; margin-bottom: 8px;">Aucune annonce trouvée</h3>
-        <p style="color: #64748b;">Essayez de modifier vos filtres de recherche.</p>
+        <h3 style="color: var(--ink); margin-bottom: 8px;">Aucune annonce trouvée</h3>
+        <p style="color: var(--text-muted);">Essayez de modifier vos filtres de recherche.</p>
     </div>
 {% endif %}
 {% endblock %}

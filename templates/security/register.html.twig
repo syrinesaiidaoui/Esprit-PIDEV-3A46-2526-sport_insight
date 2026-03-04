@@ -28,6 +28,15 @@
                 <div class="mb-3">
                     {{ form_label(registrationForm.email) }}
                     {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                    <div class="form-text" style="color: var(--text-muted);">
+                        Use
+                        <code style="color: var(--primary); background: rgba(16, 185, 129, 0.12); padding: 2px 6px; border-radius: 6px;">@player.com</code>
+                        for players,
+                        <code style="color: var(--primary); background: rgba(16, 185, 129, 0.12); padding: 2px 6px; border-radius: 6px;">@coach.com</code>
+                        for coaches, and
+                        <code style="color: var(--primary); background: rgba(16, 185, 129, 0.12); padding: 2px 6px; border-radius: 6px;">@esprit.tn</code>
+                        for admins.
+                    </div>
                     {{ form_errors(registrationForm.email) }}
                 </div>
                 <div class="mb-3">

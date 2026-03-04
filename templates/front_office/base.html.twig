@@ -5,15 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sport Insight Boutique{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logos/mini%20logo%20nuit.png') }}?v=20260304">
+    <link rel="shortcut icon" href="{{ asset('images/logos/mini%20logo%20nuit.png') }}?v=20260304">
+    <link rel="apple-touch-icon" href="{{ asset('images/logos/mini%20logo%20nuit.png') }}?v=20260304">
     <script>
         (function () {
+            function isValidMode(mode) {
+                return mode === 'light' || mode === 'dark';
+            }
+
             try {
-                var savedTheme = localStorage.getItem('front_theme_mode');
-                var mode = savedTheme === 'light' || savedTheme === 'dark'
+                var savedTheme = localStorage.getItem('theme_mode')
+                    || localStorage.getItem('front_theme_mode')
+                    || localStorage.getItem('admin_theme_mode');
+
+                var mode = isValidMode(savedTheme)
                     ? savedTheme
                     : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
                 document.documentElement.setAttribute('data-theme', mode);
-            } catch (e) {}
+            } catch (e) {
+                if (!isValidMode(document.documentElement.getAttribute('data-theme'))) {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            }
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,8 +137,8 @@
         body {
             margin: 0;
             font-family: 'Manrope', sans-serif;
-            background-color: var(--page-bg-color);
-            background-image: var(--page-bg);
+            background-color: var(--page-bg-color) !important;
+            background-image: var(--page-bg) !important;
             color: var(--ink);
             transition: background-color var(--theme-transition-duration) var(--theme-transition-ease),
                         color var(--theme-transition-duration) var(--theme-transition-ease);
@@ -177,30 +192,38 @@
         .nav-brand {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
             text-decoration: none;
             color: var(--ink);
             flex-shrink: 0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.62);
+            box-shadow: 0 5px 12px rgba(2, 6, 23, 0.1);
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
         }
 
-        .nav-brand-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #34d399, #10b981);
-            color: #fff;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 700;
+        .nav-brand:hover {
+            transform: translateY(-1px);
+            border-color: rgba(16, 185, 129, 0.45);
+            box-shadow: 0 8px 16px rgba(2, 6, 23, 0.14);
         }
 
-        .nav-brand-text {
+        .nav-brand-logo {
             display: block;
-            color: var(--ink);
-            font-size: 18px;
-            font-weight: 700;
+            height: 40px;
+            width: auto;
+            max-width: min(220px, 30vw);
+            object-fit: contain;
+        }
+
+        .nav-brand-logo--light {
+            height: 40px;
+        }
+
+        .nav-brand-logo--dark {
+            display: none;
+            height: 40px;
         }
 
         .nav-links {
@@ -756,7 +779,17 @@
             border-color: rgba(148, 163, 184, 0.28);
             box-shadow: 0 10px 30px rgba(2, 6, 23, 0.4);
         }
-        [data-theme="dark"] .nav-brand-text { color: #e2e8f0; }
+        [data-theme="dark"] .nav-brand {
+            background: rgba(15, 23, 42, 0.82);
+            border-color: rgba(148, 163, 184, 0.35);
+            box-shadow: 0 10px 24px rgba(2, 6, 23, 0.38);
+        }
+        [data-theme="dark"] .nav-brand:hover {
+            border-color: rgba(52, 211, 153, 0.55);
+            box-shadow: 0 14px 28px rgba(2, 6, 23, 0.45);
+        }
+        [data-theme="dark"] .nav-brand-logo--light { display: none; }
+        [data-theme="dark"] .nav-brand-logo--dark { display: block; }
         [data-theme="dark"] .nav-links a { color: rgba(226, 232, 240, 0.78); }
         [data-theme="dark"] .nav-links a:hover { color: #f8fafc; background: rgba(148, 163, 184, 0.14); }
         [data-theme="dark"] .badge-soft { background: #163a34; color: #99f6e4; }
@@ -909,6 +942,18 @@
         [data-theme="dark"] .page-container [style*="color:#111827"] {
             color: var(--ink) !important;
         }
+        [data-theme="dark"] .front-table th {
+            background: rgba(15, 23, 42, 0.72);
+            color: #cbd5e1;
+            border-bottom-color: var(--border-color);
+        }
+        [data-theme="dark"] .front-table td {
+            color: var(--ink);
+            border-bottom-color: var(--border-color);
+        }
+        [data-theme="dark"] .front-table tbody tr:hover {
+            background: rgba(148, 163, 184, 0.12);
+        }
 
         .flash-stack {
             margin-bottom: 16px;
@@ -926,8 +971,6 @@
         .flash-success { background: #e8f9ee; color: #166534; border: 1px solid #bbf7d0; }
         .flash-warning { background: #fff7e5; color: #92400e; border: 1px solid #fde68a; }
         .flash-danger, .flash-error { background: #fef0f0; color: #991b1b; border: 1px solid #fecaca; }
-
->>>>>>> origin/integr8
         .front-table {
             background: var(--card-bg);
             border-radius: 12px;
@@ -1031,8 +1074,22 @@
                 top: 8px;
             }
 
-            .nav-brand-text {
-                display: none;
+            .nav-brand-logo {
+                height: 34px;
+                max-width: 52vw;
+            }
+
+            .nav-brand-logo--light {
+                height: 34px;
+            }
+
+            .nav-brand-logo--dark {
+                height: 34px;
+            }
+
+            .nav-brand {
+                padding: 3px 8px;
+                border-radius: 10px;
             }
 
             .btn-chip {
@@ -1054,48 +1111,54 @@
 </head>
 <body class="{{ currentTheme == 'dark' ? 'dark' : '' }}">
     {% set cartCount = app.request.session.get('cart', {})|length %}
+    {% set currentRoute = app.request.get('_route') %}
+    {% set isAuthNavPage = currentRoute in ['app_login', 'app_register', 'app_sign_up'] %}
 
     <nav class="top-navbar">
         <div class="nav-left">
             <a href="{{ path('front_home') }}" class="nav-brand">
-                <span class="nav-brand-icon">SI</span>
-                <span class="nav-brand-text">{{ 'nav.brand'|trans }}</span>
+                <img src="{{ asset('images/logos/logo.png') }}" alt="{{ 'nav.brand'|trans }}" class="nav-brand-logo nav-brand-logo--light">
+                <img src="{{ asset('images/logos/logo%20nn.png') }}" alt="{{ 'nav.brand'|trans }}" class="nav-brand-logo nav-brand-logo--dark">
             </a>
         </div>
 
         <div class="nav-center">
-            <ul class="nav-links">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle {{ app.request.get('_route') starts with 'front_entrainement' or app.request.get('_route') starts with 'front_participation' or app.request.get('_route') starts with 'front_evaluation' or app.request.get('_route') starts with 'front_matchmaking' ? 'active' : '' }}" data-bs-toggle="dropdown">
-                        {{ 'nav.training'|trans }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ path('front_entrainement_index') }}">Entrainements</a></li>
-                        <li><a class="dropdown-item" href="{{ path('front_participation_index') }}">Participations</a></li>
-                        <li><a class="dropdown-item" href="{{ path('front_evaluation_index') }}">Evaluations</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item dropdown-item-accent" href="{{ path('front_matchmaking_index') }}">Matchmaking (IA)</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle {{ app.request.get('_route') starts with 'app_front_matchs' or app.request.get('_route') starts with 'app_front_equipes' or app.request.get('_route') starts with 'app_joueur' ? 'active' : '' }}" data-bs-toggle="dropdown">
-                        {{ 'nav.matches'|trans }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ path('app_front_matchs_index') }}">{{ 'nav.matches'|trans }}</a></li>
-                        <li><a class="dropdown-item" href="{{ path('app_front_equipes_index') }}">{{ 'nav.teams'|trans }}</a></li>
-                        <li><a class="dropdown-item" href="{{ path('app_joueurs_index') }}">{{ 'nav.players'|trans }}</a></li>
-                    </ul>
-                </li>
-                <li><a href="{{ path('front_equipement_index') }}" class="{{ app.request.get('_route') starts with 'front_equipement' ? 'active' : '' }}">{{ 'nav.equipment'|trans }}</a></li>
-                <li><a href="{{ path('front_sponsoring_index') }}" class="{{ app.request.get('_route') starts with 'front_sponsoring' ? 'active' : '' }}">Sponsors</a></li>
-                <li><a href="{{ path('app_annonce_index') }}" class="{{ app.request.get('_route') starts with 'app_annonce' ? 'active' : '' }}">Annonces</a></li>
-            </ul>
+            {% if not isAuthNavPage %}
+                <ul class="nav-links">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle {{ app.request.get('_route') starts with 'front_entrainement' or app.request.get('_route') starts with 'front_participation' or app.request.get('_route') starts with 'front_evaluation' or app.request.get('_route') starts with 'front_matchmaking' ? 'active' : '' }}" data-bs-toggle="dropdown">
+                            {{ 'nav.training'|trans }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('front_entrainement_index') }}">Entrainements</a></li>
+                            <li><a class="dropdown-item" href="{{ path('front_participation_index') }}">Participations</a></li>
+                            <li><a class="dropdown-item" href="{{ path('front_evaluation_index') }}">Evaluations</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item dropdown-item-accent" href="{{ path('front_matchmaking_index') }}">Matchmaking (IA)</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle {{ app.request.get('_route') starts with 'app_front_matchs' or app.request.get('_route') starts with 'app_front_equipes' or app.request.get('_route') starts with 'app_joueur' ? 'active' : '' }}" data-bs-toggle="dropdown">
+                            {{ 'nav.matches'|trans }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_front_matchs_index') }}">{{ 'nav.matches'|trans }}</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_front_equipes_index') }}">{{ 'nav.teams'|trans }}</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_joueurs_index') }}">{{ 'nav.players'|trans }}</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ path('front_equipement_index') }}" class="{{ app.request.get('_route') starts with 'front_equipement' ? 'active' : '' }}">{{ 'nav.equipment'|trans }}</a></li>
+                    <li><a href="{{ path('front_sponsoring_index') }}" class="{{ app.request.get('_route') starts with 'front_sponsoring' ? 'active' : '' }}">Sponsors</a></li>
+                    <li><a href="{{ path('app_annonce_index') }}" class="{{ app.request.get('_route') starts with 'app_annonce' ? 'active' : '' }}">Annonces</a></li>
+                </ul>
+            {% endif %}
         </div>
 
         <div class="nav-right">
             <div class="nav-actions">
-                <a href="{{ path('front_equipement_cart') }}" class="btn-chip btn-chip--cta">{{ 'nav.cart'|trans }} <span class="cart-pill">{{ cartCount }}</span></a>
+                {% if not isAuthNavPage %}
+                    <a href="{{ path('front_equipement_cart') }}" class="btn-chip btn-chip--cta">{{ 'nav.cart'|trans }} <span class="cart-pill">{{ cartCount }}</span></a>
+                {% endif %}
 
                 <div class="dropdown" data-bs-auto-close="outside">
                     <button class="settings-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Settings">
@@ -1159,7 +1222,7 @@
 
     </nav>
 
-    {% if app.request.get('_route') != 'app_login' and app.request.get('_route') != 'app_logout' %}
+    {% if currentRoute not in ['app_login', 'app_logout', 'app_register', 'app_sign_up'] %}
         {{ render(path('trending_banner')) }}
     {% endif %}
 
@@ -1197,13 +1260,27 @@
                 dark: '{{ path('app_theme_set', {mode: 'dark'}) }}'
             };
 
+            function isValidMode(mode) {
+                return mode === 'light' || mode === 'dark';
+            }
+
             function getStoredMode() {
                 try {
-                    var stored = localStorage.getItem('front_theme_mode');
-                    return stored === 'light' || stored === 'dark' ? stored : null;
+                    var stored = localStorage.getItem('theme_mode')
+                        || localStorage.getItem('front_theme_mode')
+                        || localStorage.getItem('admin_theme_mode');
+                    return isValidMode(stored) ? stored : null;
                 } catch (e) {
                     return null;
                 }
+            }
+
+            function persistMode(mode) {
+                try {
+                    localStorage.setItem('theme_mode', mode);
+                    localStorage.setItem('front_theme_mode', mode);
+                    localStorage.setItem('admin_theme_mode', mode);
+                } catch (e) {}
             }
 
             function preferredSystemMode() {
@@ -1211,7 +1288,8 @@
             }
 
             function currentMode() {
-                return document.body.classList.contains('dark') ? 'dark' : 'light';
+                var htmlTheme = document.documentElement.getAttribute('data-theme');
+                return isValidMode(htmlTheme) ? htmlTheme : 'light';
             }
 
             function resolveInitialMode() {
@@ -1233,17 +1311,15 @@
                 themeToggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
             }
 
-            function applyMode(mode, persistMode) {
+            function applyMode(mode, shouldPersist) {
                 var root = document.documentElement;
                 var isDark = mode === 'dark';
                 root.classList.add('theme-switching');
                 root.setAttribute('data-theme', mode);
                 document.body.classList.toggle('dark', isDark);
                 refreshToggle(mode);
-                if (persistMode !== false) {
-                    try {
-                        localStorage.setItem('front_theme_mode', mode);
-                    } catch (e) {}
+                if (shouldPersist !== false) {
+                    persistMode(mode);
                 }
                 setTimeout(function () {
                     root.classList.remove('theme-switching');
@@ -1251,11 +1327,6 @@
             }
 
             applyMode(resolveInitialMode(), false);
-
-            themeToggle.addEventListener('pointerdown', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            });
 
             themeToggle.addEventListener('click', function (event) {
                 event.preventDefault();

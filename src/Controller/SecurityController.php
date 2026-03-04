@@ -57,9 +57,7 @@ class SecurityController extends AbstractController
             $plainPassword = (string) $form->get('plainPassword')->getData();
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             $email = strtolower(trim((string) $user->getEmail()));
-            if (str_contains($email, '@esprit.tn')) {
-                $user->setRoles(['ROLE_ADMIN']);
-            }
+            $user->setRoles($this->resolveRolesFromEmail($email));
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -72,5 +70,22 @@ class SecurityController extends AbstractController
         return $this->render('security/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]);
+    }
+
+    private function resolveRolesFromEmail(string $email): array
+    {
+        if (str_ends_with($email, '@esprit.tn')) {
+            return ['ROLE_ADMIN'];
+        }
+
+        if (str_ends_with($email, '@coach.com')) {
+            return ['ROLE_ENTRAINEUR'];
+        }
+
+        if (str_ends_with($email, '@player.com')) {
+            return ['ROLE_JOUEUR'];
+        }
+
+        return ['ROLE_USER'];
     }
 }

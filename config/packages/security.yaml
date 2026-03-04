@@ -21,8 +21,8 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                username_parameter: email
-                password_parameter: password
+                username_parameter: _username
+                password_parameter: _password
                 default_target_path: front_home
 
             logout:
@@ -34,6 +34,7 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/sign-up, roles: PUBLIC_ACCESS }
+        - { path: ^/theme, roles: PUBLIC_ACCESS }
         - { path: ^/_trending, roles: PUBLIC_ACCESS }
         - { path: ^/annonce, roles: PUBLIC_ACCESS }
         - { path: ^/commentaire, roles: PUBLIC_ACCESS }

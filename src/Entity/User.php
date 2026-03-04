@@ -571,20 +571,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'email' => $this->email,
             'password' => $this->password,
             'roles' => $this->roles,
-            'nom' => $this->nom,
-            'prenom' => $this->prenom,
             'statut' => $this->statut,
         ];
     }
 
     public function __unserialize(array $data): void
     {
-        $this->id = $data['id'] ?? null;
-        $this->email = $data['email'] ?? null;
-        $this->password = $data['password'] ?? null;
-        $this->roles = $data['roles'] ?? [];
-        $this->nom = $data['nom'] ?? null;
-        $this->prenom = $data['prenom'] ?? null;
-        $this->statut = $data['statut'] ?? 'actif';
+        $legacyPrefix = "\0" . self::class . "\0";
+        $id = $data['id'] ?? $data[$legacyPrefix . 'id'] ?? $data[0] ?? 0;
+
+        // Keep a valid identifier shape for EntityUserProvider refresh.
+        $this->id = is_numeric($id) ? (int) $id : 0;
+        $this->email = $data['email'] ?? $data[$legacyPrefix . 'email'] ?? $data[1] ?? null;
+        $this->password = $data['password'] ?? $data[$legacyPrefix . 'password'] ?? $data[2] ?? null;
+        $this->roles = $data['roles'] ?? $data[$legacyPrefix . 'roles'] ?? $data[3] ?? [];
+        $this->nom = $data['nom'] ?? $data[$legacyPrefix . 'nom'] ?? null;
+        $this->prenom = $data['prenom'] ?? $data[$legacyPrefix . 'prenom'] ?? null;
+        $this->statut = $data['statut'] ?? $data[$legacyPrefix . 'statut'] ?? 'actif';
     }
 }

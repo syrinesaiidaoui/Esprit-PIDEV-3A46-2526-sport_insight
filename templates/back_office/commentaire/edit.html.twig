@@ -1,0 +1,39 @@
+{% extends 'back_office/base.html.twig' %}
+
+{% block title %}Modifier commentaire{% endblock %}
+
+{% block body %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>Modifier le commentaire #{{ commentaire.id }}</h1>
+    </div>
+
+    <div class="card" style="padding: 24px; max-width: 820px;">
+        {{ form_start(form) }}
+            <div class="mb-3">
+                {{ form_label(form.auteurAnonyme) }}
+                {{ form_widget(form.auteurAnonyme, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.auteurAnonyme) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.contenu) }}
+                {{ form_widget(form.contenu, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.contenu) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.dateCommentaire) }}
+                {{ form_widget(form.dateCommentaire, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateCommentaire) }}
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" type="submit">Enregistrer</button>
+                <a href="{{ path('back_commentaire_index') }}" class="btn btn-secondary">Annuler</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+

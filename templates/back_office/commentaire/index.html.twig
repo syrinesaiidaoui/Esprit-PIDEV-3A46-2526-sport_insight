@@ -1,0 +1,63 @@
+{% extends 'back_office/base.html.twig' %}
+
+{% block title %}Commentaires{% endblock %}
+
+{% block body %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>Gestion des commentaires</h1>
+    </div>
+
+    <div class="card" style="padding: 0;">
+        {% if commentaires is not empty %}
+            <table class="table table-striped" style="margin: 0;">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Auteur</th>
+                        <th>Annonce</th>
+                        <th>Contenu</th>
+                        <th>Date</th>
+                        <th style="width: 170px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for commentaire in commentaires %}
+                    <tr>
+                        <td>#{{ commentaire.id }}</td>
+                        <td>
+                            {% if commentaire.joueur %}
+                                {{ commentaire.joueur.prenom }} {{ commentaire.joueur.nom }}
+                            {% else %}
+                                {{ commentaire.auteurAnonyme ?: 'Anonyme' }}
+                            {% endif %}
+                        </td>
+                        <td>{{ commentaire.annonce ? commentaire.annonce.titre : '-' }}</td>
+                        <td style="max-width: 420px;">
+                            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ commentaire.contenu }}
+                            </div>
+                        </td>
+                        <td>{{ commentaire.dateCommentaire ? commentaire.dateCommentaire|date('Y-m-d') : '-' }}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <a href="{{ path('back_commentaire_edit', {'id': commentaire.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                                <form method="post" action="{{ path('back_commentaire_delete', {'id': commentaire.id}) }}" onsubmit="return confirm('Supprimer ce commentaire ?');" style="margin: 0;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                    <button class="btn btn-sm btn-danger" type="submit">Supprimer</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="padding: 24px; color: var(--text-muted);">
+                Aucun commentaire trouvé.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
