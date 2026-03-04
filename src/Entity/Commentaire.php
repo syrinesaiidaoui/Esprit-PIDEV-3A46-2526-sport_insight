@@ -27,7 +27,7 @@ class Commentaire
     #[ORM\JoinColumn(nullable: true)]
     private ?User $joueur = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'commentaires')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Annonce $annonce = null;
 

@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AIContractService
@@ -130,14 +132,16 @@ PROMPT;
                 // Build a simple QR payload: sponsor|equipe|montant
                 $payload = sprintf('sponsor:%s|equipe:%s|montant:%.2f', $sponsor, $equipe, $montant);
 
-                // Use Endroid builder
-                $builder = \Endroid\QrCode\Builder\Builder::create()
-                    ->data($payload)
-                    ->size(300)
-                    ->margin(10)
-                    ->build();
+                $qrCode = new QrCode(
+                    data: $payload,
+                    size: 300,
+                    margin: 10
+                );
 
-                $result = $builder->getString();
+                $writer = new PngWriter();
+                $result = $writer->write($qrCode);
+
+                $result = $result->getString();
                 file_put_contents($qrPathFilesystem, $result);
 
                 $qrHtml = sprintf('<img src="%s" alt="QR Code" style="height:100px;">', htmlspecialchars($qrPathPublic, ENT_QUOTES));

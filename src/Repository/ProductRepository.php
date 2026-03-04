@@ -133,6 +133,7 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('from', $from)
             ->setParameter('statuses', $statuses)
             ->groupBy('p.id')
+            ->having('(COALESCE(SUM(o.quantity), 0) + COALESCE(SUM(oi.quantity), 0)) > 0')
             ->orderBy('totalSold', 'DESC')
             ->setMaxResults($limit);
 

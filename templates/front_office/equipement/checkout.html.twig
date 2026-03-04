@@ -9,7 +9,7 @@
     <section class="front-card">
         <h2 style="font-size:30px;margin:0 0 12px;">Informations client</h2>
 
-        <form method="post" action="{{ path('front_equipement_checkout') }}" style="display:grid;gap:10px;">
+        <form method="post" action="{{ path('front_equipement_checkout') }}" style="display:grid;gap:10px;" id="customer-form">
             <input type="hidden" name="_token" value="{{ csrf_token('checkout') }}">
 
             <div>
@@ -79,6 +79,15 @@
             <button type="submit" class="btn btn-primary">Valider et payer</button>
             <a href="{{ path('front_equipement_cart') }}" class="btn btn-secondary">Retour au panier</a>
         </form>
+
+        <div style="margin-top:14px; padding:12px; border:1px dashed #cbd5e1; border-radius:10px; background:rgba(148,163,184,0.08);">
+            <p style="margin:0 0 8px; font-weight:700;">Ou payer via Stripe Checkout (recommande)</p>
+            <form method="post" action="{{ path('front_equipement_checkout_stripe') }}" id="stripe-form">
+                <button type="submit" class="btn btn-success" id="stripe-btn" style="background:#0f9f6e;border-color:#0f9f6e;" disabled>Payer avec Stripe Checkout</button>
+            </form>
+            <p id="stripe-hint" style="margin:8px 0 0;font-size:12px;color:#475569;">Remplissez d'abord toutes les informations client pour activer Stripe.</p>
+            <p id="stripe-error" style="margin:6px 0 0;font-size:12px;color:#b91c1c;display:none;">Merci de completer vos informations avant de passer par Stripe.</p>
+        </div>
     </section>
 
     <aside class="front-card">
@@ -110,6 +119,11 @@
     const wrap = document.getElementById('online_payment_fields');
     const fields = ['card_holder', 'card_number', 'card_expiry', 'card_cvv']
         .map((id) => document.getElementById(id));
+    const customerForm = document.getElementById('customer-form');
+    const stripeForm = document.getElementById('stripe-form');
+    const stripeBtn = document.getElementById('stripe-btn');
+    const stripeError = document.getElementById('stripe-error');
+    const stripeHint = document.getElementById('stripe-hint');
 
     const toggle = () => {
         if (!method || !wrap) return;
@@ -124,6 +138,44 @@
     if (method) {
         method.addEventListener('change', toggle);
         toggle();
+    }
+
+    // Guard Stripe checkout until customer info is valid
+    const requiredSelectors = ['input[name=\"full_name\"]','input[name=\"email\"]','input[name=\"phone\"]','input[name=\"address\"]','input[name=\"city\"]','input[name=\"postal_code\"]'];
+    const requiredInputs = requiredSelectors
+        .map((sel) => document.querySelector(sel))
+        .filter(Boolean);
+
+    const validateCustomerForm = () => {
+        if (!customerForm || !stripeBtn) return false;
+        const allValid = customerForm.checkValidity();
+        stripeBtn.disabled = !allValid;
+        if (allValid) {
+            if (stripeError) stripeError.style.display = 'none';
+            if (stripeHint) stripeHint.textContent = 'Stripe est actif : vous pouvez payer en toute securite.';
+        } else {
+            if (stripeHint) stripeHint.textContent = 'Remplissez d abord toutes les informations client pour activer Stripe.';
+        }
+        return allValid;
+    };
+
+    requiredInputs.forEach((el) => {
+        el.addEventListener('input', validateCustomerForm);
+        el.addEventListener('change', validateCustomerForm);
+    });
+    validateCustomerForm();
+
+    if (stripeForm) {
+        stripeForm.addEventListener('submit', (e) => {
+            const ok = validateCustomerForm();
+            if (!ok) {
+                e.preventDefault();
+                if (stripeError) stripeError.style.display = 'block';
+                requiredInputs.forEach((el) => {
+                    if (el && !el.validity.valid) el.reportValidity();
+                });
+            }
+        });
     }
 })();
 </script>

@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Stripe\StripeClient;
 
 #[Route('/equipement')]
 class EquipementController extends AbstractController
@@ -37,16 +39,18 @@ class EquipementController extends AbstractController
         // use custom param name to avoid KnpPaginator auto-sorting conflicts
         $sort = $request->query->get('sortBy');
         $dir = strtolower((string)$request->query->get('dir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
-        $page = max(1, (int) $request->query->get('page', 1));
+        $page = max(1, (int) $request->query->get('page', '1'));
         $perPage = 9;
 
         try {
             $productsQuery = $repo->createSearchQueryBuilder($q, $category, $sort, $dir);
+            /** @var \Knp\Component\Pager\Pagination\SlidingPagination $pagination */
             $pagination = $paginator->paginate($productsQuery, $page, $perPage);
             $products = $pagination->getItems();
         } catch (\Throwable $e) {
-            // Defensive fallback if an invalid sort/field sneaks in (e.g. “price” on a missing alias)
+            // Defensive fallback if an invalid sort/field sneaks in (e.g. â€œpriceâ€ on a missing alias)
             $productsQuery = $repo->createSearchQueryBuilder($q, $category, null, 'ASC');
+            /** @var \Knp\Component\Pager\Pagination\SlidingPagination $pagination */
             $pagination = $paginator->paginate($productsQuery, $page, $perPage);
             $products = $pagination->getItems();
         }
@@ -76,14 +80,22 @@ class EquipementController extends AbstractController
             }
         }
 
+        $paginationData = $pagination->getPaginationData();
+        $totalPages = (int)($paginationData['pageCount'] ?? 1);
+
         return $this->render('front_office/equipement/index.html.twig', [
             'products' => $products,
             'page' => $pagination->getCurrentPageNumber(),
-            'totalPages' => $pagination->getPageCount(),
+            'totalPages' => $totalPages,
             'totalProducts' => $pagination->getTotalItemCount(),
             'categories' => $categories,
             'apiProducts' => $apiProducts,
             'apiProductsUrl' => $this->generateUrl('api_catalog_products'),
+            'algolia' => [
+                'appId' => $_ENV['ALGOLIA_APP_ID'] ?? '',
+                'searchKey' => $_ENV['ALGOLIA_SEARCH_KEY'] ?? '',
+                'indexName' => $_ENV['ALGOLIA_INDEX_NAME'] ?? 'sport_insight_products',
+            ],
         ]);
     }
 
@@ -440,6 +452,152 @@ class EquipementController extends AbstractController
         return $this->redirectToRoute('front_equipement_checkout_success');
     }
 
+    #[Route('/checkout/stripe', name: 'front_equipement_checkout_stripe', methods: ['POST'])]
+    public function checkoutStripe(
+        Request $request,
+        ProductRepository $repo,
+        #[Autowire(env: 'STRIPE_SECRET_KEY')] string $stripeSecretKey
+    ): Response {
+        $cart = $this->normalizeCart($request->getSession()->get('cart', []));
+        if (empty($cart)) {
+            $this->addFlash('warning', 'Votre panier est vide.');
+            return $this->redirectToRoute('front_equipement_cart');
+        }
+
+        if ($stripeSecretKey === '' || str_contains($stripeSecretKey, 'SECRET_KEY')) {
+            $this->addFlash('danger', 'Stripe nâ€™est pas configure. Ajoutez STRIPE_SECRET_KEY dans .env.local.');
+            return $this->redirectToRoute('front_equipement_checkout');
+        }
+
+        $lineItems = [];
+        foreach ($cart as $line) {
+            $product = $repo->find($line['id'] ?? 0);
+            if (!$product) {
+                continue;
+            }
+            $qty = max(1, (int) ($line['quantity'] ?? 1));
+            $price = (float) $product->getPrice();
+            $lineItems[] = [
+                'quantity' => $qty,
+                'price_data' => [
+                    'currency' => 'usd',
+                    'unit_amount' => (int) round($price * 100),
+                    'product_data' => [
+                        'name' => $product->getName(),
+                        'description' => 'Taille: ' . ($line['size'] ?? $product->getSize() ?? 'M'),
+                    ],
+                ],
+            ];
+        }
+
+        if (empty($lineItems)) {
+            $this->addFlash('danger', 'Impossible de preparer le panier pour Stripe.');
+            return $this->redirectToRoute('front_equipement_cart');
+        }
+
+        $stripe = new StripeClient($stripeSecretKey);
+        $session = $stripe->checkout->sessions->create([
+            'mode' => 'payment',
+            'line_items' => $lineItems,
+            'success_url' => $this->generateUrl('front_equipement_checkout_stripe_success', ['session_id' => '{CHECKOUT_SESSION_ID}'], UrlGeneratorInterface::ABSOLUTE_URL),
+            'cancel_url' => $this->generateUrl('front_equipement_cart', [], UrlGeneratorInterface::ABSOLUTE_URL),
+        ]);
+
+        return $this->redirect($session->url);
+    }
+
+    #[Route('/checkout/stripe/success', name: 'front_equipement_checkout_stripe_success', methods: ['GET'])]
+    public function checkoutStripeSuccess(
+        Request $request,
+        ProductRepository $repo,
+        EntityManagerInterface $em,
+        OrderNotificationService $orderNotificationService,
+        #[Autowire(service: 'state_machine.order_status')]
+        WorkflowInterface $orderWorkflow,
+        #[Autowire(env: 'STRIPE_SECRET_KEY')] string $stripeSecretKey
+    ): Response {
+        $sessionId = (string) $request->query->get('session_id');
+        if ($sessionId === '') {
+            $this->addFlash('danger', 'Session Stripe manquante.');
+            return $this->redirectToRoute('front_equipement_cart');
+        }
+
+        $cart = $this->normalizeCart($request->getSession()->get('cart', []));
+        if (empty($cart)) {
+            $this->addFlash('warning', 'Panier vide apres paiement. Rien a enregistrer.');
+            return $this->redirectToRoute('front_equipement_index');
+        }
+
+        $stripe = new StripeClient($stripeSecretKey);
+        $stripeSession = $stripe->checkout->sessions->retrieve($sessionId, ['expand' => ['payment_intent']]);
+        if (($stripeSession->payment_status ?? '') !== 'paid') {
+            $this->addFlash('danger', 'Paiement non confirme.');
+            return $this->redirectToRoute('front_equipement_cart');
+        }
+
+        $orders = [];
+        $total = 0.0;
+        foreach ($cart as $line) {
+            $product = $repo->find($line['id'] ?? 0);
+            if (!$product) {
+                continue;
+            }
+            $qty = (int) ($line['quantity'] ?? 1);
+            $size = $line['size'] ?? $product->getSize();
+            if ($product->getStock() < $qty) {
+                $this->addFlash('danger', sprintf('Stock insuffisant pour %s', $product->getName()));
+                return $this->redirectToRoute('front_equipement_cart');
+            }
+
+            $order = new Order();
+            $order->setProduct($product);
+            $order->setQuantity($qty);
+            $order->setSize($size);
+            $order->setOrderDate(new \DateTime());
+            $order->setContactEmail($stripeSession->customer_details->email ?? '');
+            $order->setContactPhone($stripeSession->customer_details->phone ?? '');
+            $address = $stripeSession->customer_details->address ?? null;
+            $addressLine = $address ? trim(($address->line1 ?? '') . ' ' . ($address->line2 ?? '')) : '';
+            $city = $address->city ?? '';
+            $postal = $address->postal_code ?? '';
+            $shipping = trim($addressLine . ' ' . $city . ' ' . $postal);
+            $order->setShippingAddress($shipping);
+            $order->setBillingAddress($shipping);
+            $order->setPaymentMethod('stripe_checkout');
+            $order->setPaymentStatus('paid');
+            $order->setStatus('pending');
+            if ($orderWorkflow->can($order, 'pay')) {
+                $orderWorkflow->apply($order, 'pay');
+            }
+
+            $product->setStock($product->getStock() - $qty);
+            $lineTotal = (float) $product->getPrice() * $qty;
+            $order->setTotalAmount(number_format($lineTotal, 2, '.', ''));
+
+            $orders[] = $order;
+            $total += $lineTotal;
+
+            $em->persist($order);
+            $em->persist($product);
+        }
+
+        $em->flush();
+        $request->getSession()->remove('cart');
+
+        try {
+            $customerEmail = (string) ($stripeSession->customer_details->email ?? '');
+            $customerName = (string) ($stripeSession->customer_details->name ?? 'Client');
+            if ($customerEmail !== '') {
+                $orderNotificationService->sendOrderConfirmation($customerEmail, $customerName, $orders);
+                $orderNotificationService->sendPaymentConfirmation($customerEmail, $customerName, $orders);
+            }
+        } catch (\Throwable) {
+            // best-effort; continue
+        }
+
+        return $this->redirectToRoute('front_equipement_checkout_success');
+    }
+
     #[Route('/checkout-success', name: 'front_equipement_checkout_success')]
     public function checkoutSuccess(): Response
     {
@@ -518,6 +676,33 @@ class EquipementController extends AbstractController
         return $this->render('front_office/equipement/orders.html.twig', [
             'orders' => $orders,
         ]);
+    }
+
+    #[Route('/search-feed', name: 'front_equipement_search_feed', methods: ['GET'])]
+    public function searchFeed(ProductRepository $repo, Request $request): JsonResponse
+    {
+        $products = $repo->findAll();
+        $baseUrl = $request->getSchemeAndHttpHost();
+        $data = array_map(static function (Product $p) use ($baseUrl): array {
+            $id = $p->getId();
+            $image = $p->getImage();
+            if ($image && !str_starts_with($image, 'http')) {
+                $image = rtrim($baseUrl, '/') . '/' . ltrim($image, '/');
+            }
+            return [
+                'objectID' => $id,
+                'name' => $p->getName(),
+                'category' => $p->getCategory(),
+                'brand' => $p->getBrand(),
+                'size' => $p->getSize(),
+                'price' => (float) $p->getPrice(),
+                'stock' => $p->getStock(),
+                'image' => $image,
+                'url' => $baseUrl . '/equipement/' . $id,
+            ];
+        }, $products);
+
+        return $this->json($data);
     }
 
     // =========================
@@ -628,6 +813,7 @@ class EquipementController extends AbstractController
         return $catalog;
     }
 
+    /** @phpstan-ignore-next-line */
     private function formatCatalogForPrompt(array $catalog): string
     {
         $lines = [];
@@ -673,6 +859,7 @@ class EquipementController extends AbstractController
         return false;
     }
 
+    /** @phpstan-ignore-next-line */
     private function buildShopAssistantReply(string $message, array $catalog): string
     {
         $normalized = mb_strtolower($message);
@@ -932,3 +1119,4 @@ class EquipementController extends AbstractController
         return implode("\n", array_merge($header, $invoiceLines, $footer));
     }
 }
+

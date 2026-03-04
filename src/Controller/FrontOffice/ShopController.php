@@ -72,7 +72,11 @@ class ShopController extends AbstractController
     }
 
     #[Route('/product/{id}', name: 'product_detail', methods: ['GET'])]
-    public function productDetail(int $id, ProductRepository $productRepository, CartService $cartService): Response
+    public function productDetail(
+        int $id,
+        ProductRepository $productRepository,
+        CartService $cartService
+    ): Response
     {
         $product = $productRepository->find($id);
 

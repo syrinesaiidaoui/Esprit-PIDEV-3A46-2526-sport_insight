@@ -20,6 +20,9 @@ class FrontChatController extends AbstractController
     public function chat(Annonce $annonce, ChatMessageRepository $repo, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Utilisateur introuvable.');
+        }
         $entraineur = $annonce->getEntraineur();
 
         // Mark messages as read if the current user is the recipient
@@ -43,13 +46,16 @@ class FrontChatController extends AbstractController
     public function send(Annonce $annonce, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Utilisateur introuvable.');
+        }
         $entraineur = $annonce->getEntraineur();
 
         $message = $request->request->get('message');
         $cvFile = $request->files->get('cv_file');
 
         $cvUploaded = false;
-        if ($user && $cvFile) {
+        if ($cvFile) {
             /** @var \App\Entity\User $user */
             $user->setCvFile($cvFile);
             $em->persist($user);

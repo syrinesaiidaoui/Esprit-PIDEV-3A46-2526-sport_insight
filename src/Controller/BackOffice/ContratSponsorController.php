@@ -31,27 +31,18 @@ final class ContratSponsorController extends AbstractController
             }
         }
 
-        // Rechercher avec les critères
+        // Rechercher avec les critÃ¨res
         if ($sponsorNom || $dateDebutObj) {
             $contrats = $contratSponsorRepository->searchContrats($sponsorNom, $dateDebutObj);
         } else {
             $contrats = $contratSponsorRepository->findAll();
         }
 
-        // Vérifier les contrats expirés et envoyer les notifications
+        // Vérifier les contrats expirés
         foreach ($contrats as $contrat) {
             if ($contrat->isExpired() && !$contrat->isNotified()) {
                 $contrat->setStatut('Expiré');
                 $contrat->setNotified(true);
-
-                $coach = $contrat->getEquipe()->getEntraineur();
-                if ($coach) {
-                    $notificationService->notifyCoach(
-                        $coach,
-                        "Le contrat du sponsor {$contrat->getSponsor()->getNom()} est expiré."
-                    );
-                }
-
                 $entityManager->persist($contrat);
             }
         }
@@ -77,7 +68,7 @@ final class ContratSponsorController extends AbstractController
                 $sponsor = $contratSponsor->getSponsor();
                 if ($sponsor) {
                     $sponsor->setLogoFile($uploadedLogo);
-                    // Mettre à jour la date de modification
+                    // Mettre Ã  jour la date de modification
                     $sponsor->setUpdatedAt(new \DateTimeImmutable());
                     $entityManager->persist($sponsor);
                 }
@@ -87,7 +78,7 @@ final class ContratSponsorController extends AbstractController
             $entityManager->flush();
 
             if ($uploadedLogo) {
-                $this->addFlash('success', 'Logo téléchargé avec succès');
+                $this->addFlash('success', 'Logo tÃ©lÃ©chargÃ© avec succÃ¨s');
             }
 
             $referer = $request->headers->get('referer', '');
@@ -126,7 +117,7 @@ final class ContratSponsorController extends AbstractController
                 $sponsor = $contratSponsor->getSponsor();
                 if ($sponsor) {
                     $sponsor->setLogoFile($uploadedLogo);
-                    // Mettre à jour la date de modification
+                    // Mettre Ã  jour la date de modification
                     $sponsor->setUpdatedAt(new \DateTimeImmutable());
                     $entityManager->persist($sponsor);
                 }
@@ -134,11 +125,11 @@ final class ContratSponsorController extends AbstractController
 
             $entityManager->flush();
 
-            // Vérifier si le logo a été mis à jour
+            // VÃ©rifier si le logo a Ã©tÃ© mis Ã  jour
             if ($uploadedLogo && $contratSponsor->getSponsor()) {
                 $newLogoName = $contratSponsor->getSponsor()->getLogoName();
                 if ($newLogoName && $newLogoName !== $originalLogoName) {
-                    $this->addFlash('success', 'Logo mis à jour: ' . $newLogoName);
+                    $this->addFlash('success', 'Logo mis Ã  jour: ' . $newLogoName);
                 }
             }
 
@@ -176,3 +167,4 @@ final class ContratSponsorController extends AbstractController
         return $this->redirectToRoute($route, [], Response::HTTP_SEE_OTHER);
     }
 }
+

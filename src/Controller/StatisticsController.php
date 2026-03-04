@@ -18,6 +18,8 @@ class StatisticsController extends AbstractController
 
         $labels = [];
         $data = [];
+        $backgroundColors = [];
+        $borderColors = [];
         $palette = [
             ['bg' => 'rgba(16, 185, 129, 0.7)', 'border' => 'rgba(16, 185, 129, 1)'], // Emerald
             ['bg' => 'rgba(139, 92, 246, 0.7)', 'border' => 'rgba(139, 100, 246, 1)'], // Violet

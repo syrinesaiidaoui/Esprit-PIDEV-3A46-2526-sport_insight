@@ -32,11 +32,11 @@
     }
 
     .thumb {
-        border: 1px solid #dbe2ea;
+        border: 1px solid var(--border-color);
         border-radius: 10px;
         overflow: hidden;
         height: 82px;
-        background: #fff;
+        background: var(--card-bg);
     }
 
     .thumb img {
@@ -63,7 +63,7 @@
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: .5px;
-        color: #64748b;
+        color: var(--text-muted);
         margin-bottom: 6px;
         font-weight: 800;
     }
@@ -75,29 +75,30 @@
     }
 
     .option-choices span {
-        border: 1px solid #dbe2ea;
+        border: 1px solid var(--border-color);
         border-radius: 999px;
         padding: 5px 10px;
         font-size: 12px;
         font-weight: 700;
-        background: #fff;
+        background: var(--card-bg);
+        color: var(--ink);
     }
 
     .size-guide {
         margin-top: 14px;
-        border: 1px dashed #a7f3d0;
+        border: 1px dashed var(--border-color);
         border-radius: 10px;
         padding: 10px;
-        background: #f0fdf4;
-        color: #065f46;
+        background: var(--surface);
+        color: var(--ink);
         font-size: 13px;
         font-weight: 700;
     }
 
     .bundle-box {
         margin-top: 14px;
-        background: #f8fafc;
-        border: 1px solid #dbe2ea;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 12px;
         display: grid;
@@ -118,13 +119,14 @@
     }
 
     .delivery-options label {
-        border: 1px solid #dbe2ea;
+        border: 1px solid var(--border-color);
         border-radius: 10px;
         padding: 10px;
         font-size: 14px;
         font-weight: 700;
         display: block;
-        background: #fff;
+        background: var(--card-bg);
+        color: var(--ink);
     }
 
     .recommend-grid {
@@ -271,7 +273,6 @@
                     <button class="btn btn-secondary" disabled>Indisponible</button>
                 {% endif %}
                 <a href="{{ path('front_equipement_cart') }}" class="btn btn-secondary">Aller au panier</a>
-                <button class="btn btn-secondary" type="button">Ajouter aux favoris</button>
             </div>
         </form>
 

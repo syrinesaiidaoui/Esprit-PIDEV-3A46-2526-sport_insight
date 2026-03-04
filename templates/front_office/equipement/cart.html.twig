@@ -61,6 +61,32 @@
         font-weight: 700;
     }
 
+    .cart-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cart-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: linear-gradient(140deg, #0f2f22, #1f6b49);
+        box-shadow: 0 8px 14px rgba(0,0,0,.18);
+        position: relative;
+    }
+
+    .cart-logo::after {
+        content: '';
+        position: absolute;
+        inset: 8px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='54' height='30' x='5' y='16' rx='6' fill='%23ffffff' stroke='%230b172a' stroke-width='4'/%3E%3Cpath d='M18 32h28' stroke='%230b172a' stroke-width='4'/%3E%3Cpath d='M18 38h20' stroke='%230b172a' stroke-width='4'/%3E%3Ccircle cx='24' cy='46' r='6' fill='%23ffffff' stroke='%230b172a' stroke-width='4'/%3E%3Ccircle cx='42' cy='46' r='6' fill='%23ffffff' stroke='%230b172a' stroke-width='4'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,.18));
+    }
+
     @media (max-width: 980px) {
         .cart-layout { grid-template-columns: 1fr; }
     }
@@ -68,7 +94,7 @@
 {% endblock %}
 
 {% block body %}
-<h1 class="section-title">Votre panier</h1>
+<h1 class="section-title cart-title"><span class="cart-logo" aria-hidden="true"></span>Votre panier</h1>
 
 <div class="cart-layout">
     <section class="front-card">

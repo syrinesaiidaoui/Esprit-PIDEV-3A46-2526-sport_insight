@@ -100,6 +100,23 @@ class ProductApiController extends AbstractController
         }
     }
 
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    public function show(int $id): Response
+    {
+        $product = $this->productRepository->find($id);
+        if (!$product) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Product not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json([
+            'success' => true,
+            'product' => $this->normalizeProductEntity($product, 0),
+        ], Response::HTTP_OK);
+    }
+
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(int $id, Request $request): Response
     {
@@ -201,8 +218,8 @@ class ProductApiController extends AbstractController
     public function list(Request $request): Response
     {
         try {
-            $page = max(1, (int) $request->query->get('page', 1));
-            $perPage = (int) $request->query->get('perPage', 10);
+            $page = max(1, (int) $request->query->get('page', '1'));
+            $perPage = (int) $request->query->get('perPage', '10');
             $perPage = max(1, min(100, $perPage));
             $q = trim((string) $request->query->get('q', ''));
             $category = trim((string) $request->query->get('category', ''));
@@ -218,6 +235,7 @@ class ProductApiController extends AbstractController
                 $sort
             );
 
+            /** @var \Knp\Component\Pager\Pagination\SlidingPagination $pagination */
             $pagination = $this->paginator->paginate($qb, $page, $perPage);
             $data = [];
 
@@ -236,6 +254,7 @@ class ProductApiController extends AbstractController
                     $category !== '' ? $category : null,
                     $sort
                 );
+                /** @var \Knp\Component\Pager\Pagination\SlidingPagination $jsonPagination */
                 $jsonPagination = $this->paginator->paginate($jsonProducts, $page, $perPage);
 
                 foreach ($jsonPagination->getItems() as $item) {
@@ -247,6 +266,9 @@ class ProductApiController extends AbstractController
                 $pagination = $jsonPagination;
             }
 
+            $paginationData = $pagination->getPaginationData();
+            $totalPages = (int) ($paginationData['pageCount'] ?? 1);
+
             return $this->json([
                 'success' => true,
                 'count' => count($data),
@@ -254,8 +276,8 @@ class ProductApiController extends AbstractController
                     'page' => $pagination->getCurrentPageNumber(),
                     'perPage' => $pagination->getItemNumberPerPage(),
                     'totalItems' => $pagination->getTotalItemCount(),
-                    'totalPages' => $pagination->getPageCount(),
-                    'hasNextPage' => $pagination->getCurrentPageNumber() < $pagination->getPageCount(),
+                    'totalPages' => $totalPages,
+                    'hasNextPage' => $pagination->getCurrentPageNumber() < $totalPages,
                     'hasPreviousPage' => $pagination->getCurrentPageNumber() > 1,
                 ],
                 'products' => $data
