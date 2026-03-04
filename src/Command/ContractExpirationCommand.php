@@ -4,17 +4,19 @@ namespace App\Command;
 
 use App\Repository\ContratSponsorRepository;
 use App\Service\TwilioService;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'app:contract:expiration',
+    description: 'Check for expired contracts and send SMS alerts to team contacts'
+)]
 class ContractExpirationCommand extends Command
 {
-    protected static $defaultName = 'app:contract:expiration';
-    protected static $defaultDescription = 'Check for expired contracts and send SMS alerts to team contacts';
-
     private ContratSponsorRepository $contratRepo;
     private TwilioService $twilio;
 
@@ -30,7 +32,6 @@ class ContractExpirationCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription(self::$defaultDescription)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without sending actual SMS (test mode)')
             ->addOption('days-ahead', null, InputOption::VALUE_REQUIRED, 'Check for contracts expiring within N days', 0);
     }

@@ -399,7 +399,11 @@ final class FrontMatchsController extends AbstractController
         }
 
         $errors = \DateTimeImmutable::getLastErrors();
-        if (is_array($errors) && (($errors['warning_count'] ?? 0) > 0 || ($errors['error_count'] ?? 0) > 0)) {
+        if (!is_array($errors)) {
+            return null;
+        }
+
+        if ($errors['warning_count'] > 0 || $errors['error_count'] > 0) {
             return null;
         }
 
