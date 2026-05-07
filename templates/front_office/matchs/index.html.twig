@@ -125,7 +125,7 @@
 
         .matchs-search-form {
             display: grid;
-            grid-template-columns: minmax(240px, 1.6fr) minmax(140px, 1fr) minmax(140px, 1fr) auto auto;
+            grid-template-columns: minmax(220px, 1.35fr) minmax(132px, .8fr) minmax(132px, .8fr) minmax(280px, 1.45fr) auto auto;
             gap: 10px;
             align-items: end;
             margin: 0;
@@ -166,6 +166,57 @@
         .matchs-field input:focus {
             border-color: rgba(16, 185, 129, 0.75);
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+
+        .matchs-status-filter {
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            padding: 4px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 4px;
+        }
+
+        .matchs-status-option {
+            min-width: 0;
+            margin: 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .matchs-status-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .matchs-status-option span {
+            width: 100%;
+            min-height: 34px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            color: var(--text-soft);
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.1;
+            white-space: nowrap;
+            transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+        }
+
+        .matchs-status-option input:checked + span {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #f8fafc;
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.22);
+        }
+
+        .matchs-status-option input:focus-visible + span {
+            outline: 2px solid rgba(16, 185, 129, 0.7);
+            outline-offset: 2px;
         }
 
         .matchs-actions {
@@ -356,6 +407,18 @@
             font-weight: 700;
         }
 
+        .fixture-score--pending {
+            min-width: 78px;
+            justify-content: center;
+            color: var(--text-soft);
+            font-size: 22px;
+            letter-spacing: 0.04em;
+        }
+
+        .fixture-score__pending {
+            font-size: 20px;
+        }
+
         .fixture-card__meta {
             display: flex;
             justify-content: space-between;
@@ -460,7 +523,7 @@
 
         @media (max-width: 1100px) {
             .matchs-search-form {
-                grid-template-columns: minmax(200px, 1fr) minmax(140px, 1fr) minmax(140px, 1fr);
+                grid-template-columns: minmax(200px, 1fr) minmax(140px, 1fr);
             }
         }
 
@@ -548,6 +611,28 @@
                     <input type="date" id="dateTo" name="dateTo" value="{{ dateTo }}">
                 </div>
 
+                <div class="matchs-field matchs-field--status">
+                    <label>Statut</label>
+                    <div class="matchs-status-filter" role="group" aria-label="Filtrer par statut">
+                        <label class="matchs-status-option">
+                            <input type="radio" name="status" value="" {{ status == '' ? 'checked' : '' }}>
+                            <span>Tous</span>
+                        </label>
+                        <label class="matchs-status-option">
+                            <input type="radio" name="status" value="programme" {{ status == 'programme' ? 'checked' : '' }}>
+                            <span>Programme</span>
+                        </label>
+                        <label class="matchs-status-option">
+                            <input type="radio" name="status" value="live" {{ status == 'live' ? 'checked' : '' }}>
+                            <span>Live</span>
+                        </label>
+                        <label class="matchs-status-option">
+                            <input type="radio" name="status" value="fini" {{ status == 'fini' ? 'checked' : '' }}>
+                            <span>Fini</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="matchs-actions">
                     <button type="submit" class="matchs-btn matchs-btn--primary">Rechercher</button>
                 </div>
@@ -583,6 +668,7 @@
             const teamInput = document.getElementById('team');
             const dateFromInput = document.getElementById('dateFrom');
             const dateToInput = document.getElementById('dateTo');
+            const statusInputs = Array.from(form.querySelectorAll('input[name="status"]'));
             const endpoint = form.dataset.searchUrl;
 
             let debounceTimer = null;
@@ -605,6 +691,11 @@
                 hint.hidden = message === '';
             };
 
+            const getStatusValue = () => {
+                const checked = statusInputs.find((input) => input.checked);
+                return checked ? checked.value : '';
+            };
+
             const refreshResults = () => {
                 if (!endpoint) {
                     return;
@@ -615,8 +706,9 @@
                     (dateFromInput && dateFromInput.value)
                     || (dateToInput && dateToInput.value)
                 );
+                const hasStatusFilter = getStatusValue() !== '';
 
-                if (teamValue !== '' && teamValue.length < MIN_TEAM_LENGTH && !hasDateFilters) {
+                if (teamValue !== '' && teamValue.length < MIN_TEAM_LENGTH && !hasDateFilters && !hasStatusFilter) {
                     if (requestController) {
                         requestController.abort();
                         requestController = null;
@@ -697,6 +789,10 @@
                 if (!field) {
                     return;
                 }
+                field.addEventListener('change', refreshResults);
+            });
+
+            statusInputs.forEach((field) => {
                 field.addEventListener('change', refreshResults);
             });
         })();

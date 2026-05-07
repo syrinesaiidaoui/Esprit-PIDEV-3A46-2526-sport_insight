@@ -1,6 +1,13 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
+    trusted_proxies: '127.0.0.1,::1'
+    trusted_headers:
+        - 'x-forwarded-for'
+        - 'x-forwarded-host'
+        - 'x-forwarded-proto'
+        - 'x-forwarded-port'
+        - 'x-forwarded-prefix'
     annotations: false
     http_method_override: false
     handle_all_throwables: true
@@ -17,6 +24,12 @@ framework:
     #fragments: true
     php_errors:
         log: true
+
+when@dev:
+    framework:
+        php_errors:
+            # E_ALL without deprecations to reduce logger collector overhead in dev page loads.
+            log: 8191
 
 when@test:
     framework:

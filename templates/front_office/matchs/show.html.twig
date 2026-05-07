@@ -1486,8 +1486,17 @@
                 </div>
 
                 <div class="details-overview__score">
+                    {% set detailsStatus = (match.statut ?? '')|lower %}
+                    {% set detailsHasScore = match.scoreEquipeDomicile is not null or match.scoreEquipeExterieur is not null %}
+                    {% set detailsIsScheduled = detailsStatus in ['programme', 'programmee', 'programmé', 'programmée', 'scheduled', 'upcoming'] %}
                     <span>Score</span>
-                    <strong>{{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}</strong>
+                    <strong>
+                        {% if detailsHasScore or not detailsIsScheduled %}
+                            {{ match.scoreEquipeDomicile ?? 0 }} - {{ match.scoreEquipeExterieur ?? 0 }}
+                        {% else %}
+                            A venir
+                        {% endif %}
+                    </strong>
                 </div>
             </div>
           <div class="match-export-wrap">
@@ -1506,7 +1515,7 @@
                     <div style="text-align: center;">
                         <div class="team-heading">
                             {% if match.equipeDomicile.image %}
-                                <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                <img src="{{ media_url(match.equipeDomicile.image, 'equipes') }}" alt="{{ match.equipeDomicile.nom }}" style="width: 40px; height: 40px; object-fit: contain;">
                             {% endif %}
                             {{ match.equipeDomicile.nom }}
                         </div>
@@ -1528,7 +1537,7 @@
                                         <div class="joueur-position" data-numero="{{ lineup.joueur.numero }}" style="left: {% if lineup.positionX %}{{ lineup.positionX }}%{% else %}50%{% endif %}; top: {% if lineup.positionY %}{{ lineup.positionY }}%{% else %}50%{% endif %};">
                                             <div style="position: relative;">
                                                 {% if lineup.joueur.image %}
-                                                    <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
+                                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
                                                 {% else %}
                                                     <div class="joueur-placeholder">👤</div>
                                                 {% endif %}
@@ -1551,7 +1560,7 @@
                     <div style="text-align: center;">
                         <div class="team-heading">
                             {% if match.equipeExterieur.image %}
-                                <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                <img src="{{ media_url(match.equipeExterieur.image, 'equipes') }}" alt="{{ match.equipeExterieur.nom }}" style="width: 40px; height: 40px; object-fit: contain;">
                             {% endif %}
                             {{ match.equipeExterieur.nom }}
                         </div>
@@ -1572,7 +1581,7 @@
                                         <div class="joueur-position" data-numero="{{ lineup.joueur.numero }}" style="left: {% if lineup.positionX %}{{ lineup.positionX }}%{% else %}50%{% endif %}; top: {% if lineup.positionY %}{{ lineup.positionY }}%{% else %}50%{% endif %};">
                                             <div style="position: relative;">
                                                 {% if lineup.joueur.image %}
-                                                    <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
+                                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
                                                 {% else %}
                                                     <div class="joueur-placeholder">👤</div>
                                                 {% endif %}

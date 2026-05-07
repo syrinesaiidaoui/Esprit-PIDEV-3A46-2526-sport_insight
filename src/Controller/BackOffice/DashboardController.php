@@ -75,10 +75,67 @@ class DashboardController extends AbstractController
             ],
         ]);
 
+        $clubOverviewChart = $chartBuilder->createChart(Chart::TYPE_BAR);
+        $clubOverviewChart->setData([
+            'labels' => ['Teams', 'Players', 'Matches'],
+            'datasets' => [[
+                'label' => 'Club entities',
+                'data' => [
+                    $data['clubOverview']['totalTeams'] ?? 0,
+                    $data['clubOverview']['totalPlayers'] ?? 0,
+                    $data['clubOverview']['totalMatches'] ?? 0,
+                ],
+                'backgroundColor' => ['#14b8a6', '#6366f1', '#f59e0b'],
+                'borderWidth' => 0,
+            ]],
+        ]);
+        $clubOverviewChart->setOptions([
+            'plugins' => ['legend' => ['display' => false]],
+            'scales' => ['y' => ['beginAtZero' => true]],
+        ]);
+
+        $playersByTeam = $data['playersByTeam'] ?? [];
+        $playersByTeamChart = $chartBuilder->createChart(Chart::TYPE_BAR);
+        $playersByTeamChart->setData([
+            'labels' => array_map(static fn (array $team): string => (string) $team['name'], $playersByTeam),
+            'datasets' => [[
+                'label' => 'Players',
+                'data' => array_map(static fn (array $team): int => (int) $team['count'], $playersByTeam),
+                'backgroundColor' => 'rgba(99, 102, 241, 0.7)',
+                'borderColor' => 'rgb(67, 56, 202)',
+                'borderWidth' => 1,
+            ]],
+        ]);
+        $playersByTeamChart->setOptions([
+            'plugins' => ['legend' => ['display' => true]],
+            'scales' => ['y' => ['beginAtZero' => true]],
+        ]);
+
+        $matchStatusClub = $data['matchStatusClub'] ?? [];
+        $clubMatchStatusChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
+        $clubMatchStatusChart->setData([
+            'labels' => array_map(
+                static fn (string $status): string => ucfirst($status),
+                array_keys($matchStatusClub)
+            ),
+            'datasets' => [[
+                'label' => 'Matches by status',
+                'data' => array_values($matchStatusClub),
+                'backgroundColor' => ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#64748b'],
+                'borderWidth' => 0,
+            ]],
+        ]);
+        $clubMatchStatusChart->setOptions([
+            'plugins' => ['legend' => ['display' => true, 'position' => 'bottom']],
+        ]);
+
         return $this->render('back_office/dashboard/index.html.twig', array_merge($data, [
             'revenueChart' => $revenueChart,
             'topProductsChart' => $topProductsChart,
             'statusChart' => $statusChart,
+            'clubOverviewChart' => $clubOverviewChart,
+            'playersByTeamChart' => $playersByTeamChart,
+            'clubMatchStatusChart' => $clubMatchStatusChart,
         ]));
     }
 }

@@ -57,13 +57,13 @@ class Entrainement
     /**
      * @var Collection<int, Participation>
      */
-    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $participations;
 
     /**
      * @var Collection<int, Evaluation>
      */
-    #[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'entrainement', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $evaluations;
 
     public function __construct()

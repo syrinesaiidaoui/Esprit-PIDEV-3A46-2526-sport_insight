@@ -408,7 +408,7 @@
                 <div class="player-photo-panel">
                     <div class="player-photo-inner">
                         {% if joueur.image %}
-                            <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}">
+                            <img src="{{ media_url(joueur.image, 'joueurs') }}" alt="{{ joueur.prenom }} {{ joueur.nom }}">
                         {% else %}
                             <span class="player-photo-fallback"><i class="lucide-user-round"></i></span>
                         {% endif %}
@@ -482,7 +482,7 @@
                 <article class="player-team-mini">
                     <div class="player-team-mini__logo">
                         {% if joueur.equipe.image %}
-                            <img src="{{ asset('uploads/equipes/' ~ joueur.equipe.image) }}" alt="{{ joueur.equipe.nom }}">
+                            <img src="{{ media_url(joueur.equipe.image, 'equipes') }}" alt="{{ joueur.equipe.nom }}">
                         {% else %}
                             <span class="player-team-mini__fallback">{{ joueur.equipe.nom|slice(0, 1)|upper }}</span>
                         {% endif %}

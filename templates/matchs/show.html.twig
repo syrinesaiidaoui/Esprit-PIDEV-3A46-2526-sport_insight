@@ -345,7 +345,7 @@
                         <div class="team-name">
                             {% if match.equipeDomicile.image %}
                                 <div class="team-logo">
-                                    <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}">
+                                    <img src="{{ media_url(match.equipeDomicile.image, 'equipes') }}" alt="{{ match.equipeDomicile.nom }}">
                                 </div>
                             {% endif %}
                             {{ match.equipeDomicile.nom }}
@@ -357,7 +357,7 @@
                                     {% for lineup in domicileLineups %}
                                         <div class="joueur-lineup-card">
                                             {% if lineup.joueur.image %}
-                                                <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
+                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
                                             {% else %}
                                                 <div class="joueur-lineup-placeholder">👤</div>
                                             {% endif %}
@@ -376,7 +376,7 @@
                         <div class="team-name">
                             {% if match.equipeExterieur.image %}
                                 <div class="team-logo">
-                                    <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}">
+                                    <img src="{{ media_url(match.equipeExterieur.image, 'equipes') }}" alt="{{ match.equipeExterieur.nom }}">
                                 </div>
                             {% endif %}
                             {{ match.equipeExterieur.nom }}
@@ -388,7 +388,7 @@
                                     {% for lineup in exterieurLineups %}
                                         <div class="joueur-lineup-card">
                                             {% if lineup.joueur.image %}
-                                                <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
+                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
                                             {% else %}
                                                 <div class="joueur-lineup-placeholder">👤</div>
                                             {% endif %}

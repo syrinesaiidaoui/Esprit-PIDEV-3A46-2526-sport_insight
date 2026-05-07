@@ -22,6 +22,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Stripe\StripeClient;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 #[Route('/equipement')]
 class EquipementController extends AbstractController
@@ -30,9 +32,15 @@ class EquipementController extends AbstractController
     //  Product listing
     // =========================
     #[Route('/', name: 'front_equipement_index')]
-    public function index(ProductRepository $repo, Request $request, EntityManagerInterface $em, PaginatorInterface $paginator): Response
+    public function index(
+        ProductRepository $repo,
+        Request $request,
+        EntityManagerInterface $em,
+        PaginatorInterface $paginator,
+        CacheInterface $cache
+    ): Response
     {
-        $this->syncJsonCatalogToDatabase($repo, $em);
+        $this->syncJsonCatalogToDatabase($repo, $em, $cache);
 
         $q = $request->query->get('q');
         $category = $request->query->get('category');
@@ -99,10 +107,22 @@ class EquipementController extends AbstractController
         ]);
     }
 
-    private function syncJsonCatalogToDatabase(ProductRepository $repo, EntityManagerInterface $em): void
+    private function syncJsonCatalogToDatabase(ProductRepository $repo, EntityManagerInterface $em, CacheInterface $cache): void
     {
         $apiFilePath = $this->getParameter('kernel.project_dir') . '/public/api/products.json';
         if (!is_file($apiFilePath)) {
+            return;
+        }
+
+        $fingerprint = sprintf('%s:%d', (string) @filemtime($apiFilePath), (int) @filesize($apiFilePath));
+        $cacheKey = 'catalog.sync.fingerprint.' . md5($apiFilePath);
+        $alreadySynced = $cache->get($cacheKey, static function (ItemInterface $item): string {
+            $item->expiresAfter(86400);
+
+            return '';
+        });
+
+        if ($alreadySynced === $fingerprint) {
             return;
         }
 
@@ -110,6 +130,23 @@ class EquipementController extends AbstractController
         $apiDecoded = json_decode($apiRaw ?: '[]', true);
         if (!is_array($apiDecoded)) {
             return;
+        }
+
+        $names = [];
+        foreach ($apiDecoded as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $name = trim((string) ($item['name'] ?? ''));
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        $existingProducts = [];
+        foreach ($repo->findByNames($names) as $existingProduct) {
+            $existingProducts[(string) $existingProduct->getName()] = $existingProduct;
         }
 
         $hasChanges = false;
@@ -124,11 +161,12 @@ class EquipementController extends AbstractController
                 continue;
             }
 
-            $product = $repo->findOneBy(['name' => $name]);
+            $product = $existingProducts[$name] ?? null;
             if (!$product) {
                 $product = new Product();
                 $product->setName($name);
                 $em->persist($product);
+                $existingProducts[$name] = $product;
             }
 
             $product->setCategory((string)($item['category'] ?? 'Football'));
@@ -148,6 +186,13 @@ class EquipementController extends AbstractController
         if ($hasChanges) {
             $em->flush();
         }
+
+        $cache->delete($cacheKey);
+        $cache->get($cacheKey, static function (ItemInterface $item) use ($fingerprint): string {
+            $item->expiresAfter(86400);
+
+            return $fingerprint;
+        });
     }
 
     // =========================
@@ -618,11 +663,25 @@ class EquipementController extends AbstractController
                 $pid = (int) $value['id'];
                 $size = strtoupper(trim((string)($value['size'] ?? 'M')));
                 $qty = max(1, (int) ($value['quantity'] ?? 1));
+            } elseif (
+                is_array($value)
+                && isset($value['product'])
+                && is_object($value['product'])
+                && method_exists($value['product'], 'getId')
+                && method_exists($value['product'], 'getSize')
+            ) {
+                $pid = (int) $value['product']->getId();
+                $size = strtoupper(trim((string)($value['product']->getSize() ?: 'M')));
+                $qty = max(1, (int) ($value['quantity'] ?? 1));
             } else {
                 // legacy format: key=productId, value=qty
                 $pid = (int) $key;
                 $size = 'M';
                 $qty = max(1, (int) $value);
+            }
+
+            if ($pid <= 0) {
+                continue;
             }
             $normKey = $pid . '::' . $size;
             if (!isset($normalized[$normKey])) {

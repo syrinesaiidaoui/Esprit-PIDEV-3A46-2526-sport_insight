@@ -2,56 +2,310 @@
 
 {% block title %}Mon Profil - FC Club{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        .profile-shell {
+            max-width: 980px;
+            margin: 36px auto 24px;
+        }
+
+        .profile-card {
+            border-radius: 24px;
+            border: 1px solid rgba(71, 98, 168, 0.38);
+            background: linear-gradient(155deg, rgba(13, 24, 47, 0.96) 0%, rgba(9, 19, 40, 0.95) 52%, rgba(8, 22, 48, 0.94) 100%);
+            box-shadow: 0 26px 48px rgba(2, 10, 32, 0.46);
+            overflow: hidden;
+        }
+
+        .profile-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 28px 30px 22px;
+            border-bottom: 1px solid rgba(88, 116, 188, 0.3);
+            background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 46%),
+                radial-gradient(circle at bottom left, rgba(45, 212, 191, 0.12), transparent 40%);
+        }
+
+        .profile-eyebrow {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #67e8f9;
+            margin-bottom: 8px;
+        }
+
+        .profile-title {
+            margin: 0;
+            font-size: clamp(28px, 3.3vw, 40px);
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .profile-subtitle {
+            margin: 8px 0 0;
+            color: #9fb4d8;
+            max-width: 640px;
+            line-height: 1.5;
+            font-size: 16px;
+        }
+
+        .profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(86, 117, 193, 0.36);
+            background: rgba(8, 18, 40, 0.65);
+            padding: 10px 14px;
+        }
+
+        .profile-badge-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(145deg, #22d3ee, #14b8a6);
+            color: #052225;
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(125, 211, 252, 0.3);
+            flex-shrink: 0;
+        }
+
+        .profile-badge-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-badge-name {
+            margin: 0;
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .profile-badge-role {
+            margin: 4px 0 0;
+            color: #93c5fd;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .profile-form-wrap {
+            padding: 26px 30px 30px;
+        }
+
+        .profile-form .row {
+            --bs-gutter-x: 16px;
+        }
+
+        .profile-form .form-label {
+            color: #dbeafe;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .profile-form .form-control {
+            border-radius: 12px;
+            border: 1px solid rgba(86, 117, 193, 0.45);
+            background: rgba(10, 22, 49, 0.82);
+            color: #f8fafc;
+            padding: 12px 14px;
+            min-height: 50px;
+        }
+
+        .profile-form .form-control:focus {
+            border-color: rgba(34, 211, 238, 0.72);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16);
+            background: rgba(10, 22, 49, 0.92);
+            color: #f8fafc;
+        }
+
+        .profile-muted {
+            margin-top: -4px;
+            margin-bottom: 16px;
+            color: #8fa3c8;
+            font-size: 13px;
+        }
+
+        .profile-upload {
+            margin-top: 14px;
+            border: 1px solid rgba(89, 118, 194, 0.38);
+            border-radius: 18px;
+            background: linear-gradient(150deg, rgba(18, 32, 64, 0.72), rgba(11, 24, 50, 0.75));
+            padding: 18px;
+        }
+
+        .profile-upload-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .profile-upload-preview {
+            width: 86px;
+            height: 86px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(148, 163, 184, 0.22);
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .profile-upload-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-upload-title {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .profile-upload-note {
+            margin: 6px 0 0;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .profile-upload input[type="file"] {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(86, 117, 193, 0.5);
+            background: rgba(10, 22, 49, 0.88);
+            color: #f8fafc;
+            padding: 9px 10px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .profile-actions .btn {
+            border-radius: 12px;
+            min-height: 46px;
+            padding: 10px 20px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .profile-shell {
+                margin: 18px auto 12px;
+            }
+
+            .profile-head,
+            .profile-form-wrap {
+                padding: 20px 16px;
+            }
+
+            .profile-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .profile-badge {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="row justify-content-center" style="margin-top: 40px;">
-    <div class="col-md-8">
-        <div class="front-card">
-            <h1 class="section-title">Mon Profil</h1>
-            <p class="text-muted mb-4">Gérez vos informations personnelles et votre photo de profil (requise pour la reconnaissance faciale).</p>
-
-            {{ form_start(form) }}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {{ form_row(form.prenom) }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form_row(form.nom) }}
-                    </div>
+    <div class="profile-shell">
+        <section class="profile-card">
+            <header class="profile-head">
+                <div>
+                    <span class="profile-eyebrow">Mon espace</span>
+                    <h1 class="profile-title">Mon profil</h1>
+                    <p class="profile-subtitle">Mettez a jour vos informations personnelles et votre photo de reference pour une meilleure confiance sur la plateforme.</p>
                 </div>
 
-                <div class="mb-3">
-                    {{ form_row(form.email) }}
-                    <small class="text-muted">L'email ne peut pas être modifié.</small>
-                </div>
-
-                <div class="mb-3">
-                    {{ form_row(form.telephone) }}
-                </div>
-
-                <div class="mb-4 p-3 bg-light rounded" style="border: 1px dashed var(--primary);">
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="profile-badge">
+                    <div class="profile-badge-avatar">
                         {% if user.photo %}
-                            <img src="{{ asset('uploads/photos/' ~ user.photo) }}" style="width: 100px; height: 100px; border-radius: 12px; object-fit: cover; border: 3px solid var(--primary);">
+                            <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="Profile photo">
                         {% else %}
-                            <div style="width: 100px; height: 100px; border-radius: 12px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #9ca3af;">
-                                <i class="lucide-user"></i>
-                            </div>
+                            {{ user.prenom ? user.prenom|first|upper : 'U' }}
                         {% endif %}
-                        <div>
-                            <h5 class="mb-1">Photo de profil</h5>
-                            <p class="text-muted small mb-0">Cette photo sera utilisée comme référence lors de vos commentaires.</p>
+                    </div>
+                    <div>
+                        <p class="profile-badge-name">{{ user.prenom }} {{ user.nom }}</p>
+                        <p class="profile-badge-role">{{ user.roles|first|default('ROLE_USER') }}</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="profile-form-wrap">
+                {{ form_start(form, {attr: {class: 'profile-form'}}) }}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.prenom) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.nom) }}
                         </div>
                     </div>
-                    {{ form_widget(form.photoFile) }}
-                    {{ form_errors(form.photoFile) }}
-                </div>
 
-                <div class="d-flex gap-3 mt-4">
-                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                    <a href="{{ path('front_home') }}" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 10px 20px; text-decoration: none; font-weight: 500;">Annuler</a>
-                </div>
-            {{ form_end(form) }}
-        </div>
+                    <div class="mb-2">
+                        {{ form_row(form.email) }}
+                    </div>
+                    <p class="profile-muted">L email est verrouille et ne peut pas etre modifie.</p>
+
+                    <div class="mb-3">
+                        {{ form_row(form.telephone) }}
+                    </div>
+
+                    <div class="profile-upload">
+                        <div class="profile-upload-head">
+                            <div class="profile-upload-preview">
+                                {% if user.photo %}
+                                    <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="Current profile photo">
+                                {% else %}
+                                    <i class="lucide-user"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h2 class="profile-upload-title">Photo de profil</h2>
+                                <p class="profile-upload-note">Cette image sera utilisee comme reference lors de vos commentaires et controles de reconnaissance faciale.</p>
+                            </div>
+                        </div>
+                        {{ form_widget(form.photoFile) }}
+                        {{ form_errors(form.photoFile) }}
+                    </div>
+
+                    <div class="profile-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="lucide-save" style="font-size:14px;"></i> Enregistrer les modifications
+                        </button>
+                        <a href="{{ path('front_home') }}" class="btn btn-outline-secondary">
+                            <i class="lucide-x" style="font-size:14px;"></i> Annuler
+                        </a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </section>
     </div>
-</div>
 {% endblock %}

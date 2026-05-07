@@ -51,7 +51,7 @@
                         <tr>
                             <td>
                                 {% if joueur.image %}
-                                    <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" style="max-height: 40px; max-width: 40px; border-radius: 4px;">
+                                    <img src="{{ media_url(joueur.image, 'joueurs') }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" style="max-height: 40px; max-width: 40px; border-radius: 4px;">
                                 {% else %}
                                     <span class="text-muted">-</span>
                                 {% endif %}

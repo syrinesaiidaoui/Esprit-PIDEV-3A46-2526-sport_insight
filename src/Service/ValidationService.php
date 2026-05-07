@@ -162,7 +162,7 @@ class ValidationService
         }
 
         // Status validation
-        $validStatuses = ['pending', 'confirmed', 'shipped', 'delivered'];
+        $validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'rejected'];
         if (empty($data['status'] ?? null)) {
             $errors['status'][] = 'Le statut est obligatoire';
         } elseif (!in_array($data['status'], $validStatuses)) {

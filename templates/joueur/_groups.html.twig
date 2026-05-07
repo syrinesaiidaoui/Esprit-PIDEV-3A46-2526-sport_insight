@@ -7,7 +7,7 @@
                         <span class="players-group__caret" aria-hidden="true"><i class="lucide-chevron-down"></i></span>
                         <span class="players-group__logo-wrap">
                             {% if groupe.equipe.image %}
-                                <img src="{{ asset('uploads/equipes/' ~ groupe.equipe.image) }}" alt="{{ groupe.equipe.nom }}" class="players-group__logo">
+                                <img src="{{ media_url(groupe.equipe.image, 'equipes') }}" alt="{{ groupe.equipe.nom }}" class="players-group__logo">
                             {% else %}
                                 <span class="players-group__logo-fallback">{{ groupe.equipe.nom|slice(0, 1)|upper }}</span>
                             {% endif %}
@@ -24,7 +24,7 @@
                             <article class="player-card">
                                 <div class="player-card__media">
                                     {% if joueur.image %}
-                                        <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="player-card__image">
+                                        <img src="{{ media_url(joueur.image, 'joueurs') }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="player-card__image">
                                     {% else %}
                                         <span class="player-card__placeholder"><i class="lucide-user-round"></i></span>
                                     {% endif %}

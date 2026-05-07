@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
+      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data_test.db"
+      APP_SECRET: "test_secret_for_ci_only"
+      TWILIO_SID: "test_sid"
+      TWILIO_AUTH_TOKEN: "test_auth_token"
+      TWILIO_PHONE: "+10000000000"
+      TWILIO_DEFAULT_COUNTRY: "US"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: ctype, iconv, intl, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Lint YAML
+        run: php bin/console lint:yaml config --parse-tags
+
+      - name: Lint Twig
+        run: php bin/console lint:twig templates
+
+      - name: Prepare test database
+        run: |
+          php bin/console doctrine:database:create --if-not-exists --env=test
+          php bin/console doctrine:schema:create --env=test
+
+      - name: Run PHPUnit
+        run: php bin/phpunit --testdox
+
+      - name: Warm cache for PHPStan
+        run: php bin/console cache:warmup --env=dev
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --no-progress

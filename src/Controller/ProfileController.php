@@ -23,13 +23,14 @@ class ProfileController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
+            $this->addFlash('success', 'Votre profil a ete mis a jour avec succes.');
+
             return $this->redirectToRoute('app_profile_edit');
         }
 
         return $this->render('profile/edit.html.twig', [
             'form' => $form->createView(),
-            'user' => $user
+            'user' => $user,
         ]);
     }
 }

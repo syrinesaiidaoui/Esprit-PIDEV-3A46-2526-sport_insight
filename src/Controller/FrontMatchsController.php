@@ -27,12 +27,14 @@ final class FrontMatchsController extends AbstractController
         $team = trim((string) $request->query->get('team', $request->query->get('search', '')));
         $dateFrom = trim((string) $request->query->get('dateFrom', ''));
         $dateTo = trim((string) $request->query->get('dateTo', ''));
+        $status = $this->normalizeStatusFilter((string) $request->query->get('status', ''));
 
         $matchs = $this->findFilteredMatchs(
             $matchsRepository,
             $team,
             $dateFrom,
-            $dateTo
+            $dateTo,
+            $status
         );
 
         return $this->render('front_office/matchs/index.html.twig', [
@@ -40,6 +42,7 @@ final class FrontMatchsController extends AbstractController
             'team' => $team,
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
+            'status' => $status,
         ]);
     }
 
@@ -49,12 +52,14 @@ final class FrontMatchsController extends AbstractController
         $team = trim((string) $request->query->get('team', $request->query->get('search', '')));
         $dateFrom = trim((string) $request->query->get('dateFrom', ''));
         $dateTo = trim((string) $request->query->get('dateTo', ''));
+        $status = $this->normalizeStatusFilter((string) $request->query->get('status', ''));
 
         $matchs = $this->findFilteredMatchs(
             $matchsRepository,
             $team,
             $dateFrom,
             $dateTo,
+            $status,
             self::AJAX_RESULTS_LIMIT
         );
 
@@ -350,14 +355,16 @@ final class FrontMatchsController extends AbstractController
         string $team,
         string $dateFrom,
         string $dateTo,
+        string $status,
         ?int $limit = null
     ): array {
         $normalizedTeam = $this->normalizeTeamTerm($team);
         $qb = $matchsRepository->createQueryBuilder('m')
+            ->select('partial m.{id,statut,dateMatch,heureDebut,scoreEquipeDomicile,scoreEquipeExterieur,lieu}')
             ->leftJoin('m.equipeDomicile', 'dom')
-            ->addSelect('dom')
+            ->addSelect('partial dom.{id,nom,image}')
             ->leftJoin('m.equipeExterieur', 'ext')
-            ->addSelect('ext');
+            ->addSelect('partial ext.{id,nom,image}');
 
         if ($normalizedTeam !== '') {
             $qb->andWhere('dom.nom LIKE :teamPrefix OR ext.nom LIKE :teamPrefix')
@@ -376,6 +383,12 @@ final class FrontMatchsController extends AbstractController
                 ->setParameter('dateTo', $toDate->setTime(23, 59, 59));
         }
 
+        $statusValues = $this->statusFilterValues($status);
+        if ($statusValues !== []) {
+            $qb->andWhere('LOWER(m.statut) IN (:statuses)')
+                ->setParameter('statuses', $statusValues);
+        }
+
         $qb->orderBy('m.dateMatch', 'DESC')
             ->addOrderBy('m.heureDebut', 'DESC')
             ->addOrderBy('m.id', 'DESC');
@@ -384,7 +397,7 @@ final class FrontMatchsController extends AbstractController
             $qb->setMaxResults($limit);
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->getArrayResult();
     }
 
     private function parseDateInput(string $value): ?\DateTimeImmutable
@@ -400,7 +413,7 @@ final class FrontMatchsController extends AbstractController
 
         $errors = \DateTimeImmutable::getLastErrors();
         if (!is_array($errors)) {
-            return null;
+            return $date;
         }
 
         if ($errors['warning_count'] > 0 || $errors['error_count'] > 0) {
@@ -418,5 +431,79 @@ final class FrontMatchsController extends AbstractController
         }
 
         return $value;
+    }
+
+    private function normalizeStatusFilter(string $status): string
+    {
+        $value = mb_strtolower(trim($status));
+        $value = strtr($value, [
+            'é' => 'e',
+            'è' => 'e',
+            'ê' => 'e',
+            'ë' => 'e',
+            'à' => 'a',
+            'â' => 'a',
+            'î' => 'i',
+            'ï' => 'i',
+            'ô' => 'o',
+            'ù' => 'u',
+            'û' => 'u',
+            'ç' => 'c',
+        ]);
+
+        if (in_array($value, ['programme', 'programmee', 'scheduled', 'upcoming', 'a venir'], true)) {
+            return 'programme';
+        }
+
+        if (in_array($value, ['fini', 'finie', 'termine', 'terminee', 'ended', 'finished', 'complete', 'completed'], true)) {
+            return 'fini';
+        }
+
+        if (in_array($value, ['live', 'en cours', 'cours', 'en direct', 'direct', 'ongoing', 'in progress'], true)) {
+            return 'live';
+        }
+
+        return '';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function statusFilterValues(string $status): array
+    {
+        return match ($status) {
+            'programme' => [
+                'programme',
+                'programmee',
+                'programmé',
+                'programmée',
+                'scheduled',
+                'upcoming',
+                'a venir',
+                'à venir',
+            ],
+            'live' => [
+                'live',
+                'en cours',
+                'cours',
+                'en direct',
+                'direct',
+                'ongoing',
+                'in progress',
+            ],
+            'fini' => [
+                'fini',
+                'finie',
+                'termine',
+                'terminé',
+                'terminee',
+                'terminée',
+                'ended',
+                'finished',
+                'complete',
+                'completed',
+            ],
+            default => [],
+        };
     }
 }

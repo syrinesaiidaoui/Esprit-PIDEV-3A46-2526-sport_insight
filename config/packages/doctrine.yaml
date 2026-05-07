@@ -6,13 +6,16 @@ doctrine:
         # either here or in the DATABASE_URL env var (see .env file)
         #server_version: '16'
 
-        profiling_collect_backtrace: '%kernel.debug%'
+        profiling_collect_backtrace: false
         use_savepoints: true
+        # Keep JavaFX-owned support tables out of Doctrine's schema tool.
+        # The shared demo database is managed additively by both apps.
+        schema_filter: '~^(?!ai_checklist_progress$|comment_favorite$|comment_reaction$|daily_nutrition_summary$|face_profile$|food_log$|match_follow_target$|password_reset_token$).*~'
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
         report_fields_where_declared: true
-        validate_xml_mapping: true
+        validate_xml_mapping: false
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
         mappings:

@@ -8,8 +8,16 @@
         .chart-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         .chart-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; min-height: 320px; }
         .chart-card canvas { max-height: 260px !important; }
+        .chart-grid-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .club-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .match-pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(59, 130, 246, 0.12); color: #1d4ed8; }
+        .match-pill.status-finished { background: rgba(34, 197, 94, 0.14); color: #15803d; }
+        .match-pill.status-planned { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+        .match-pill.status-canceled { background: rgba(239, 68, 68, 0.14); color: #b91c1c; }
         @media (max-width: 1100px) { .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { .chart-grid-two { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { .club-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; } .club-kpis { grid-template-columns: 1fr; } }
     </style>
 {% endblock %}
 
@@ -71,6 +79,94 @@
         <div class="chart-card">
             <h5 class="mb-2">Répartition des statuts</h5>
             {{ render_chart(statusChart) }}
+        </div>
+    </div>
+</section>
+
+<section class="club-kpis">
+    <article class="stat-card">
+        <div class="stat-card-label">Teams</div>
+        <div class="stat-card-value">{{ clubOverview.totalTeams }}</div>
+        <div class="stat-card-sub">Registered teams</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-card-label">Players</div>
+        <div class="stat-card-value">{{ clubOverview.totalPlayers }}</div>
+        <div class="stat-card-sub">All squads combined</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-card-label">Matches</div>
+        <div class="stat-card-value">{{ clubOverview.totalMatches }}</div>
+        <div class="stat-card-sub">Recorded fixtures</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-card-label">Upcoming matches</div>
+        <div class="stat-card-value">{{ clubOverview.upcomingMatches }}</div>
+        <div class="stat-card-sub">From today onward</div>
+    </article>
+</section>
+
+<section class="data-table" style="margin-bottom: 24px;">
+    <div class="data-table-header">
+        <div>
+            <h3>Matchs, equipes et joueurs</h3>
+            <p class="muted">Vue consolidée des activites sportives du club</p>
+        </div>
+    </div>
+    <div class="chart-grid-two">
+        <div class="chart-card">
+            <h5 class="mb-2">Volume global du club</h5>
+            {{ render_chart(clubOverviewChart) }}
+        </div>
+        <div class="chart-card">
+            <h5 class="mb-2">Joueurs par equipe</h5>
+            {{ render_chart(playersByTeamChart) }}
+        </div>
+    </div>
+</section>
+
+<section class="data-table" style="margin-bottom: 24px;">
+    <div class="data-table-header">
+        <div>
+            <h3>Statut des matchs</h3>
+            <p class="muted">Distribution des matchs par statut actuel</p>
+        </div>
+    </div>
+    <div class="chart-grid-two">
+        <div class="chart-card">
+            <h5 class="mb-2">Repartition</h5>
+            {{ render_chart(clubMatchStatusChart) }}
+        </div>
+        <div class="chart-card">
+            <h5 class="mb-2">Derniers matchs enregistres</h5>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Match</th>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Statut</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for match in recentMatches %}
+                        {% set statusClass = match.status|lower|replace({' ': '-'}) %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">{{ match.label }}</div>
+                                <div class="muted-soft">{{ match.location }}</div>
+                            </td>
+                            <td>{{ match.date ? match.date|date('Y-m-d') : '-' }}</td>
+                            <td>{{ match.score }}</td>
+                            <td><span class="match-pill status-{{ statusClass }}">{{ match.status }}</span></td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="4">Aucun match disponible.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

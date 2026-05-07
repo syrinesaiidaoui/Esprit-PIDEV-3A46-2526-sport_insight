@@ -84,10 +84,7 @@
 <div class="trending-banner">
     <div class="trending-banner__icon">TOP</div>
     <div>
-        {% set names = [] %}
-        {% for item in trendingItems %}
-            {% set names = names|merge([item.product.name]) %}
-        {% endfor %}
+        {% set names = trendingNames|default([]) %}
 
         {% if names|length > 0 %}
             <p class="trending-banner__title">{{ 'trending.title'|trans }}</p>
@@ -100,6 +97,6 @@
         {% endif %}
     </div>
     <div class="trending-banner__action">
-        <a href="{{ path('app_shop_index') }}" class="btn btn-primary">{{ 'trending.button'|trans }}</a>
+        <a href="{{ path('front_equipement_index') }}" class="btn btn-primary">{{ 'trending.button'|trans }}</a>
     </div>
 </div>

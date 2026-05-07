@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\ProductOrder\Order;
+use App\Entity\ProductOrder\OrderItem;
 use App\Entity\ProductOrder\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -31,6 +33,29 @@ class ProductRepository extends ServiceEntityRepository
         $rows = $qb->getQuery()->getScalarResult();
 
         return array_map(fn($r) => $r['category'], $rows);
+    }
+
+    /**
+     * @param string[] $names
+     *
+     * @return Product[]
+     */
+    public function findByNames(array $names): array
+    {
+        $normalizedNames = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $name): string => trim((string) $name),
+            $names
+        ))));
+
+        if ($normalizedNames === []) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.name IN (:names)')
+            ->setParameter('names', $normalizedNames)
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -121,31 +146,161 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function findTrending(int $days = 30, int $limit = 5): array
     {
-        $from = new \DateTime(sprintf('-%d days', $days));
-        $statuses = ['confirmed', 'shipped', 'delivered'];
+        $days = max(1, $days);
+        $limit = max(1, $limit);
+        $topProductIds = $this->getTopTrendingProductIds($days, $limit);
+        if ($topProductIds === []) {
+            return [];
+        }
 
-        $qb = $this->createQueryBuilder('p')
-            ->select('p')
-            ->addSelect('(COALESCE(SUM(o.quantity), 0) + COALESCE(SUM(oi.quantity), 0)) AS totalSold')
-            ->leftJoin('p.orders', 'o', 'WITH', 'o.status IN (:statuses) AND o.orderDate >= :from')
-            ->leftJoin('p.orderItems', 'oi')
-            ->leftJoin('oi.orderRef', 'ord', 'WITH', 'ord.status IN (:statuses) AND ord.orderDate >= :from')
+        $totalsByProductId = $this->computeTrendingTotalsByProductId($days);
+
+        $products = $this->createQueryBuilder('p')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('ids', $topProductIds)
+            ->getQuery()
+            ->getResult();
+
+        $productsById = [];
+        foreach ($products as $product) {
+            $productId = $product->getId();
+            if ($productId !== null) {
+                $productsById[$productId] = $product;
+            }
+        }
+
+        $result = [];
+        foreach ($topProductIds as $productId) {
+            if (!isset($productsById[$productId])) {
+                continue;
+            }
+
+            $totalSold = (int) ($totalsByProductId[$productId] ?? 0);
+            if ($totalSold <= 0) {
+                continue;
+            }
+
+            $result[] = [
+                'product' => $productsById[$productId],
+                'totalSold' => $totalSold,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Return only product names for the trending banner to reduce hydration overhead.
+     *
+     * @return string[]
+     */
+    public function findTrendingProductNames(int $days = 30, int $limit = 5): array
+    {
+        $days = max(1, $days);
+        $limit = max(1, $limit);
+        $topProductIds = $this->getTopTrendingProductIds($days, $limit);
+        if ($topProductIds === []) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('p')
+            ->select('p.id AS id', 'p.name AS name')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('ids', $topProductIds)
+            ->getQuery()
+            ->getArrayResult();
+
+        $namesById = [];
+        foreach ($rows as $row) {
+            $productId = (int) ($row['id'] ?? 0);
+            $name = trim((string) ($row['name'] ?? ''));
+            if ($productId > 0 && $name !== '') {
+                $namesById[$productId] = $name;
+            }
+        }
+
+        $orderedNames = [];
+        foreach ($topProductIds as $productId) {
+            if (isset($namesById[$productId])) {
+                $orderedNames[] = $namesById[$productId];
+            }
+        }
+
+        return $orderedNames;
+    }
+
+    /**
+     * @return array<int,int>
+     */
+    private function computeTrendingTotalsByProductId(int $days): array
+    {
+        $from = new \DateTimeImmutable(sprintf('-%d days', max(1, $days)));
+        $statuses = ['confirmed', 'shipped', 'delivered'];
+        $totalsByProductId = [];
+
+        $legacyRows = $this->getEntityManager()->createQueryBuilder()
+            ->select('IDENTITY(o.product) AS productId')
+            ->addSelect('SUM(o.quantity) AS totalSold')
+            ->from(Order::class, 'o')
+            ->leftJoin('o.items', 'legacyItems')
+            ->andWhere('o.product IS NOT NULL')
+            ->andWhere('legacyItems.id IS NULL')
+            ->andWhere('o.quantity IS NOT NULL')
+            ->andWhere('o.status IN (:statuses)')
+            ->andWhere('o.orderDate >= :from')
+            ->groupBy('o.product')
             ->setParameter('from', $from)
             ->setParameter('statuses', $statuses)
-            ->groupBy('p.id')
-            ->having('(COALESCE(SUM(o.quantity), 0) + COALESCE(SUM(oi.quantity), 0)) > 0')
-            ->orderBy('totalSold', 'DESC')
-            ->setMaxResults($limit);
+            ->getQuery()
+            ->getArrayResult();
 
-        $result = $qb->getQuery()->getResult();
+        foreach ($legacyRows as $row) {
+            $productId = (int) ($row['productId'] ?? 0);
+            if ($productId <= 0) {
+                continue;
+            }
 
-        // Doctrine returns an array: [0 => Product, 'totalSold' => n]
-        return array_map(static function (array $row): array {
-            return [
-                'product' => $row[0],
-                'totalSold' => (int) $row['totalSold'],
-            ];
-        }, $result);
+            $totalsByProductId[$productId] = ($totalsByProductId[$productId] ?? 0) + (int) ($row['totalSold'] ?? 0);
+        }
+
+        $lineRows = $this->getEntityManager()->createQueryBuilder()
+            ->select('IDENTITY(oi.product) AS productId')
+            ->addSelect('SUM(oi.quantity) AS totalSold')
+            ->from(OrderItem::class, 'oi')
+            ->innerJoin('oi.orderRef', 'ord')
+            ->andWhere('ord.status IN (:statuses)')
+            ->andWhere('ord.orderDate >= :from')
+            ->groupBy('oi.product')
+            ->setParameter('from', $from)
+            ->setParameter('statuses', $statuses)
+            ->getQuery()
+            ->getArrayResult();
+
+        foreach ($lineRows as $row) {
+            $productId = (int) ($row['productId'] ?? 0);
+            if ($productId <= 0) {
+                continue;
+            }
+
+            $totalsByProductId[$productId] = ($totalsByProductId[$productId] ?? 0) + (int) ($row['totalSold'] ?? 0);
+        }
+
+        return $totalsByProductId;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function getTopTrendingProductIds(int $days, int $limit): array
+    {
+        $totalsByProductId = $this->computeTrendingTotalsByProductId($days);
+        if ($totalsByProductId === []) {
+            return [];
+        }
+
+        arsort($totalsByProductId, SORT_NUMERIC);
+
+        return array_slice(array_keys($totalsByProductId), 0, max(1, $limit));
     }
 
     //    /**

@@ -444,7 +444,7 @@
         <div class="match-info">
             <div class="team-info">
                 {% if match.equipeDomicile.image %}
-                    <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}" class="team-info-logo">
+                    <img src="{{ media_url(match.equipeDomicile.image, 'equipes') }}" alt="{{ match.equipeDomicile.nom }}" class="team-info-logo">
                 {% endif %}
                 <div class="team-info-text">
                     <h3>{{ match.equipeDomicile.nom }}</h3>
@@ -463,7 +463,7 @@
                     <p>Équipe extérieure</p>
                 </div>
                 {% if match.equipeExterieur.image %}
-                    <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}" class="team-info-logo">
+                    <img src="{{ media_url(match.equipeExterieur.image, 'equipes') }}" alt="{{ match.equipeExterieur.nom }}" class="team-info-logo">
                 {% endif %}
             </div>
         </div>
@@ -496,7 +496,7 @@
                             <div class="joueur-draggable" data-lineup-id="{{ lineup.id }}" style="left: {% if lineup.positionX %}{{ lineup.positionX }}%{% else %}50%{% endif %}; top: {% if lineup.positionY %}{{ lineup.positionY }}%{% else %}{{ 30 + loop.index0 * 10 }}%{% endif %};">
                                 <div class="joueur-avatar">
                                     {% if lineup.joueur.image %}
-                                        <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
+                                        <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
                                     {% else %}
                                         <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);">👤</div>
                                     {% endif %}
@@ -514,7 +514,7 @@
                         {% for lineup in domicileLineups %}
                             <div class="joueur-list-item">
                                 {% if lineup.joueur.image %}
-                                    <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="" class="joueur-list-item-img">
+                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="" class="joueur-list-item-img">
                                 {% else %}
                                     <div style="width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid white;">👤</div>
                                 {% endif %}
@@ -550,7 +550,7 @@
                             <div class="joueur-draggable" data-lineup-id="{{ lineup.id }}" style="left: {% if lineup.positionX %}{{ lineup.positionX }}%{% else %}{{ 50 + (7 - loop.index0) * 5 }}%{% endif %}; top: {% if lineup.positionY %}{{ lineup.positionY }}%{% else %}{{ 30 + loop.index0 * 10 }}%{% endif %};">
                                 <div class="joueur-avatar">
                                     {% if lineup.joueur.image %}
-                                        <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
+                                        <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-photo">
                                     {% else %}
                                         <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);">👤</div>
                                     {% endif %}
@@ -568,7 +568,7 @@
                         {% for lineup in exterieurLineups %}
                             <div class="joueur-list-item">
                                 {% if lineup.joueur.image %}
-                                    <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="" class="joueur-list-item-img">
+                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="" class="joueur-list-item-img">
                                 {% else %}
                                     <div style="width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid white;">👤</div>
                                 {% endif %}

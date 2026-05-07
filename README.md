@@ -37,12 +37,9 @@ It combines training, matches, players, announcements, sponsorship, equipment st
 
 ## Authentication and Roles
 
-Role assignment is currently automatic at registration by email domain:
+New users are always created with `ROLE_USER`.
 
-- `@esprit.tn` -> `ROLE_ADMIN`
-- `@coach.com` -> `ROLE_ENTRAINEUR`
-- `@player.com` -> `ROLE_JOUEUR`
-- any other domain -> `ROLE_USER`
+Privileged roles (`ROLE_ADMIN`, `ROLE_ENTRAINEUR`, `ROLE_JOUEUR`) must be assigned explicitly through an admin-managed process (never inferred from email domain).
 
 Configured in:
 - `src/Controller/SecurityController.php`
@@ -102,6 +99,26 @@ php -S 127.0.0.1:8000 -t public
 
 Open: `http://127.0.0.1:8000`
 
+## Java/Web Integration
+
+The Symfony web app and the JavaFX desktop app are validated together on one machine using the same MySQL database:
+
+- database name: `sport_insight`
+- default local connection: `mysql://root:@127.0.0.1:3306/sport_insight`
+- Java repository: `C:\PI Java`
+- Java entry point: `tn.esprit.gui.HomeLauncher`
+
+Start XAMPP first so MySQL is listening on port `3306`. Then run the web app from this repository and the JavaFX app from `C:\PI Java`.
+
+Safe database commands:
+
+```bash
+php bin/console doctrine:migrations:status
+php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+Do not run `php bin/console doctrine:schema:update --force` on the shared demo database. Doctrine does not know every Java-side support column/table, and a forced schema update can remove data needed by the JavaFX app. Use additive migrations or `scripts/ensure_shared_schema.sql` for shared-schema repair.
+
 ## Useful Commands
 
 ```bash
@@ -109,6 +126,8 @@ php bin/console cache:clear
 php bin/console lint:twig templates
 php bin/console doctrine:migrations:status
 php bin/phpunit
+vendor/bin/phpstan analyse
+composer audit
 ```
 
 ## Project Structure

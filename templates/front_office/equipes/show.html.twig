@@ -373,7 +373,7 @@
                 <div class="team-logo-panel">
                     <div class="team-logo-panel__inner">
                         {% if equipe.image %}
-                            <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
+                            <img src="{{ media_url(equipe.image, 'equipes') }}" alt="{{ equipe.nom }}">
                         {% else %}
                             <span class="team-logo-fallback">
                                 <i class="lucide-shield"></i>

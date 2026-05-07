@@ -43,3 +43,7 @@ services:
     App\Service\MatchDetailAiService:
         arguments:
             $groqApiKey: '%app.groq_api_key%'
+
+    App\Service\MediaPathResolver:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

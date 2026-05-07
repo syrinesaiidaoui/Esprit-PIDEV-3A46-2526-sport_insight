@@ -4,11 +4,17 @@
             {% set statusText = (match.statut ?? 'Programme') %}
             {% set normalizedStatus = statusText|lower %}
             {% set statusClass = 'status-scheduled' %}
-            {% if 'cours' in normalizedStatus %}
+            {% set isLive = normalizedStatus in ['live', 'en cours', 'en direct', 'ongoing', 'in progress'] or 'cours' in normalizedStatus %}
+            {% set isFinished = normalizedStatus in ['fini', 'finie', 'ended', 'finished', 'complete', 'completed'] or 'termin' in normalizedStatus %}
+            {% set homeScore = match.scoreEquipeDomicile is defined and match.scoreEquipeDomicile is not null ? match.scoreEquipeDomicile : null %}
+            {% set awayScore = match.scoreEquipeExterieur is defined and match.scoreEquipeExterieur is not null ? match.scoreEquipeExterieur : null %}
+            {% set hasScore = homeScore is not null or awayScore is not null %}
+            {% set shouldShowScore = hasScore or isLive or isFinished %}
+            {% if isLive %}
                 {% set statusClass = 'status-ongoing' %}
-            {% elseif 'termin' in normalizedStatus %}
+            {% elseif isFinished %}
                 {% set statusClass = 'status-finished' %}
-            {% elseif 'annul' in normalizedStatus %}
+            {% elseif 'annul' in normalizedStatus or 'cancel' in normalizedStatus or 'report' in normalizedStatus %}
                 {% set statusClass = 'status-cancelled' %}
             {% endif %}
 
@@ -30,7 +36,7 @@
                     <div class="fixture-team">
                         <div class="fixture-team__logo">
                             {% if match.equipeDomicile and match.equipeDomicile.image %}
-                                <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}">
+                                <img src="{{ media_url(match.equipeDomicile.image, 'equipes') }}" alt="{{ match.equipeDomicile.nom }}">
                             {% else %}
                                 <span class="fixture-team__fallback">{{ (match.equipeDomicile.nom ?? 'D')|slice(0, 1)|upper }}</span>
                             {% endif %}
@@ -38,16 +44,20 @@
                         <strong class="fixture-team__name">{{ match.equipeDomicile.nom ?? 'Equipe domicile' }}</strong>
                     </div>
 
-                    <div class="fixture-score">
-                        <span>{{ match.scoreEquipeDomicile is not null ? match.scoreEquipeDomicile : 0 }}</span>
-                        <small>-</small>
-                        <span>{{ match.scoreEquipeExterieur is not null ? match.scoreEquipeExterieur : 0 }}</span>
+                    <div class="fixture-score {{ shouldShowScore ? '' : 'fixture-score--pending' }}">
+                        {% if shouldShowScore %}
+                            <span>{{ homeScore is not null ? homeScore : 0 }}</span>
+                            <small>-</small>
+                            <span>{{ awayScore is not null ? awayScore : 0 }}</span>
+                        {% else %}
+                            <span class="fixture-score__pending">VS</span>
+                        {% endif %}
                     </div>
 
                     <div class="fixture-team">
                         <div class="fixture-team__logo">
                             {% if match.equipeExterieur and match.equipeExterieur.image %}
-                                <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}">
+                                <img src="{{ media_url(match.equipeExterieur.image, 'equipes') }}" alt="{{ match.equipeExterieur.nom }}">
                             {% else %}
                                 <span class="fixture-team__fallback">{{ (match.equipeExterieur.nom ?? 'E')|slice(0, 1)|upper }}</span>
                             {% endif %}

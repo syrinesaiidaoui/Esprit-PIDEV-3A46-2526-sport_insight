@@ -56,8 +56,7 @@ class SecurityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = (string) $form->get('plainPassword')->getData();
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
-            $email = strtolower(trim((string) $user->getEmail()));
-            $user->setRoles($this->resolveRolesFromEmail($email));
+            $user->setRoles($this->resolveRegistrationRoles());
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -72,20 +71,12 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    private function resolveRolesFromEmail(string $email): array
+    /**
+     * Never infer privileged roles from user input (e.g. email domains).
+     * Role elevation must go through an explicit admin process.
+     */
+    private function resolveRegistrationRoles(): array
     {
-        if (str_ends_with($email, '@esprit.tn')) {
-            return ['ROLE_ADMIN'];
-        }
-
-        if (str_ends_with($email, '@coach.com')) {
-            return ['ROLE_ENTRAINEUR'];
-        }
-
-        if (str_ends_with($email, '@player.com')) {
-            return ['ROLE_JOUEUR'];
-        }
-
         return ['ROLE_USER'];
     }
 }

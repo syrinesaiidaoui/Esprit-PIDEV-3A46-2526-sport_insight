@@ -24,6 +24,10 @@ security:
                 username_parameter: _username
                 password_parameter: _password
                 default_target_path: front_home
+                enable_csrf: true
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
 
             logout:
                 path: app_logout
@@ -38,10 +42,20 @@ security:
         - { path: ^/_trending, roles: PUBLIC_ACCESS }
         - { path: ^/annonce, roles: PUBLIC_ACCESS }
         - { path: ^/commentaire, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: PUBLIC_ACCESS }
+        - { path: ^/api/catalog/products$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/products$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/products/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/joueurs/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
+
+        # Restrict product catalog mutations
+        - { path: ^/api/products$, roles: ROLE_ADMIN, methods: [POST] }
+        - { path: ^/api/products/\d+$, roles: ROLE_ADMIN, methods: [PUT, PATCH, DELETE] }
+
+        # Other API endpoints require at least an authenticated user
+        - { path: ^/api, roles: ROLE_USER }
 
         # Admin routes
-        - { path: ^/back, roles: PUBLIC_ACCESS }
+        - { path: ^/back, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
 
         # Everything else requires authentication

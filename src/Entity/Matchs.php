@@ -66,7 +66,16 @@ class Matchs
     #[Assert\GreaterThanOrEqual(0, message: 'Le score doit être un nombre positif')]
     private ?int $scoreEquipeExterieur = 0;
 
-    #[ORM\OneToMany(mappedBy: 'matchs', targetEntity: MatchLineup::class, cascade: ['remove'])]
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $oddsSnapshotJson = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $oddsSource = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTime $oddsSyncedAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'matchs', targetEntity: MatchLineup::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $matchLineups;
 
     public function __construct()
@@ -227,6 +236,42 @@ class Matchs
     public function setScoreEquipeExterieur(?int $scoreEquipeExterieur): static
     {
         $this->scoreEquipeExterieur = $scoreEquipeExterieur;
+
+        return $this;
+    }
+
+    public function getOddsSnapshotJson(): ?array
+    {
+        return $this->oddsSnapshotJson;
+    }
+
+    public function setOddsSnapshotJson(?array $oddsSnapshotJson): static
+    {
+        $this->oddsSnapshotJson = $oddsSnapshotJson;
+
+        return $this;
+    }
+
+    public function getOddsSource(): ?string
+    {
+        return $this->oddsSource;
+    }
+
+    public function setOddsSource(?string $oddsSource): static
+    {
+        $this->oddsSource = $oddsSource;
+
+        return $this;
+    }
+
+    public function getOddsSyncedAt(): ?\DateTime
+    {
+        return $this->oddsSyncedAt;
+    }
+
+    public function setOddsSyncedAt(?\DateTime $oddsSyncedAt): static
+    {
+        $this->oddsSyncedAt = $oddsSyncedAt;
 
         return $this;
     }

@@ -14,10 +14,10 @@ class TrendingController extends AbstractController
     #[Route('/_trending/banner', name: 'trending_banner')]
     public function banner(): Response
     {
-        $items = $this->trendingService->getTrending(30, 5);
+        $names = $this->trendingService->getTrendingProductNames(30, 5);
 
         return $this->render('front_office/_trending_banner.html.twig', [
-            'trendingItems' => $items,
+            'trendingNames' => $names,
         ]);
     }
 }

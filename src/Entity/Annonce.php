@@ -54,7 +54,7 @@ class Annonce
     /**
      * @var Collection<int, Commentaire>
      */
-    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'annonce', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'annonce', cascade: ['persist'], orphanRemoval: true)]
     private Collection $commentaires;
 
     public function __construct()

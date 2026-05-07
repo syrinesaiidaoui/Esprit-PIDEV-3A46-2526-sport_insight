@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/products', name: 'api_products_')]
 class ProductApiController extends AbstractController
@@ -28,6 +29,7 @@ class ProductApiController extends AbstractController
         private PaginatorInterface $paginator
     ) {}
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): Response
     {
@@ -91,11 +93,10 @@ class ProductApiController extends AbstractController
                 'product' => $this->normalizeProductEntity($product, 0)
             ], Response::HTTP_CREATED);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable) {
             return $this->json([
                 'success' => false,
                 'message' => 'An error occurred',
-                'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -117,6 +118,7 @@ class ProductApiController extends AbstractController
         ], Response::HTTP_OK);
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(int $id, Request $request): Response
     {
@@ -176,15 +178,15 @@ class ProductApiController extends AbstractController
                 'product' => $this->normalizeProductEntity($product, 0)
             ], Response::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable) {
             return $this->json([
                 'success' => false,
                 'message' => 'An error occurred',
-                'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): Response
     {
@@ -205,11 +207,10 @@ class ProductApiController extends AbstractController
                 'message' => 'Product deleted successfully'
             ], Response::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable) {
             return $this->json([
                 'success' => false,
                 'message' => 'An error occurred',
-                'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -283,11 +284,10 @@ class ProductApiController extends AbstractController
                 'products' => $data
             ], Response::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable) {
             return $this->json([
                 'success' => false,
                 'message' => 'An error occurred',
-                'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -1,0 +1,60 @@
+doctrine_doctor:
+    enabled: true
+
+    analysis:
+        # Keep default vendor exclusion and ignore front controller entrypoint.
+        # This prevents Doctrine Doctor internal analyzer queries from being
+        # interpreted as application queries in the profiler.
+        exclude_paths:
+            - 'vendor/'
+            - '/public/index.php'
+            - 'vendor/ahmed-bhs/doctrine-doctor/'
+
+    profiler:
+        show_in_toolbar: true
+        show_debug_info: false
+
+    debug:
+        enabled: false
+        internal_logging: false
+
+    analyzers:
+        # Keep a lightweight runtime profile for smoother dev pages.
+        n_plus_one: { enabled: true, threshold: 10 }
+        slow_query: { enabled: true, threshold: 250 }
+        find_all: { enabled: true, threshold: 500 }
+        lazy_loading: { enabled: true, threshold: 25 }
+        dql_injection: { enabled: true }
+        sql_injection_raw_queries: { enabled: true }
+
+        # Heavy analyzers disabled to reduce overhead on every request.
+        missing_index: { enabled: false }
+        hydration: { enabled: false }
+        eager_loading: { enabled: false }
+        entity_manager_clear: { enabled: false }
+        get_reference: { enabled: false }
+        flush_in_loop: { enabled: false }
+        bulk_operation: { enabled: false }
+        strict_mode: { enabled: false }
+        charset: { enabled: false }
+        inno_db_engine: { enabled: false }
+        connection_pooling: { enabled: false }
+        collection_initialization: { enabled: false }
+        cascade_configuration: { enabled: false }
+        sensitive_data_exposure: { enabled: false }
+        insecure_random: { enabled: false }
+        foreign_key_mapping: { enabled: false }
+        partial_object: { enabled: false }
+        dto_hydration: { enabled: false }
+        cascade_all: { enabled: false }
+        cascade_persist_independent: { enabled: false }
+        missing_orphan_removal: { enabled: false }
+        cascade_remove_independent: { enabled: false }
+        bidirectional_consistency: { enabled: false }
+        orphan_removal_no_cascade: { enabled: false }
+        ondelete_mismatch: { enabled: false }
+        join_optimization: { enabled: false }
+        doctrine_cache: { enabled: false }
+        naming_convention: { enabled: false }
+        missing_embeddable_opportunity: { enabled: false }
+        blameable_trait: { enabled: false }

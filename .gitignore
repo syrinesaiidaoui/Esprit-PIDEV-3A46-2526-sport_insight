@@ -23,3 +23,9 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# Generated user media
+/public/uploads/
+
+# Local Codex workspace metadata
+/.codex/
