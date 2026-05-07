@@ -41,7 +41,8 @@ jobs:
 
       - name: Prepare test database
         run: |
-          php bin/console doctrine:database:create --if-not-exists --env=test
+          mkdir -p var
+          rm -f var/data_test.db
           php bin/console doctrine:schema:create --env=test
 
       - name: Run PHPUnit
