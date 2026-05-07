@@ -5,7 +5,7 @@
 
     {% if equipe.image %}
         <div class="mb-4">
-            <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}" style="max-height: 200px; max-width: 300px;">
+            <img src="{{ media_url(equipe.image, 'equipes') }}" alt="{{ equipe.nom }}" style="max-height: 200px; max-width: 300px;">
         </div>
     {% endif %}
 

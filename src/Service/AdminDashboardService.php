@@ -2,14 +2,24 @@
 
 namespace App\Service;
 
+use App\Entity\Equipe;
+use App\Entity\Matchs;
 use App\Entity\ProductOrder\Order;
+use App\Repository\EquipeRepository;
+use App\Repository\JoueurRepository;
+use App\Repository\MatchsRepository;
 use App\Repository\OrderRepository;
 
 class AdminDashboardService
 {
     private const REVENUE_STATUSES = ['confirmed', 'shipped', 'delivered'];
 
-    public function __construct(private readonly OrderRepository $orderRepository)
+    public function __construct(
+        private readonly OrderRepository $orderRepository,
+        private readonly EquipeRepository $equipeRepository,
+        private readonly JoueurRepository $joueurRepository,
+        private readonly MatchsRepository $matchsRepository
+    )
     {
     }
 
@@ -125,12 +135,104 @@ class AdminDashboardService
         $overview['totalRevenue'] = round($overview['totalRevenue'], 2);
         usort($productSales, static fn (array $a, array $b): int => $b['quantity'] <=> $a['quantity']);
 
+        $clubData = $this->buildClubData();
+
         return [
             'overview' => $overview,
             'statusBreakdown' => $statusCounts,
             'dailyStats' => array_values($daily),
             'monthlyStats' => array_values($monthly),
             'topSellingProducts' => array_slice($productSales, 0, 5),
+            'clubOverview' => $clubData['overview'],
+            'playersByTeam' => $clubData['playersByTeam'],
+            'matchStatusClub' => $clubData['matchStatus'],
+            'recentMatches' => $clubData['recentMatches'],
+        ];
+    }
+
+    private function buildClubData(): array
+    {
+        $teams = $this->equipeRepository->findAll();
+        $players = $this->joueurRepository->findAll();
+        $matches = $this->matchsRepository->createQueryBuilder('m')
+            ->leftJoin('m.equipeDomicile', 'home')
+            ->leftJoin('m.equipeExterieur', 'away')
+            ->addSelect('home', 'away')
+            ->orderBy('m.dateMatch', 'DESC')
+            ->addOrderBy('m.heureDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $today = new \DateTimeImmutable('today');
+        $upcomingMatches = 0;
+        $matchStatus = [];
+        $recentMatches = [];
+
+        foreach ($matches as $match) {
+            if (!$match instanceof Matchs) {
+                continue;
+            }
+
+            $status = strtolower(trim((string) ($match->getStatut() ?: 'unknown')));
+            if ($status === '') {
+                $status = 'unknown';
+            }
+            $matchStatus[$status] = ($matchStatus[$status] ?? 0) + 1;
+
+            $date = $match->getDateMatch();
+            if ($date instanceof \DateTimeInterface) {
+                $matchDate = new \DateTimeImmutable($date->format('Y-m-d'));
+                if ($matchDate >= $today) {
+                    $upcomingMatches++;
+                }
+            }
+
+            if (count($recentMatches) < 8) {
+                $recentMatches[] = [
+                    'id' => $match->getId(),
+                    'date' => $date,
+                    'label' => sprintf(
+                        '%s vs %s',
+                        (string) ($match->getEquipeDomicile()?->getNom() ?: 'N/A'),
+                        (string) ($match->getEquipeExterieur()?->getNom() ?: 'N/A')
+                    ),
+                    'score' => sprintf(
+                        '%d - %d',
+                        (int) ($match->getScoreEquipeDomicile() ?? 0),
+                        (int) ($match->getScoreEquipeExterieur() ?? 0)
+                    ),
+                    'status' => ucfirst($status),
+                    'location' => (string) ($match->getLieu() ?: 'N/A'),
+                ];
+            }
+        }
+
+        $playersByTeam = [];
+        foreach ($teams as $team) {
+            if (!$team instanceof Equipe) {
+                continue;
+            }
+
+            $playersByTeam[] = [
+                'name' => (string) ($team->getNom() ?: 'Team'),
+                'count' => $team->getJoueurs()->count(),
+            ];
+        }
+
+        usort($playersByTeam, static fn (array $a, array $b): int => $b['count'] <=> $a['count']);
+        $playersByTeam = array_slice($playersByTeam, 0, 8);
+        arsort($matchStatus, SORT_NUMERIC);
+
+        return [
+            'overview' => [
+                'totalTeams' => count($teams),
+                'totalPlayers' => count($players),
+                'totalMatches' => count($matches),
+                'upcomingMatches' => $upcomingMatches,
+            ],
+            'playersByTeam' => $playersByTeam,
+            'matchStatus' => $matchStatus,
+            'recentMatches' => $recentMatches,
         ];
     }
 

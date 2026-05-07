@@ -1,46 +1,3 @@
-<<<<<<< HEAD
-{% extends 'front_office/base.html.twig' %}
-
-{% block title %}Equipement - FC Club{% endblock %}
-
-{% block body %}
-    <h2 class="section-title">Equipement du Club</h2>
-
-    <div class="front-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Article</th>
-                    <th>Categorie</th>
-                    <th>Disponibilite</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Maillots domicile 2025/26</td>
-                    <td>Tenue</td>
-                    <td><span class="badge-success">Disponible</span></td>
-                </tr>
-                <tr>
-                    <td>Maillots exterieur 2025/26</td>
-                    <td>Tenue</td>
-                    <td><span class="badge-success">Disponible</span></td>
-                </tr>
-                <tr>
-                    <td>Short officiel</td>
-                    <td>Tenue</td>
-                    <td><span class="badge-success">Disponible</span></td>
-                </tr>
-                <tr>
-                    <td>Ballons entrainement</td>
-                    <td>Materiel</td>
-                    <td><span class="badge-danger">Rupture</span></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-{% endblock %}
-=======
 ﻿{% extends 'front_office/base.html.twig' %}
 
 {% block title %}{{ 'nav.brand'|trans }}{% endblock %}
@@ -110,6 +67,114 @@
         display: block;
     }
 
+    /* Custom select with embedded logos / swatches (visible only when dropdown is opened) */
+    .vs-wrapper { position: relative; }
+    .vs-hidden-select { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+    .vs-toggle {
+        width: 100%;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #1f2937;
+        background: linear-gradient(180deg, #0f172a, #0c1828);
+        color: #e2e8f0;
+        font-weight: 700;
+        cursor: pointer;
+        transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .vs-toggle:hover { border-color: #0f5132; box-shadow: 0 8px 16px rgba(0,0,0,.16); }
+    .vs-toggle .label { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .vs-arrow { font-size: 12px; color: #94a3b8; }
+
+    .vs-list {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        background: #0c1627;
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        box-shadow: 0 18px 28px rgba(0,0,0,.35);
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 6px;
+        z-index: 30;
+        display: none;
+    }
+
+    .vs-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        color: #e2e8f0;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .12s ease, color .12s ease;
+    }
+    .vs-option:hover { background: #0f172a; }
+    .vs-option.active { background: #0f172a; color: #e2e8f0; }
+
+    .vs-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 8px;
+        background: #131f2f;
+        background-size: cover;
+        background-position: center;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+        flex-shrink: 0;
+    }
+    .vs-icon.swatch { border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+
+    .brand-nike  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b172a'/%3E%3Cpath d='M20 40c8-4 28-14 32-16 2-1 1 1-1 2-14 7-22 11-31 15-6 2-9 0-6-2 2-2 3-2 6-3z' fill='%23ffffff'/%3E%3C/svg%3E"); }
+    .brand-adidas { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b172a'/%3E%3Cpath d='M12 44l10-18 6 3-10 18zm13 0l10-18 6 3-10 18zm13 0l10-18 6 3-10 18z' fill='%23ffffff'/%3E%3C/svg%3E"); }
+    .brand-puma  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b172a'/%3E%3Cpath d='M12 30c9-2 17 4 24 4 8 0 12-6 16-6 2 0 3 2 0 5-4 4-10 7-17 7-8 0-14-4-19-3-2 0-4 0-4-2 0-1 0-3 0-5z' fill='%23ffffff'/%3E%3Ccircle cx='20' cy='22' r='3' fill='%23ffffff'/%3E%3C/svg%3E"); }
+    .brand-nb    { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b172a'/%3E%3Cpath d='M16 42l6-20h8l-6 20zm10 0l6-20h8l-6 20z' fill='%23fff'/%3E%3Cpath d='M18 28h24l-1.4 4H16.6zM16 36h24l-1.4 4H14.6z' fill='%2316a34a'/%3E%3C/svg%3E"); }
+
+    .stock-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 12px;
+    }
+
+    .stock-pill .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+    }
+
+    .stock-pill.stock-ok { background: #e6f4ee; color: #0f5132; }
+    .stock-pill.stock-ok .dot { background: #22c55e; }
+    .stock-pill.stock-low { background: #fff7ed; color: #c2410c; }
+    .stock-pill.stock-low .dot { background: #fb923c; }
+    .stock-pill.stock-out { background: #fef2f2; color: #b91c1c; }
+    .stock-pill.stock-out .dot { background: #f43f5e; }
+
+    /* Dark mode readability for stock pills */
+    [data-theme="dark"] .stock-pill {
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        color: #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+    [data-theme="dark"] .stock-pill .dot { box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+    [data-theme="dark"] .stock-pill.stock-ok { background: rgba(22, 163, 74, 0.18); color: #bbf7d0; }
+    [data-theme="dark"] .stock-pill.stock-ok .dot { background: #22c55e; }
+    [data-theme="dark"] .stock-pill.stock-low { background: rgba(251, 146, 60, 0.18); color: #ffd7b0; }
+    [data-theme="dark"] .stock-pill.stock-low .dot { background: #fb923c; }
+    [data-theme="dark"] .stock-pill.stock-out { background: rgba(244, 63, 94, 0.18); color: #fecdd3; }
+    [data-theme="dark"] .stock-pill.stock-out .dot { background: #f43f5e; }
     .product-layout {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -120,6 +185,13 @@
         padding: 0;
         overflow: hidden;
         position: relative;
+        cursor: pointer;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
     }
 
     .card-media {
@@ -152,22 +224,11 @@
         text-transform: uppercase;
     }
 
-    .wishlist-btn {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        width: 34px;
-        height: 34px;
-        border: 0;
-        border-radius: 999px;
-        background: rgba(255,255,255,.96);
-        color: #64748b;
-        font-size: 16px;
-        font-weight: 700;
-    }
-
-    .wishlist-btn.active {
-        color: #dc2626;
+    /* Dark-mode readability for product badges */
+    [data-theme="dark"] .product-badges span {
+        background: rgba(15, 23, 42, 0.9);
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.4);
     }
 
     .product-body {
@@ -223,19 +284,30 @@
 
     .option-tags span {
         font-size: 11px;
-        padding: 4px 8px;
-        border: 1px solid #dbe2ea;
-        border-radius: 999px;
-        color: #475569;
+        padding: 3px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--ink);
         font-weight: 700;
+        background: var(--surface);
     }
 
     .card-actions {
         margin-top: 10px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
         gap: 8px;
+        align-items: center;
+        justify-content: space-between;
     }
+
+    .card-actions .btn {
+        padding: 7px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        min-height: 36px;
+    }
+
+    /* Size dropdown back to native select */
 
     .helper-grid {
         display: grid;
@@ -247,7 +319,7 @@
     #ai-chat-bubble {
         position: fixed;
         bottom: 22px;
-        right: 22px;
+        right: max(16px, calc((100vw - 1380px) / 2 + 16px));
         width: 58px;
         height: 58px;
         border-radius: 999px;
@@ -266,8 +338,11 @@
     #ai-chat-window {
         position: fixed;
         bottom: 90px;
-        right: 22px;
-        width: 350px;
+        right: max(16px, calc((100vw - 1380px) / 2 + 16px));
+        width: min(380px, calc(100vw - 32px));
+        height: clamp(380px, 62vh, 620px);
+        max-height: calc(100vh - 120px);
+        max-height: calc(100dvh - 120px);
         background: #fff;
         border: 1px solid #dbe2ea;
         border-radius: 14px;
@@ -294,6 +369,8 @@
         flex-wrap: wrap;
         gap: 6px;
         padding: 10px 10px 4px;
+        max-height: 96px;
+        overflow-y: auto;
         border-bottom: 1px solid #e5e7eb;
         background: #f8fafc;
     }
@@ -317,7 +394,8 @@
     }
 
     #ai-chat-messages {
-        height: 300px;
+        flex: 1 1 auto;
+        min-height: 140px;
         overflow-y: auto;
         padding: 12px;
         font-size: 14px;
@@ -474,6 +552,120 @@
         color: #b91c1c;
     }
 
+    [data-theme="dark"] #ai-chat-window {
+        background: rgba(15, 23, 42, 0.96);
+        border-color: rgba(148, 163, 184, 0.35);
+        box-shadow: 0 22px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    [data-theme="dark"] #ai-chat-header {
+        background: linear-gradient(140deg, #0f3d2d, #15803d);
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] #ai-quick-replies {
+        background: rgba(2, 6, 23, 0.9);
+        border-bottom-color: rgba(148, 163, 184, 0.28);
+    }
+
+    [data-theme="dark"] .ai-chip {
+        background: rgba(15, 23, 42, 0.92);
+        border-color: rgba(148, 163, 184, 0.36);
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .ai-chip:hover {
+        border-color: #34d399;
+        color: #a7f3d0;
+        box-shadow: 0 6px 14px rgba(16, 185, 129, 0.22);
+    }
+
+    [data-theme="dark"] #ai-chat-messages {
+        background: rgba(2, 6, 23, 0.9);
+        color: #cbd5e1;
+    }
+
+    [data-theme="dark"] .ai-message {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .ai-card {
+        background: rgba(15, 23, 42, 0.92);
+        border-color: rgba(148, 163, 184, 0.3);
+        border-left-color: #22c55e;
+        box-shadow: 0 10px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    [data-theme="dark"] .ai-title {
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .ai-label {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .ai-value {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .ai-value.price {
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .ai-value.stock-ok {
+        color: #4ade80;
+    }
+
+    [data-theme="dark"] .ai-value.stock-out {
+        color: #f87171;
+    }
+
+    [data-theme="dark"] .ai-link-chip {
+        background: rgba(15, 23, 42, 0.9);
+        border-color: rgba(148, 163, 184, 0.36);
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .ai-link-chip.primary {
+        background: #166534;
+        border-color: #16a34a;
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] .ai-generic {
+        color: #99f6e4;
+        background: rgba(15, 23, 42, 0.92);
+        border-color: rgba(148, 163, 184, 0.3);
+        border-left-color: #2dd4bf;
+    }
+
+    [data-theme="dark"] .ai-image-link {
+        color: #67e8f9;
+    }
+
+    [data-theme="dark"] #ai-chat-form {
+        border-top-color: rgba(148, 163, 184, 0.28);
+        background: rgba(2, 6, 23, 0.9);
+    }
+
+    [data-theme="dark"] #ai-chat-input {
+        background: transparent;
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] #ai-chat-input::placeholder {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] #ai-chat-form button {
+        background: #166534;
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] #ai-chat-error {
+        color: #fca5a5;
+    }
+
     @media (max-width: 1150px) {
         .product-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -486,7 +678,14 @@
     @media (max-width: 700px) {
         .product-layout { grid-template-columns: 1fr; }
         .helper-grid { grid-template-columns: 1fr; }
-        #ai-chat-window { width: calc(100vw - 24px); right: 12px; }
+        #ai-chat-bubble { right: 12px; bottom: 12px; }
+        #ai-chat-window {
+            right: 12px;
+            bottom: 78px;
+            width: calc(100vw - 24px);
+            height: min(560px, calc(100dvh - 96px));
+            max-height: calc(100dvh - 96px);
+        }
     }
 </style>
 {% endblock %}
@@ -542,7 +741,6 @@
             </div>
 
             <div class="catalog-actions">
-        <button class="btn btn-primary" id="apply-filters" type="submit">{{ 'btn.apply'|trans }}</button>
         <button class="btn btn-secondary" id="reset-filters" type="button" data-reset-url="{{ path('front_equipement_index') }}">{{ 'btn.reset'|trans }}</button>
         <a class="btn btn-secondary" href="{{ path('front_equipement_orders') }}">{{ 'btn.orders'|trans }}</a>
         <a class="btn btn-secondary" href="{{ apiProductsUrl }}" target="_blank" rel="noopener">{{ 'btn.api'|trans }}</a>
@@ -557,13 +755,41 @@
 
         <div class="filter-group">
             <label for="f-brand">Marque</label>
-            <select id="f-brand" class="form-select js-filter">
-                <option value="">Toutes</option>
-                <option>Nike</option>
-                <option>Adidas</option>
-                <option>Puma</option>
-                <option>New Balance</option>
-            </select>
+            <div class="vs-wrapper" id="vs-brand">
+                <select id="f-brand" class="form-select js-filter vs-hidden-select">
+                    <option value="">Toutes</option>
+                    <option>Nike</option>
+                    <option>Adidas</option>
+                    <option>Puma</option>
+                    <option>New Balance</option>
+                </select>
+                <button type="button" class="vs-toggle" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="label"><span class="vs-icon"></span><span class="vs-text">Toutes</span></span>
+                    <span class="vs-arrow">▼</span>
+                </button>
+                <div class="vs-list" role="listbox">
+                    <div class="vs-option" data-value="" role="option" aria-selected="true">
+                        <span class="vs-icon" style="background:#131f2f;"></span>
+                        <span>Toutes</span>
+                    </div>
+                    <div class="vs-option" data-value="Nike" role="option">
+                        <span class="vs-icon brand-nike"></span>
+                        <span>Nike</span>
+                    </div>
+                    <div class="vs-option" data-value="Adidas" role="option">
+                        <span class="vs-icon brand-adidas"></span>
+                        <span>Adidas</span>
+                    </div>
+                    <div class="vs-option" data-value="Puma" role="option">
+                        <span class="vs-icon brand-puma"></span>
+                        <span>Puma</span>
+                    </div>
+                    <div class="vs-option" data-value="New Balance" role="option">
+                        <span class="vs-icon brand-nb"></span>
+                        <span>New Balance</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="filter-group">
@@ -597,14 +823,46 @@
 
         <div class="filter-group">
             <label for="f-color">Couleur</label>
-            <select id="f-color" class="form-select js-filter">
-                <option value="">Toutes</option>
-                <option>black</option>
-                <option>white</option>
-                <option>red</option>
-                <option>blue</option>
-                <option>green</option>
-            </select>
+            <div class="vs-wrapper" id="vs-color">
+                <select id="f-color" class="form-select js-filter vs-hidden-select">
+                    <option value="">Toutes</option>
+                    <option>black</option>
+                    <option>white</option>
+                    <option>red</option>
+                    <option>blue</option>
+                    <option>green</option>
+                </select>
+                <button type="button" class="vs-toggle" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="label"><span class="vs-icon swatch" style="background:#131f2f;"></span><span class="vs-text">Toutes</span></span>
+                    <span class="vs-arrow">▼</span>
+                </button>
+                <div class="vs-list" role="listbox">
+                    <div class="vs-option" data-value="" role="option" aria-selected="true">
+                        <span class="vs-icon swatch" style="background:#131f2f;"></span>
+                        <span>Toutes</span>
+                    </div>
+                    <div class="vs-option" data-value="black" role="option">
+                        <span class="vs-icon swatch" style="background:#0f172a;"></span>
+                        <span>Black</span>
+                    </div>
+                    <div class="vs-option" data-value="white" role="option">
+                        <span class="vs-icon swatch" style="background:#f8fafc;"></span>
+                        <span>White</span>
+                    </div>
+                    <div class="vs-option" data-value="red" role="option">
+                        <span class="vs-icon swatch" style="background:#ef4444;"></span>
+                        <span>Red</span>
+                    </div>
+                    <div class="vs-option" data-value="blue" role="option">
+                        <span class="vs-icon swatch" style="background:#2563eb;"></span>
+                        <span>Blue</span>
+                    </div>
+                    <div class="vs-option" data-value="green" role="option">
+                        <span class="vs-icon swatch" style="background:#22c55e;"></span>
+                        <span>Green</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="filter-group">
@@ -621,11 +879,36 @@
 
         <div class="filter-group">
             <label for="f-availability">Disponibilite</label>
-            <select id="f-availability" class="form-select js-filter">
-                <option value="">Toutes</option>
-                <option value="in">En stock uniquement</option>
-                <option value="low">Stock faible</option>
-            </select>
+            <div class="vs-wrapper" id="vs-availability">
+                <select id="f-availability" class="form-select js-filter vs-hidden-select">
+                    <option value="">Toutes</option>
+                    <option value="in">En stock uniquement</option>
+                    <option value="low">Stock faible</option>
+                    <option value="out">Rupture</option>
+                </select>
+                <button type="button" class="vs-toggle" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="label"><span class="vs-icon swatch" style="background:#131f2f;"></span><span class="vs-text">Toutes</span></span>
+                    <span class="vs-arrow">▼</span>
+                </button>
+                <div class="vs-list" role="listbox">
+                    <div class="vs-option" data-value="" role="option" aria-selected="true">
+                        <span class="vs-icon swatch" style="background:#1f2937;"></span>
+                        <span>Toutes</span>
+                    </div>
+                    <div class="vs-option" data-value="in" role="option">
+                        <span class="vs-icon swatch" style="background:#22c55e;"></span>
+                        <span>En stock uniquement</span>
+                    </div>
+                    <div class="vs-option" data-value="low" role="option">
+                        <span class="vs-icon swatch" style="background:#fb923c;"></span>
+                        <span>Stock faible</span>
+                    </div>
+                    <div class="vs-option" data-value="out" role="option">
+                        <span class="vs-icon swatch" style="background:#f43f5e;"></span>
+                        <span>Rupture</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <p style="font-size:12px;color:#64748b;margin:8px 0 0;">Inclut des options football : equipe/ligue, coupe, matiere et edition sur chaque carte.</p>
@@ -646,13 +929,17 @@
                          data-color="{{ inferredColor }}"
                          data-surface="{{ inferredSurface }}"
                          data-stock="{{ product.stock }}"
-                         data-price="{{ price }}">
+                         data-price="{{ price }}"
+                         data-name="{{ product.name|lower }}"
+                         data-category="{{ (product.category ?: '')|lower }}"
+                         data-meta="{{ (product.category ?: '')|lower }}"
+                         data-url="{{ path('front_equipement_show', {'id': product.id}) }}">
                     <div class="card-media">
                     <div class="product-badges">
                             <span>{{ 'card.discount'|trans({'%discount%': discount}) }}</span>
                             <span>{{ product.category ?: 'Equipement football' }}</span>
+                            <span>{{ product.size ?: 'Taille M' }}</span>
                     </div>
-                        <button type="button" class="wishlist-btn" aria-label="Basculer favoris">+</button>
                         {% if product.image %}
                             {% set imageSrc = product.image starts with 'http://' or product.image starts with 'https://' ? product.image : (product.image starts with 'api/' ? asset(product.image) : (product.image starts with '/api/' ? product.image : asset('uploads/' ~ product.image))) %}
                             <img src="{{ imageSrc }}" alt="{{ product.name }}">
@@ -675,10 +962,11 @@
                             <span>{{ 'card.opt.team'|trans }}</span>
                         </div>
 
-                        <p style="margin:10px 0 0; font-size:12px;" class="{{ product.stock <= 0 ? 'stock-out' : (product.stock < 5 ? 'stock-low' : 'stock-ok') }}">
+                        <p style="margin:10px 0 0; font-size:12px;" class="stock-pill {{ product.stock <= 0 ? 'stock-out' : (product.stock < 15 ? 'stock-low' : 'stock-ok') }}">
+                            <span class="dot" aria-hidden="true"></span>
                             {% if product.stock <= 0 %}
                                 {{ 'stock.out'|trans }}
-                            {% elseif product.stock < 5 %}
+                            {% elseif product.stock < 15 %}
                                 {{ 'stock.low'|trans({'%count%': product.stock}) }}
                             {% else %}
                                 {{ 'stock.ok'|trans({'%count%': product.stock}) }}
@@ -686,7 +974,6 @@
                         </p>
 
                         <div class="card-actions">
-                            <a href="{{ path('front_equipement_show', {'id': product.id}) }}" class="btn btn-secondary">{{ 'card.view'|trans }}</a>
                             {% if product.stock > 0 %}
                                 <form method="get" action="{{ path('front_equipement_buy', {'id': product.id}) }}" class="d-flex gap-2" style="margin:0;">
                                     <select name="size" class="form-select form-select-sm" aria-label="Choisir taille" style="max-width:110px;">
@@ -752,11 +1039,22 @@
     {% for apiProduct in apiProducts|default([]) %}
         {% set apiPrice = apiProduct.price|default(0) + 0 %}
         {% set apiStock = apiProduct.stock|default(0) %}
-        <article class="front-card product-card">
+        <article class="front-card product-card {% if apiProduct.dbId is defined %}js-card{% endif %}"
+                 {% if apiProduct.dbId is defined %}data-url="{{ path('front_equipement_show', {'id': apiProduct.dbId}) }}"{% endif %}
+                 data-brand="{{ apiProduct.brand|default('')|lower }}"
+                 data-size="{{ apiProduct.size|default('M')|lower }}"
+                 data-color="{{ apiProduct.color|default('')|lower }}"
+                 data-surface="{{ apiProduct.category|default('training')|lower }}"
+                 data-stock="{{ apiStock }}"
+                 data-price="{{ apiPrice }}"
+                 data-name="{{ apiProduct.name|default('')|lower }}"
+                 data-category="{{ apiProduct.category|default('')|lower }}"
+                 data-meta="{{ apiProduct.category|default('')|lower }}">
             <div class="card-media">
                 <div class="product-badges">
                     <span>API item</span>
                     <span>{{ apiProduct.category|default('football') }}</span>
+                    <span>{{ apiProduct.size|default('Taille M') }}</span>
                 </div>
                 {% if apiProduct.image %}
                     {% if apiProduct.imageUrl is defined and apiProduct.imageUrl %}
@@ -781,14 +1079,12 @@
                 <p style="margin:8px 0 0;color:#64748b;font-size:13px;">{{ apiProduct.description|default('Produit API depuis products.json') }}</p>
                 <div class="card-actions">
                     {% if apiProduct.dbId is defined %}
-                        <a href="{{ path('front_equipement_show', {'id': apiProduct.dbId}) }}" class="btn btn-secondary">{{ 'card.view'|trans }}</a>
                         {% if apiStock > 0 %}
                             <a href="{{ path('front_equipement_buy', {'id': apiProduct.dbId}) }}" class="btn btn-primary">{{ 'card.add'|trans }}</a>
                         {% else %}
                             <button class="btn btn-secondary" disabled>{{ 'card.unavailable'|trans }}</button>
                         {% endif %}
                     {% else %}
-                        <button class="btn btn-secondary" disabled>Non synchronise</button>
                         <button class="btn btn-secondary" disabled>Non synchronise</button>
                     {% endif %}
                 </div>
@@ -800,40 +1096,6 @@
         </div>
     {% endfor %}
 </div>
-<h2 class="section-title" style="margin-top:24px;">Equipement du Club</h2>
-<div class="front-table">
-    <table>
-        <thead>
-            <tr>
-                <th>Article</th>
-                <th>Categorie</th>
-                <th>Disponibilite</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Maillots domicile 2025/26</td>
-                <td>Tenue</td>
-                <td><span class="badge-success">Disponible</span></td>
-            </tr>
-            <tr>
-                <td>Maillots exterieur 2025/26</td>
-                <td>Tenue</td>
-                <td><span class="badge-success">Disponible</span></td>
-            </tr>
-            <tr>
-                <td>Short officiel</td>
-                <td>Tenue</td>
-                <td><span class="badge-success">Disponible</span></td>
-            </tr>
-            <tr>
-                <td>Ballons entrainement</td>
-                <td>Materiel</td>
-                <td><span class="badge-danger">Rupture</span></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
 </div>
 {% endblock %}
 
@@ -843,9 +1105,13 @@
 document.addEventListener('DOMContentLoaded', function () {
     const cards = Array.from(document.querySelectorAll('.js-card'));
     const filters = Array.from(document.querySelectorAll('.js-filter'));
-    const applyBtn = document.getElementById('apply-filters');
     const resetBtn = document.getElementById('reset-filters');
     const catalogForm = document.getElementById('catalog-form');
+    const searchInput = document.getElementById('search');
+    const categoryInput = document.getElementById('category');
+    const sortInput = document.getElementById('sortBy');
+    const dirInput = document.getElementById('dir');
+    const grid = document.getElementById('product-grid');
 
     function withinPrice(cardPrice, range) {
         if (!range) return true;
@@ -860,7 +1126,9 @@ document.addEventListener('DOMContentLoaded', function () {
             color: (document.getElementById('f-color')?.value || '').toLowerCase(),
             surface: (document.getElementById('f-surface')?.value || '').toLowerCase(),
             availability: (document.getElementById('f-availability')?.value || '').toLowerCase(),
-            price: (document.getElementById('f-price')?.value || '').toLowerCase()
+            price: (document.getElementById('f-price')?.value || '').toLowerCase(),
+            search: (searchInput?.value || '').trim().toLowerCase(),
+            category: (categoryInput?.value || '').trim().toLowerCase()
         };
 
         cards.forEach((card) => {
@@ -870,6 +1138,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const surface = card.dataset.surface || '';
             const stock = parseInt(card.dataset.stock || '0', 10);
             const price = parseFloat(card.dataset.price || '0');
+            const name = card.dataset.name || '';
+            const meta = card.dataset.meta || '';
+            const cat = card.dataset.category || '';
 
             const matchBrand = !values.brand || brand.includes(values.brand);
             const matchSize = !values.size || size.includes(values.size);
@@ -878,26 +1149,88 @@ document.addEventListener('DOMContentLoaded', function () {
             const matchPrice = withinPrice(price, values.price);
             const matchAvailability = !values.availability
                 || (values.availability === 'in' && stock > 0)
-                || (values.availability === 'low' && stock > 0 && stock < 5);
+                || (values.availability === 'low' && stock > 0 && stock < 15)
+                || (values.availability === 'out' && stock <= 0);
+            const matchSearch = !values.search || name.includes(values.search) || meta.includes(values.search);
+            const matchCategory = !values.category || cat === values.category;
 
-            card.style.display = matchBrand && matchSize && matchColor && matchSurface && matchPrice && matchAvailability
+            card.style.display = matchBrand && matchSize && matchColor && matchSurface && matchPrice && matchAvailability && matchSearch && matchCategory
                 ? ''
                 : 'none';
         });
+        applySort();
     }
+
+    // Visual select (logos / swatches) synced with hidden native select
+    const visualSelects = [];
+    function initVisualSelect(wrapperId) {
+        const wrapper = document.getElementById(wrapperId);
+        if (!wrapper) return;
+        const select = wrapper.querySelector('.vs-hidden-select');
+        const toggle = wrapper.querySelector('.vs-toggle');
+        const list = wrapper.querySelector('.vs-list');
+        const text = wrapper.querySelector('.vs-text');
+        const icon = wrapper.querySelector('.vs-icon');
+        if (!select || !toggle || !list || !text || !icon) return;
+
+        const options = Array.from(list.querySelectorAll('.vs-option'));
+        const closeList = () => { list.style.display = 'none'; toggle.setAttribute('aria-expanded', 'false'); };
+        const openList = () => { list.style.display = 'block'; toggle.setAttribute('aria-expanded', 'true'); };
+
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isOpen = list.style.display === 'block';
+            isOpen ? closeList() : openList();
+        });
+
+        options.forEach((opt) => {
+            opt.addEventListener('click', () => {
+                const value = opt.dataset.value || '';
+                select.value = value;
+                options.forEach((o) => o.classList.remove('active'));
+                opt.classList.add('active');
+                const iconSpan = opt.querySelector('.vs-icon');
+                if (iconSpan) {
+                    icon.style.background = iconSpan.style.background;
+                    icon.className = iconSpan.className;
+                }
+                text.textContent = opt.innerText.trim();
+                closeList();
+                applyFilters();
+            });
+        });
+
+        document.addEventListener('click', (ev) => {
+            if (!wrapper.contains(ev.target)) closeList();
+        });
+
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') closeList();
+        });
+
+        // initialize active state from current select value
+        const current = options.find((o) => (o.dataset.value || '') === (select.value || '')) || options[0];
+        if (current) current.click();
+
+        visualSelects.push({ wrapper, select, toggle, list, options, text, icon, closeList, openList });
+    }
+
+    initVisualSelect('vs-brand');
+    initVisualSelect('vs-color');
+    initVisualSelect('vs-availability');
 
     filters.forEach((el) => el.addEventListener('change', applyFilters));
 
-    applyBtn?.addEventListener('click', (e) => {
-        // allow client-side preview then submit GET form for q/category/sort
-        applyFilters();
-        if (catalogForm) {
-            catalogForm.submit();
-        }
-    });
+    const resetVisualSelects = () => {
+        visualSelects.forEach((vs) => {
+            const first = vs.options?.[0];
+            if (first) first.click();
+        });
+    };
 
     resetBtn?.addEventListener('click', () => {
         filters.forEach((el) => el.value = '');
+        resetVisualSelects();
         applyFilters();
         const url = resetBtn.dataset.resetUrl;
         if (url) {
@@ -907,11 +1240,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
     applyFilters();
 
-    document.querySelectorAll('.wishlist-btn').forEach((btn) => {
-        btn.addEventListener('click', function () {
-            btn.classList.toggle('active');
-            btn.textContent = btn.classList.contains('active') ? 'x' : '+';
+    // live search/filter as user types
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            applyFilters();
         });
+    }
+
+    [categoryInput, sortInput, dirInput].forEach((el) => {
+        if (!el) return;
+        el.addEventListener('change', applyFilters);
+    });
+
+    if (catalogForm) {
+        catalogForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            applyFilters();
+        });
+    }
+
+    function applySort() {
+        if (!grid || !sortInput) return;
+        const sortBy = sortInput.value;
+        const dir = (dirInput?.value || 'asc') === 'desc' ? -1 : 1;
+        const visibleCards = cards.filter((c) => c.style.display !== 'none');
+        const getValue = (card) => {
+            if (sortBy === 'price') return parseFloat(card.dataset.price || '0');
+            if (sortBy === 'stock') return parseInt(card.dataset.stock || '0', 10);
+            return (card.dataset.name || '').toLowerCase();
+        };
+        visibleCards.sort((a, b) => {
+            const va = getValue(a);
+            const vb = getValue(b);
+            if (va < vb) return -1 * dir;
+            if (va > vb) return 1 * dir;
+            return 0;
+        });
+        visibleCards.forEach((card) => grid.appendChild(card));
+    }
+
+    // Make entire product cards clickable (except interactive controls)
+    document.addEventListener('click', function (event) {
+        const card = event.target.closest('.js-card');
+        if (!card || !card.dataset.url) return;
+        const isInteractive = event.target.closest('a, button, select, option, input, textarea, label, form');
+        if (isInteractive) return;
+        window.location = card.dataset.url;
     });
 
     const bubble = document.getElementById('ai-chat-bubble');
@@ -1153,4 +1527,3 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 {% endblock %}
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d

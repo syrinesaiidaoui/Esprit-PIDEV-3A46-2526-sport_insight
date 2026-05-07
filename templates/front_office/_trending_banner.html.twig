@@ -2,43 +2,57 @@
     .trending-banner {
         background: linear-gradient(90deg, rgba(16, 185, 129, 0.16), rgba(16, 185, 129, 0.04));
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 14px 18px;
-        margin-bottom: 18px;
+        border-radius: 14px;
+        width: min(1260px, calc(100% - 84px));
+        padding: 10px 14px;
+        margin: 14px auto 18px;
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 12px;
     }
 
     .trending-banner__icon {
-        width: 46px;
-        height: 46px;
-        border-radius: 10px;
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         background: #0f766e;
         color: #f8fafc;
         font-weight: 800;
-        font-size: 16px;
+        font-size: 14px;
         flex: 0 0 auto;
     }
 
     .trending-banner__title {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 800;
         color: var(--dark);
         margin: 0;
     }
 
     .trending-banner__text {
-        margin: 4px 0 0;
+        margin: 2px 0 0;
+        font-size: 14px;
         color: var(--text-muted);
     }
 
     .trending-banner__action {
         margin-left: auto;
         flex: 0 0 auto;
+    }
+
+    .trending-banner__action .btn {
+        padding: 8px 14px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+
+    @media (max-width: 980px) {
+        .trending-banner {
+            width: calc(100% - 40px);
+        }
     }
 
     [data-theme="dark"] .trending-banner {
@@ -51,6 +65,8 @@
 
     @media (max-width: 760px) {
         .trending-banner {
+            width: calc(100% - 24px);
+            margin-top: 10px;
             flex-wrap: wrap;
         }
 
@@ -68,10 +84,7 @@
 <div class="trending-banner">
     <div class="trending-banner__icon">TOP</div>
     <div>
-        {% set names = [] %}
-        {% for item in trendingItems %}
-            {% set names = names|merge([item.product.name]) %}
-        {% endfor %}
+        {% set names = trendingNames|default([]) %}
 
         {% if names|length > 0 %}
             <p class="trending-banner__title">{{ 'trending.title'|trans }}</p>
@@ -84,6 +97,6 @@
         {% endif %}
     </div>
     <div class="trending-banner__action">
-        <a href="{{ path('app_shop_index') }}" class="btn btn-primary">{{ 'trending.button'|trans }}</a>
+        <a href="{{ path('front_equipement_index') }}" class="btn btn-primary">{{ 'trending.button'|trans }}</a>
     </div>
 </div>

@@ -3,10 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-<<<<<<< HEAD
-=======
 use App\Entity\ProductOrder\Order;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -14,10 +11,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Attribute as Vich;
+use Symfony\Component\HttpFoundation\File\File;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'Un compte existe déjà avec cet email.')]
+#[Vich\Uploadable]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -35,6 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\Column]
+    #[Ignore]
     private ?string $password = null;
 
     #[ORM\Column(length: 100)]
@@ -60,12 +63,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
+    #[Vich\UploadableField(mapping: 'photos', fileNameProperty: 'photo')]
+    private ?File $photoFile = null;
+
     #[ORM\Column(length: 20)]
     #[Assert\Choice(choices: ['actif', 'bloque'], message: "Statut invalide")]
     private string $statut = 'actif';
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateInscription = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cvName = null;
+
+    #[Vich\UploadableField(mapping: 'cvs', fileNameProperty: 'cvName')]
+    private ?File $cvFile = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
+
 
     /**
      * @var Collection<int, Annonce>
@@ -86,15 +102,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $entrainements;
 
     /**
-<<<<<<< HEAD
-=======
      * @var Collection<int, Entrainement>
      */
     #[ORM\ManyToMany(targetEntity: Entrainement::class, mappedBy: 'joueurs')]
     private Collection $entrainementsJoueurs;
 
     /**
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
      * @var Collection<int, Participation>
      */
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'joueur')]
@@ -112,15 +125,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'entraineur')]
     private Collection $orders;
 
-<<<<<<< HEAD
-=======
     /**
      * @var Collection<int, Notification>
      */
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
     private Collection $notifications;
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     public function __construct()
     {
         $this->dateInscription = new \DateTime();
@@ -129,17 +139,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->annonces = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
         $this->entrainements = new ArrayCollection();
-<<<<<<< HEAD
-        $this->participations = new ArrayCollection();
-        $this->evaluations = new ArrayCollection();
-        $this->orders = new ArrayCollection();
-=======
         $this->entrainementsJoueurs = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->evaluations = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->notifications = new ArrayCollection();
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     }
 
     #[Assert\Callback]
@@ -153,33 +157,140 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = trim(strtolower($email)); return $this; }
-    public function getUserIdentifier(): string { return (string) $this->email; }
-    public function getRoles(): array { $roles = $this->roles; $roles[] = 'ROLE_USER'; return array_unique($roles); }
-    public function setRoles(array $roles): static { $this->roles = $roles; return $this; }
-    public function getPassword(): string { return $this->password; }
-    public function setPassword(string $password): static { $this->password = $password; return $this; }
-    public function eraseCredentials(): void {}
-    public function getNom(): ?string { return $this->nom; }
-    public function setNom(string $nom): static { $this->nom = ucwords(strtolower(trim($nom))); return $this; }
-    public function getPrenom(): ?string { return $this->prenom; }
-    public function setPrenom(string $prenom): static { $this->prenom = ucwords(strtolower(trim($prenom))); return $this; }
-    public function getNomComplet(): string { return $this->prenom . ' ' . $this->nom; }
-    public function getTelephone(): ?string { return $this->telephone; }
-    public function setTelephone(?string $telephone): static { $this->telephone = $telephone; return $this; }
-    public function getDateNaissance(): ?\DateTimeInterface { return $this->dateNaissance; }
-    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static { $this->dateNaissance = $dateNaissance; return $this; }
-    public function getAge(): ?int { return $this->dateNaissance ? $this->dateNaissance->diff(new \DateTime())->y : null; }
-    public function getPhoto(): ?string { return $this->photo; }
-    public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
-    public function getStatut(): string { return $this->statut; }
-    public function setStatut(string $statut): static { $this->statut = $statut; return $this; }
-    public function getDateInscription(): ?\DateTimeInterface { return $this->dateInscription; }
-    public function setDateInscription(\DateTimeInterface $dateInscription): static { $this->dateInscription = $dateInscription; return $this; }
-    public function isActif(): bool { return $this->statut === 'actif'; }
-    public function isAdmin(): bool { return in_array('ROLE_ADMIN', $this->roles); }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+    public function setEmail(string $email): static
+    {
+        $this->email = trim(strtolower($email));
+        return $this;
+    }
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
+    }
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+    #[Ignore]
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+    public function setPassword(#[\SensitiveParameter] string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
+    public function eraseCredentials(): void
+    {
+    }
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+    public function setNom(string $nom): static
+    {
+        $this->nom = ucwords(strtolower(trim($nom)));
+        return $this;
+    }
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+    public function setPrenom(string $prenom): static
+    {
+        $this->prenom = ucwords(strtolower(trim($prenom)));
+        return $this;
+    }
+    public function getNomComplet(): string
+    {
+        return $this->prenom . ' ' . $this->nom;
+    }
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+        return $this;
+    }
+    public function getDateNaissance(): ?\DateTimeInterface
+    {
+        return $this->dateNaissance;
+    }
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
+    {
+        $this->dateNaissance = $dateNaissance;
+        return $this;
+    }
+    public function getAge(): ?int
+    {
+        return $this->dateNaissance ? $this->dateNaissance->diff(new \DateTime())->y : null;
+    }
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+    public function setPhoto(?string $photo): static
+    {
+        $this->photo = $photo;
+        return $this;
+    }
+
+    public function getPhotoFile(): ?File
+    {
+        return $this->photoFile;
+    }
+
+    public function setPhotoFile(?File $photoFile = null): void
+    {
+        $this->photoFile = $photoFile;
+
+        if (null !== $photoFile) {
+            $this->updatedAt = new \DateTime();
+        }
+    }
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+    public function getDateInscription(): ?\DateTimeInterface
+    {
+        return $this->dateInscription;
+    }
+    public function setDateInscription(\DateTimeInterface $dateInscription): static
+    {
+        $this->dateInscription = $dateInscription;
+        return $this;
+    }
+    public function isActif(): bool
+    {
+        return $this->statut === 'actif';
+    }
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->roles);
+    }
 
     /**
      * @return Collection<int, Annonce>
@@ -212,8 +323,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-<<<<<<< HEAD
-=======
      * @return Collection<int, Notification>
      */
     public function getNotifications(): Collection
@@ -244,7 +353,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
      * @return Collection<int, Commentaire>
      */
     public function getCommentaires(): Collection
@@ -305,8 +413,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-<<<<<<< HEAD
-=======
      * @return Collection<int, Entrainement>
      */
     public function getEntrainementsJoueurs(): Collection
@@ -334,7 +440,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
      * @return Collection<int, Participation>
      */
     public function getParticipations(): Collection
@@ -423,8 +528,68 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-<<<<<<< HEAD
+
+
+    public function getCvName(): ?string
+    {
+        return $this->cvName;
+    }
+
+    public function setCvName(?string $cvName): self
+    {
+        $this->cvName = $cvName;
+        return $this;
+    }
+
+    public function getCvFile(): ?File
+    {
+        return $this->cvFile;
+    }
+
+    public function setCvFile(?File $cvFile = null): void
+    {
+        $this->cvFile = $cvFile;
+
+        if (null !== $cvFile) {
+            $this->updatedAt = new \DateTime();
+        }
+    }
+
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function __serialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'password' => $this->password,
+            'roles' => $this->roles,
+            'statut' => $this->statut,
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $legacyPrefix = "\0" . self::class . "\0";
+        $id = $data['id'] ?? $data[$legacyPrefix . 'id'] ?? $data[0] ?? 0;
+
+        // Keep a valid identifier shape for EntityUserProvider refresh.
+        $this->id = is_numeric($id) ? (int) $id : 0;
+        $this->email = $data['email'] ?? $data[$legacyPrefix . 'email'] ?? $data[1] ?? null;
+        $this->password = $data['password'] ?? $data[$legacyPrefix . 'password'] ?? $data[2] ?? null;
+        $this->roles = $data['roles'] ?? $data[$legacyPrefix . 'roles'] ?? $data[3] ?? [];
+        $this->nom = $data['nom'] ?? $data[$legacyPrefix . 'nom'] ?? null;
+        $this->prenom = $data['prenom'] ?? $data[$legacyPrefix . 'prenom'] ?? null;
+        $this->statut = $data['statut'] ?? $data[$legacyPrefix . 'statut'] ?? 'actif';
+    }
 }
-=======
-}
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d

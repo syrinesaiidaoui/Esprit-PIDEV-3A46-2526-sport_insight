@@ -16,32 +16,6 @@ class EvaluationRepository extends ServiceEntityRepository
         parent::__construct($registry, Evaluation::class);
     }
 
-<<<<<<< HEAD
-    //    /**
-    //     * @return Evaluation[] Returns an array of Evaluation objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('e.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Evaluation
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
-=======
     /**
      * Calcule la moyenne des compétences de chaque joueur pour l'entraîneur connecté.
      */
@@ -87,5 +61,4 @@ class EvaluationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

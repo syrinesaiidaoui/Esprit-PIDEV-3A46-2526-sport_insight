@@ -3,13 +3,131 @@
 {% block title %}Paiement - Sport Insight{% endblock %}
 
 {% block body %}
+<style>
+    .checkout-layout {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 14px;
+    }
+
+    .checkout-title {
+        font-size: 30px;
+        margin: 0 0 12px;
+    }
+
+    .checkout-form {
+        display: grid;
+        gap: 10px;
+    }
+
+    .checkout-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .checkout-online-fields {
+        display: none;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        padding: 12px;
+    }
+
+    .checkout-online-title {
+        font-size: 16px;
+        margin: 0 0 10px;
+    }
+
+    .checkout-grid-2-spaced {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .checkout-alt-payment {
+        margin-top: 14px;
+        padding: 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        background: rgba(148, 163, 184, 0.08);
+    }
+
+    .checkout-alt-title {
+        margin: 0 0 8px;
+        font-weight: 700;
+    }
+
+    .checkout-stripe-btn {
+        background: #0f9f6e;
+        border-color: #0f9f6e;
+    }
+
+    .checkout-stripe-hint {
+        margin: 8px 0 0;
+        font-size: 12px;
+        color: #475569;
+    }
+
+    .checkout-stripe-error {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: #b91c1c;
+        display: none;
+    }
+
+    .checkout-summary-list {
+        display: grid;
+        gap: 8px;
+        max-height: 360px;
+        overflow: auto;
+    }
+
+    .checkout-summary-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+    }
+
+    .checkout-summary-meta {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .checkout-total-row {
+        margin-top: 12px;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .checkout-note {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    @media (max-width: 992px) {
+        .checkout-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .checkout-grid-2,
+        .checkout-grid-2-spaced {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 <h1 class="section-title">Finaliser la commande</h1>
 
-<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;">
+<div class="checkout-layout">
     <section class="front-card">
-        <h2 style="font-size:30px;margin:0 0 12px;">Informations client</h2>
+        <h2 class="checkout-title">Informations client</h2>
 
-        <form method="post" action="{{ path('front_equipement_checkout') }}" style="display:grid;gap:10px;">
+        <form method="post" action="{{ path('front_equipement_checkout') }}" class="checkout-form" id="customer-form">
             <input type="hidden" name="_token" value="{{ csrf_token('checkout') }}">
 
             <div>
@@ -17,7 +135,7 @@
                 <input type="text" name="full_name" class="form-control" required>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="checkout-grid-2">
                 <div>
                     <label class="form-label">Email</label>
                     <input type="email" name="email" class="form-control" required>
@@ -33,7 +151,7 @@
                 <input type="text" name="address" class="form-control" required>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="checkout-grid-2">
                 <div>
                     <label class="form-label">Ville</label>
                     <input type="text" name="city" class="form-control" required>
@@ -52,9 +170,9 @@
                 </select>
             </div>
 
-            <div id="online_payment_fields" style="display:none; border:1px solid #dbeafe; border-radius:10px; padding:12px;">
-                <h3 style="font-size:16px; margin:0 0 10px;">Paiement en ligne (simulation)</h3>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div id="online_payment_fields" class="checkout-online-fields">
+                <h3 class="checkout-online-title">Paiement en ligne (simulation)</h3>
+                <div class="checkout-grid-2">
                     <div>
                         <label class="form-label">Nom du porteur</label>
                         <input type="text" name="card_holder" id="card_holder" class="form-control" placeholder="Nom complet">
@@ -64,7 +182,7 @@
                         <input type="text" name="card_number" id="card_number" class="form-control" placeholder="16 chiffres" maxlength="19">
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px; margin-top:10px;">
+                <div class="checkout-grid-2-spaced">
                     <div>
                         <label class="form-label">Expiration</label>
                         <input type="text" name="card_expiry" id="card_expiry" class="form-control" placeholder="MM/YY" maxlength="5">
@@ -79,29 +197,38 @@
             <button type="submit" class="btn btn-primary">Valider et payer</button>
             <a href="{{ path('front_equipement_cart') }}" class="btn btn-secondary">Retour au panier</a>
         </form>
+
+        <div class="checkout-alt-payment">
+            <p class="checkout-alt-title">Ou payer via Stripe Checkout (recommande)</p>
+            <form method="post" action="{{ path('front_equipement_checkout_stripe') }}" id="stripe-form">
+                <button type="submit" class="btn btn-success checkout-stripe-btn" id="stripe-btn" disabled>Payer avec Stripe Checkout</button>
+            </form>
+            <p id="stripe-hint" class="checkout-stripe-hint">Remplissez d'abord toutes les informations client pour activer Stripe.</p>
+            <p id="stripe-error" class="checkout-stripe-error">Merci de completer vos informations avant de passer par Stripe.</p>
+        </div>
     </section>
 
     <aside class="front-card">
-        <h2 style="font-size:30px;margin:0 0 12px;">Resume</h2>
+        <h2 class="checkout-title">Resume</h2>
 
-        <div style="display:grid;gap:8px;max-height:360px;overflow:auto;">
+        <div class="checkout-summary-list">
             {% for item in items %}
-                <div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #e5e7eb;padding-bottom:8px;">
+                <div class="checkout-summary-line">
                     <div>
                         <strong>{{ item.product.name }}</strong>
-                        <div style="font-size:12px;color:#64748b;">Taille : {{ item.size ?: item.product.size ?: 'M' }} | Qte : {{ item.quantity }}</div>
+                        <div class="checkout-summary-meta">Taille : {{ item.size ?: item.product.size ?: 'M' }} | Qte : {{ item.quantity }}</div>
                     </div>
                     <strong>{{ item.lineTotal|number_format(2, '.', ',') }} USD</strong>
                 </div>
             {% endfor %}
         </div>
 
-        <div style="margin-top:12px;border-top:1px solid #e5e7eb;padding-top:10px;display:flex;justify-content:space-between;">
+        <div class="checkout-total-row">
             <strong>Total</strong>
             <strong>{{ total|number_format(2, '.', ',') }} USD</strong>
         </div>
 
-        <p style="margin-top:10px;font-size:12px;color:#64748b;">Apres validation, une facture sera telechargee et un email de confirmation sera envoye.</p>
+        <p class="checkout-note">Apres validation, une facture sera telechargee et un email de confirmation sera envoye.</p>
     </aside>
 </div>
 <script>
@@ -110,6 +237,11 @@
     const wrap = document.getElementById('online_payment_fields');
     const fields = ['card_holder', 'card_number', 'card_expiry', 'card_cvv']
         .map((id) => document.getElementById(id));
+    const customerForm = document.getElementById('customer-form');
+    const stripeForm = document.getElementById('stripe-form');
+    const stripeBtn = document.getElementById('stripe-btn');
+    const stripeError = document.getElementById('stripe-error');
+    const stripeHint = document.getElementById('stripe-hint');
 
     const toggle = () => {
         if (!method || !wrap) return;
@@ -124,6 +256,44 @@
     if (method) {
         method.addEventListener('change', toggle);
         toggle();
+    }
+
+    // Guard Stripe checkout until customer info is valid
+    const requiredSelectors = ['input[name=\"full_name\"]','input[name=\"email\"]','input[name=\"phone\"]','input[name=\"address\"]','input[name=\"city\"]','input[name=\"postal_code\"]'];
+    const requiredInputs = requiredSelectors
+        .map((sel) => document.querySelector(sel))
+        .filter(Boolean);
+
+    const validateCustomerForm = () => {
+        if (!customerForm || !stripeBtn) return false;
+        const allValid = customerForm.checkValidity();
+        stripeBtn.disabled = !allValid;
+        if (allValid) {
+            if (stripeError) stripeError.style.display = 'none';
+            if (stripeHint) stripeHint.textContent = 'Stripe est actif : vous pouvez payer en toute securite.';
+        } else {
+            if (stripeHint) stripeHint.textContent = 'Remplissez d abord toutes les informations client pour activer Stripe.';
+        }
+        return allValid;
+    };
+
+    requiredInputs.forEach((el) => {
+        el.addEventListener('input', validateCustomerForm);
+        el.addEventListener('change', validateCustomerForm);
+    });
+    validateCustomerForm();
+
+    if (stripeForm) {
+        stripeForm.addEventListener('submit', (e) => {
+            const ok = validateCustomerForm();
+            if (!ok) {
+                e.preventDefault();
+                if (stripeError) stripeError.style.display = 'block';
+                requiredInputs.forEach((el) => {
+                    if (el && !el.validity.valid) el.reportValidity();
+                });
+            }
+        });
     }
 })();
 </script>

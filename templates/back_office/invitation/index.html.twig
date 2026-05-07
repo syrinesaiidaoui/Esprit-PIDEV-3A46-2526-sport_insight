@@ -1,0 +1,38 @@
+{% extends 'back_office/base.html.twig' %}
+
+{% block title %}Invitations{% endblock %}
+
+{% block body %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>Invitations</h1>
+    </div>
+
+    <div class="card" style="padding: 24px;">
+        {% if invitations is not empty %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invitation in invitations %}
+                        <tr>
+                            <td>{{ invitation.id ?? '-' }}</td>
+                            <td>{{ invitation.email ?? '-' }}</td>
+                            <td>{{ invitation.status ?? 'pending' }}</td>
+                            <td>{{ invitation.createdAt is defined and invitation.createdAt ? invitation.createdAt|date('Y-m-d H:i') : '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="margin: 0; color: var(--text-muted);">No invitations available yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

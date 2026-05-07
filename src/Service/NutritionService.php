@@ -6,14 +6,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class NutritionService
 {
-    private $client;
-    private $apiKey;
+    private HttpClientInterface $client;
+    private string $apiKey;
 
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
         // Load API Ninjas key from environment instead of hard-coding it
-        $this->apiKey = $_ENV['API_NINJAS_KEY'] ?? getenv('API_NINJAS_KEY') ?? 'your_api_ninjas_key_here';
+        $envKey = $_ENV['API_NINJAS_KEY'] ?? getenv('API_NINJAS_KEY');
+        $this->apiKey = is_string($envKey) ? $envKey : '';
     }
 
     private function matchSport(string $type): string
@@ -126,6 +127,7 @@ class NutritionService
             'light' => ['min' => 1.5, 'max' => 2.0],
             'moderate' => ['min' => 2.0, 'max' => 3.0],
             'intense' => ['min' => 3.0, 'max' => 4.0],
+            default => ['min' => 1.5, 'max' => 2.5],
         };
 
         $type = strtolower(trim($type));

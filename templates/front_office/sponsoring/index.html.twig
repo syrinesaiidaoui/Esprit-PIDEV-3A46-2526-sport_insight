@@ -1,39 +1,5 @@
 {% extends 'front_office/base.html.twig' %}
 
-<<<<<<< HEAD
-{% block title %}Sponsoring - FC Club{% endblock %}
-
-{% block body %}
-    <h2 class="section-title">Nos Sponsors</h2>
-
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="front-card text-center">
-                <div class="card-icon" style="margin:0 auto 16px"><i class="lucide-building-2"></i></div>
-                <h3>Tunisie Telecom</h3>
-                <p>Sponsor maillot principal</p>
-                <span class="badge-success">Partenaire officiel</span>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="front-card text-center">
-                <div class="card-icon" style="margin:0 auto 16px"><i class="lucide-landmark"></i></div>
-                <h3>BIAT</h3>
-                <p>Sponsor stade</p>
-                <span class="badge-success">Partenaire officiel</span>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="front-card text-center">
-                <div class="card-icon" style="margin:0 auto 16px"><i class="lucide-cup-soda"></i></div>
-                <h3>Coca-Cola</h3>
-                <p>Boissons officiel</p>
-                <span class="badge-info">Partenaire</span>
-            </div>
-        </div>
-    </div>
-{% endblock %}
-=======
 {% block title %}Sponsoring - Sport Insight{% endblock %}
 
 {% block hero %}
@@ -147,7 +113,9 @@
         {% set sponsors_array = sponsors_array|merge([{
             'nom': sponsor.nom,
             'adresse': sponsor.adresse|default(''),
-            'logo': sponsor.logoName ? asset('uploads/logos/' ~ sponsor.logoName) : ''
+            'logo': sponsor.logoName ? asset('uploads/logos/' ~ sponsor.logoName) : '',
+            'lat': sponsorCoordinates[sponsor.id].lat|default(null),
+            'lon': sponsorCoordinates[sponsor.id].lon|default(null)
         }]) %}
     {% endfor %}
     <script id="sponsors-data" type="application/json">
@@ -188,45 +156,32 @@
                 popupAnchor: [0, -15]
             });
 
-            // Geocode function carefully respecting Nominatim 1 request/sec limit
-            async function geocodeSponsors() {
-                for (let i = 0; i < sponsors.length; i++) {
-                    let sponsor = sponsors[i];
-                    if (sponsor.adresse && sponsor.adresse.trim() !== '') {
-                        try {
-                            // Search Nominatim API
-                            let response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(sponsor.adresse + ', Tunisia'));
-                            let data = await response.json();
-                            
-                            if (data && data.length > 0) {
-                                let lat = data[0].lat;
-                                let lon = data[0].lon;
-                                
-                                // Popup content
-                                let popupHtml = `
-                                    <div style="text-align:center; min-width:120px;">
-                                        ${sponsor.logo ? `<img src="${sponsor.logo}" style="max-height:40px; object-fit:contain; margin-bottom:8px;">` : ''}
-                                        <h4 style="margin:0 0 5px; font-size:14px; font-weight:bold;">${sponsor.nom}</h4>
-                                        <p style="margin:0; font-size:12px; color:#666;">${sponsor.adresse}</p>
-                                    </div>
-                                `;
-                                
-                                L.marker([lat, lon], {icon: customIcon})
-                                 .addTo(map)
-                                 .bindPopup(popupHtml);
-                            }
-                            
-                            // Wait 1 second before next request to respect Nominatim limits
-                            await new Promise(r => setTimeout(r, 1100));
-                        } catch (e) {
-                            console.error("Geocoding failed for " + sponsor.nom, e);
-                        }
-                    }
+            var markers = [];
+
+            sponsors.forEach(function(sponsor) {
+                if (sponsor.lat === null || sponsor.lon === null) {
+                    return;
                 }
+
+                var popupHtml = `
+                    <div style="text-align:center; min-width:120px;">
+                        ${sponsor.logo ? `<img src="${sponsor.logo}" alt="Sponsor logo" style="max-height:40px; object-fit:contain; margin-bottom:8px;">` : ''}
+                        <h4 style="margin:0 0 5px; font-size:14px; font-weight:bold;">${sponsor.nom}</h4>
+                        <p style="margin:0; font-size:12px; color:#666;">${sponsor.adresse}</p>
+                    </div>
+                `;
+
+                var marker = L.marker([sponsor.lat, sponsor.lon], {icon: customIcon})
+                    .addTo(map)
+                    .bindPopup(popupHtml);
+
+                markers.push(marker);
+            });
+
+            if (markers.length > 0) {
+                var group = L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.2));
             }
-            
-            geocodeSponsors();
         });
     </script>
 {% endblock %}
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d

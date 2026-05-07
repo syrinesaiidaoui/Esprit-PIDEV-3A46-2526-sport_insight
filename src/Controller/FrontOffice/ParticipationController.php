@@ -9,11 +9,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-<<<<<<< HEAD
-=======
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Entrainement;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/front/participation')]
@@ -34,8 +31,6 @@ class ParticipationController extends AbstractController
         ]);
     }
 
-<<<<<<< HEAD
-=======
     #[Route('/create-for-entrainement/{id}', name: 'front_participation_create_for_entrainement', methods: ['POST'])]
     public function createForEntrainement(int $id, Request $request, ParticipationRepository $participationRepository, EntityManagerInterface $entityManager): Response
     {
@@ -129,7 +124,6 @@ class ParticipationController extends AbstractController
         return new JsonResponse(['html' => $html]);
     }
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     #[Route('/new', name: 'front_participation_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {

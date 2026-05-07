@@ -6,14 +6,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AiCoachService
 {
-    private $client;
-    private $apiKey;
+    private HttpClientInterface $client;
+    private string $apiKey;
 
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
         // Load key from environment so secrets are not hard-coded
-        $this->apiKey = $_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? 'your_gemini_api_key_here';
+        $envKey = $_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY');
+        $this->apiKey = is_string($envKey) ? $envKey : '';
     }
 
     private function matchSport(string $type): string
@@ -211,14 +212,12 @@ class AiCoachService
 
         // Add sport-specific exercise
         $sportExercise = $this->getSportSpecificExercise($type, $p, $t, $ta);
-        if ($sportExercise) {
-            $exercises[] = $sportExercise;
-        }
+        $exercises[] = $sportExercise;
 
         return $exercises;
     }
 
-    private function getSportSpecificExercise(string $type, float $p, float $t, float $ta): ?array
+    private function getSportSpecificExercise(string $type, float $p, float $t, float $ta): array
     {
         $type = strtolower(trim($type));
 

@@ -1,11 +1,12 @@
-<<<<<<< HEAD
-body {
-    background-color: skyblue;
-}
-=======
 /* Global utilities only. Keep this file neutral to avoid overriding page themes. */
 * { box-sizing: border-box; }
 
+body {
+    min-height: 100vh;
+    background-color: var(--page-bg-color, var(--body-bg, #f8fafc));
+    background-image: var(--page-bg, linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%));
+    background-attachment: fixed;
+}
+
 .mb-8 { margin-bottom: 8px; }
 .mb-16 { margin-bottom: 16px; }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d

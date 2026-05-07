@@ -60,10 +60,7 @@
                 <table class="table table-striped">
                     <thead class="table-light">
                         <tr>
-<<<<<<< HEAD
                             <th>Logo</th>
-=======
->>>>>>> origin/rym-sponsoring
                             <th>Nom</th>
                             <th>Email</th>
                             <th>Budget</th>
@@ -74,7 +71,6 @@
                     <tbody>
                     {% for sponsor in sponsors %}
                         <tr>
-<<<<<<< HEAD
                             <td>
                                 {% set logo = sponsor.logoName ?? sponsor.logo %}
                                 {% if logo %}
@@ -83,8 +79,6 @@
                                     <span class="badge badge-secondary">Aucun</span>
                                 {% endif %}
                             </td>
-=======
->>>>>>> origin/rym-sponsoring
                             <td><strong>{{ sponsor.nom }}</strong></td>
                             <td>{{ sponsor.email }}</td>
                             <td><strong>{{ sponsor.budget }} DT</strong></td>

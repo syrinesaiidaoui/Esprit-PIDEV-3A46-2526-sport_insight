@@ -1,245 +1,574 @@
 {% extends 'front_office/base.html.twig' %}
 
-{% block title %}Équipes - Sport Insight{% endblock %}
+{% block title %}Equipes - Sport Insight{% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-        .equipes-section {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-
-        .equipes-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .equipes-header h1 {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin: 0;
-        }
-
-        .sort-link {
-            padding: 10px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.15s;
-        }
-
-        .sort-link:hover {
-            border-color: var(--primary);
-            background: var(--body-bg);
-        }
-
-        .equipes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 28px;
-            margin-bottom: 40px;
-        }
-
-        .equipe-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
+        .teams-hero {
+            position: relative;
+            max-width: 1320px;
+            margin: 16px auto 0;
+            padding: clamp(16px, 3vw, 24px);
+            border-radius: 28px;
+            background: radial-gradient(circle at 22% 24%, rgba(52, 211, 153, 0.22), rgba(2, 6, 23, 0) 46%),
+                        radial-gradient(circle at 80% 76%, rgba(96, 165, 250, 0.2), rgba(2, 6, 23, 0) 50%),
+                        var(--hero-grad);
             overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
         }
 
-        .equipe-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.2);
-            transform: translateY(-8px);
-        }
-
-        .equipe-logo-section {
-            background: linear-gradient(135deg, var(--body-bg) 0%, #f0f9ff 100%);
-            padding: 40px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-        }
-
-        .equipe-logo {
-            width: 140px;
-            height: 140px;
-            background: white;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .teams-hero__card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.26);
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: clamp(22px, 4vw, 34px);
+            color: #f8fafc;
+            isolation: isolate;
+            box-shadow: var(--soft-shadow);
         }
 
-        .equipe-logo img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+        .teams-hero__card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url('{{ asset('images/equipe.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.04);
+            z-index: 0;
         }
 
-        .equipe-logo-placeholder {
-            font-size: 60px;
-            opacity: 0.5;
+        .teams-hero__card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(2, 6, 23, 0.84) 0%, rgba(2, 6, 23, 0.72) 46%, rgba(5, 150, 105, 0.58) 100%);
+            z-index: 1;
         }
 
-        .equipe-info {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        .teams-hero__card > * {
+            position: relative;
+            z-index: 2;
         }
 
-        .equipe-name {
-            font-size: 18px;
+        .teams-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.34);
+            background: rgba(2, 6, 23, 0.48);
+            font-size: 12px;
             font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
-        .equipe-coach {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
+        .teams-hero__card h1 {
+            margin: 14px 0 0;
+            font-size: clamp(30px, 5vw, 46px);
+            line-height: 1.15;
+            color: #f8fafc;
+        }
+
+        .teams-hero__card p {
+            margin: 12px 0 0;
+            max-width: 740px;
+            color: #dbeafe;
+            font-size: 17px;
+        }
+
+        .teams-shell {
+            display: grid;
+            gap: 18px;
+        }
+
+        .teams-toolbar {
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 18px;
+            box-shadow: var(--soft-shadow);
+            display: grid;
+            gap: 14px;
+        }
+
+        .teams-toolbar__head {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .teams-toolbar__title {
+            margin: 0;
+            font-size: 28px;
+            color: var(--text-main);
+        }
+
+        .teams-toolbar__meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .teams-search-form {
+            display: grid;
+            grid-template-columns: minmax(240px, 1.2fr) auto auto;
+            gap: 10px;
+            align-items: end;
+            margin: 0;
+            padding: 0;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .teams-field {
+            display: grid;
             gap: 6px;
         }
 
-        .equipe-footer {
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 8px;
+        .teams-field label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-soft);
         }
 
-        .equipe-btn {
-            flex: 1;
+        .teams-field input {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--input-text);
             padding: 10px 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .teams-field input:focus {
+            border-color: rgba(16, 185, 129, 0.75);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+
+        .teams-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teams-btn {
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: all 0.15s;
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+            white-space: nowrap;
+        }
+
+        .teams-btn--primary {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #f8fafc;
+            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.22);
+        }
+
+        .teams-btn--primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 26px rgba(16, 185, 129, 0.3);
+        }
+
+        .teams-btn--ghost {
+            border-color: var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        .teams-btn--ghost:hover {
+            border-color: rgba(16, 185, 129, 0.55);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .teams-loading {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .teams-hint {
+            font-size: 12px;
+            color: #d97706;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .team-card {
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            overflow: hidden;
+            display: grid;
+            box-shadow: var(--soft-shadow);
+            transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(16, 185, 129, 0.45);
+            box-shadow: 0 18px 32px rgba(2, 6, 23, 0.22);
+        }
+
+        .team-card__logo-wrap {
+            padding: 24px 18px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .team-card__logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            overflow: hidden;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
+        .team-card__logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
+        .team-card__fallback {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text-soft);
         }
 
-        .empty-state {
+        .team-card__content {
+            padding: 0 16px 16px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .team-card__name {
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.25;
+            color: var(--text-main);
             text-align: center;
-            padding: 80px 40px;
         }
 
-        .empty-state-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            opacity: 0.3;
+        .team-card__coach {
+            margin: 0;
+            min-height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-soft);
+            text-align: center;
         }
 
-        .empty-state h2 {
-            font-size: 24px;
+        .team-card__coach i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .team-card__coach--muted {
+            opacity: 0.85;
+        }
+
+        .team-card__footer {
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .team-card__link {
+            width: 100%;
+            min-height: 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 14px;
             font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #f8fafc;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .2s ease, box-shadow .2s ease;
+            box-shadow: 0 12px 22px rgba(16, 185, 129, 0.2);
         }
 
-        .empty-state p {
-            color: var(--text-muted);
-            font-size: 16px;
+        .team-card__link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(16, 185, 129, 0.3);
+            color: #f8fafc;
+        }
+
+        .teams-empty-state {
+            border-radius: 20px;
+            border: 1px dashed var(--border-color);
+            background: var(--card-bg);
+            box-shadow: var(--soft-shadow);
+            padding: 44px 20px;
+            text-align: center;
+        }
+
+        .teams-empty-state__icon {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 14px;
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(16, 185, 129, 0.22);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .teams-empty-state h2 {
+            margin: 0;
+            font-size: 22px;
+            color: var(--text-main);
+        }
+
+        .teams-empty-state p {
+            margin: 10px 0 0;
+            color: var(--text-soft);
+            font-size: 14px;
+        }
+
+        [data-theme="dark"] .teams-toolbar__meta {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        [data-theme="dark"] .team-card__logo {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        @media (max-width: 760px) {
+            .teams-hero {
+                margin-top: 10px;
+                border-radius: 20px;
+                padding: 12px;
+            }
+
+            .teams-hero__card {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .teams-toolbar {
+                border-radius: 16px;
+            }
+
+            .teams-search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .teams-actions {
+                width: 100%;
+            }
+
+            .teams-btn {
+                flex: 1;
+            }
         }
     </style>
+{% endblock %}
 
-    <div class="equipes-section">
-        <div class="equipes-header">
-            <h1>👥 Équipes</h1>
-            <div style="display: flex; gap: 12px;">
-                <a href="{{ path('app_front_equipes_index', { sort: currentSort, order: currentOrder == 'asc' ? 'desc' : 'asc' }) }}" class="sort-link">
-                    {{ currentOrder == 'asc' ? '↑ Ordre croissant' : '↓ Ordre décroissant' }}
-                </a>
-            </div>
+{% block hero %}
+    <section class="teams-hero">
+        <div class="teams-hero__card">
+            <span class="teams-hero__eyebrow">Squads</span>
+            <h1>Recherchez les equipes en temps reel</h1>
+            <p>Entrez un nom d'equipe pour filtrer instantanement la liste, sans recharger la page.</p>
         </div>
+    </section>
+{% endblock %}
 
-        <!-- Formulaire de recherche -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <form method="GET" class="search-form">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                    <div style="max-width: 400px;">
-                        <label for="search" style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">Recherche</label>
-                        <input type="text" name="search" id="search" value="{{ search }}" placeholder="Nom de l'équipe..." class="form-control" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;">
-                    </div>
+{% block body %}
+    <section class="teams-shell">
+        <div class="teams-toolbar">
+            <div class="teams-toolbar__head">
+                <h2 class="teams-toolbar__title">Equipes</h2>
+                <div class="teams-toolbar__meta">
+                    <span><strong id="teams-count">{{ equipes|length }}</strong> equipe(s)</span>
+                    <span id="teams-loading" class="teams-loading" hidden>Actualisation...</span>
+                    <span id="teams-hint" class="teams-hint" hidden></span>
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button type="submit" class="btn btn-primary" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">🔍 Rechercher</button>
-                    <a href="{{ path('app_front_equipes_index') }}" class="btn btn-secondary" style="padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block;">Réinitialiser</a>
+            </div>
+
+            <form id="team-search-form" class="teams-search-form" method="GET" action="{{ path('app_front_equipes_index') }}" data-search-url="{{ path('app_front_equipes_search') }}">
+                <div class="teams-field">
+                    <label for="team">Nom de l'equipe</label>
+                    <input type="text" id="team" name="team" value="{{ team }}" placeholder="Ex: Bayern, Barca, Esperance">
+                </div>
+
+                <div class="teams-actions">
+                    <button type="submit" class="teams-btn teams-btn--primary">Rechercher</button>
+                </div>
+
+                <div class="teams-actions">
+                    <a href="{{ path('app_front_equipes_index') }}" class="teams-btn teams-btn--ghost">Reinitialiser</a>
                 </div>
             </form>
         </div>
 
-        {% if equipes %}
-            <div class="equipes-grid">
-                {% for equipe in equipes %}
-                    <div class="equipe-card">
-                        <div class="equipe-logo-section">
-                            <div class="equipe-logo">
-                                {% if equipe.image %}
-                                    <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
-                                {% else %}
-                                    <span class="equipe-logo-placeholder">🏆</span>
-                                {% endif %}
-                            </div>
-                        </div>
+        <div id="teams-results">
+            {% include 'front_office/equipes/_cards.html.twig' with {'equipes': equipes} %}
+        </div>
+    </section>
+{% endblock %}
 
-                        <div class="equipe-info">
-                            <div class="equipe-name">{{ equipe.nom }}</div>
-                            {% if equipe.coach %}
-                                <div class="equipe-coach">
-                                    👨‍💼 {{ equipe.coach }}
-                                </div>
-                            {% endif %}
-                            
-                            <div class="equipe-footer" style="margin-top: auto;">
-                                <a href="{{ path('app_front_equipes_show', {'id': equipe.id}) }}" class="equipe-btn btn-primary">
-                                    📋 Détails
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">👥</div>
-                <h2>Aucune équipe trouvée</h2>
-                <p>Il n'y a actuellement aucune équipe enregistrée.</p>
-            </div>
-        {% endif %}
-    </div>
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (() => {
+            const form = document.getElementById('team-search-form');
+            const input = document.getElementById('team');
+            const results = document.getElementById('teams-results');
+            const counter = document.getElementById('teams-count');
+            const loading = document.getElementById('teams-loading');
+            const hint = document.getElementById('teams-hint');
+
+            if (!form || !input || !results) {
+                return;
+            }
+
+            const MIN_TEAM_LENGTH = 2;
+            const INPUT_DEBOUNCE_MS = 450;
+            const endpoint = form.dataset.searchUrl;
+            let debounceTimer = null;
+            let requestController = null;
+            let requestVersion = 0;
+            let lastSignature = '';
+
+            const setLoading = (active) => {
+                if (loading) {
+                    loading.hidden = !active;
+                }
+                results.style.opacity = active ? '0.55' : '1';
+            };
+
+            const setHint = (message) => {
+                if (!hint) {
+                    return;
+                }
+                hint.textContent = message;
+                hint.hidden = message === '';
+            };
+
+            const refreshResults = () => {
+                if (!endpoint) {
+                    return;
+                }
+
+                const teamValue = input.value.trim();
+                if (teamValue !== '' && teamValue.length < MIN_TEAM_LENGTH) {
+                    if (requestController) {
+                        requestController.abort();
+                        requestController = null;
+                    }
+                    setHint(`Tapez au moins ${MIN_TEAM_LENGTH} caracteres.`);
+                    setLoading(false);
+                    return;
+                }
+
+                setHint('');
+                requestVersion += 1;
+                const localVersion = requestVersion;
+
+                if (requestController) {
+                    requestController.abort();
+                }
+
+                requestController = new AbortController();
+                setLoading(true);
+
+                const params = new URLSearchParams(new FormData(form));
+                const signature = params.toString();
+                if (signature === lastSignature) {
+                    setLoading(false);
+                    return;
+                }
+                lastSignature = signature;
+
+                fetch(`${endpoint}?${params.toString()}`, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: requestController.signal
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Search request failed');
+                        }
+                        return response.json();
+                    })
+                    .then((payload) => {
+                        if (typeof payload.html === 'string') {
+                            results.innerHTML = payload.html;
+                        }
+                        if (counter && typeof payload.count === 'number') {
+                            counter.textContent = payload.count;
+                        }
+                    })
+                    .catch((error) => {
+                        if (error.name !== 'AbortError') {
+                            console.error(error);
+                            setHint('Erreur reseau, reessayez.');
+                        }
+                    })
+                    .finally(() => {
+                        if (localVersion === requestVersion) {
+                            setLoading(false);
+                        }
+                    });
+            };
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                refreshResults();
+            });
+
+            input.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(refreshResults, INPUT_DEBOUNCE_MS);
+            });
+        })();
+    </script>
 {% endblock %}

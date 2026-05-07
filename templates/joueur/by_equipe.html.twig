@@ -28,12 +28,12 @@
         .equipe-logo-large {
             width: 140px;
             height: 140px;
-            background: white;
+            background: transparent;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             overflow: hidden;
         }
 
@@ -111,7 +111,7 @@
 
         .joueur-image-section {
             position: relative;
-            background: linear-gradient(135deg, var(--body-bg) 0%, #f0f9ff 100%);
+            background: transparent;
             padding: 16px;
             min-height: 240px;
             display: flex;
@@ -123,8 +123,9 @@
         .joueur-image {
             width: 100%;
             height: 240px;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 8px;
+            background: transparent;
         }
 
         .joueur-placeholder {
@@ -256,7 +257,7 @@
             {% if equipe.image %}
                 <div class="equipe-logo-container">
                     <div class="equipe-logo-large">
-                        <img src="{{ asset('uploads/equipes/' ~ equipe.image) }}" alt="{{ equipe.nom }}">
+                        <img src="{{ media_url(equipe.image, 'equipes') }}" alt="{{ equipe.nom }}">
                     </div>
                 </div>
             {% endif %}
@@ -275,7 +276,7 @@
                     <div class="joueur-card">
                         <div class="joueur-image-section">
                             {% if joueur.image %}
-                                <img src="{{ asset('uploads/joueurs/' ~ joueur.image) }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="joueur-image">
+                                <img src="{{ media_url(joueur.image, 'joueurs') }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="joueur-image">
                             {% else %}
                                 <div class="joueur-placeholder">👤</div>
                             {% endif %}

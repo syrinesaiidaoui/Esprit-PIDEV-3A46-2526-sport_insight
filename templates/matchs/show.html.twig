@@ -17,16 +17,16 @@
         .details-header h1 {
             font-size: 32px;
             font-weight: 800;
-            color: #1f2937;
+            color: var(--text-dark);
             margin-bottom: 24px;
         }
 
         .match-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-color);
             margin-bottom: 32px;
         }
 
@@ -62,16 +62,16 @@
         }
 
         .detail-item {
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 16px;
-            background: #f9fafb;
+            background: var(--surface-2);
         }
 
         .detail-label {
             font-size: 12px;
             font-weight: 600;
-            color: #6b7280;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
@@ -81,19 +81,19 @@
         .detail-value {
             font-size: 16px;
             font-weight: 600;
-            color: #1f2937;
+            color: var(--text-dark);
             word-break: break-word;
         }
 
         .teams-section {
             padding: 32px;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid var(--border-color);
         }
 
         .teams-section h3 {
             font-size: 18px;
             font-weight: 700;
-            color: #1f2937;
+            color: var(--text-dark);
             margin-bottom: 24px;
         }
 
@@ -104,16 +104,16 @@
         }
 
         .team-box {
-            border: 2px solid #e5e7eb;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             padding: 20px;
-            background: #f9fafb;
+            background: var(--surface-2);
         }
 
         .team-title {
             font-size: 14px;
             font-weight: 600;
-            color: #6b7280;
+            color: var(--text-muted);
             margin-bottom: 12px;
             text-transform: uppercase;
         }
@@ -131,7 +131,8 @@
         .team-logo {
             width: 60px;
             height: 60px;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -147,7 +148,7 @@
 
         .lineup-section {
             padding: 20px;
-            background: white;
+            background: var(--card-bg);
             border-radius: 6px;
             margin-top: 12px;
             border-left: 4px solid #10b981;
@@ -156,7 +157,7 @@
         .lineup-label {
             font-size: 12px;
             font-weight: 600;
-            color: #6b7280;
+            color: var(--text-muted);
             text-transform: uppercase;
             margin-bottom: 16px;
         }
@@ -168,8 +169,8 @@
         }
 
         .joueur-lineup-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
+            background: var(--surface-2);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px;
             text-align: center;
@@ -189,7 +190,7 @@
             object-fit: cover;
             margin: 0 auto 8px;
             display: block;
-            border: 2px solid #e5e7eb;
+            border: 2px solid var(--border-color);
         }
 
         .joueur-lineup-numero {
@@ -202,19 +203,32 @@
         .joueur-lineup-nom {
             font-size: 12px;
             font-weight: 600;
-            color: #1f2937;
+            color: var(--text-dark);
             word-break: break-word;
         }
 
         .joueur-lineup-prenom {
             font-size: 11px;
-            color: #6b7280;
+            color: var(--text-muted);
             word-break: break-word;
+        }
+
+        .joueur-lineup-placeholder {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 8px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
 
         .action-buttons {
             padding: 24px 32px;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid var(--border-color);
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
@@ -260,6 +274,21 @@
 
         .btn-delete:hover {
             background: #fecaca;
+        }
+
+        [data-theme="dark"] .match-header {
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-back {
+            background: var(--surface-2);
+            color: var(--text-dark);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-back:hover {
+            background: #1e293b;
         }
     </style>
 
@@ -316,7 +345,7 @@
                         <div class="team-name">
                             {% if match.equipeDomicile.image %}
                                 <div class="team-logo">
-                                    <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}">
+                                    <img src="{{ media_url(match.equipeDomicile.image, 'equipes') }}" alt="{{ match.equipeDomicile.nom }}">
                                 </div>
                             {% endif %}
                             {{ match.equipeDomicile.nom }}
@@ -328,9 +357,9 @@
                                     {% for lineup in domicileLineups %}
                                         <div class="joueur-lineup-card">
                                             {% if lineup.joueur.image %}
-                                                <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
+                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
                                             {% else %}
-                                                <div style="width: 60px; height: 60px; margin: 0 auto 8px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
+                                                <div class="joueur-lineup-placeholder">👤</div>
                                             {% endif %}
                                             <div class="joueur-lineup-numero">{{ lineup.joueur.numero }}</div>
                                             <div class="joueur-lineup-nom">{{ lineup.joueur.nom }}</div>
@@ -347,7 +376,7 @@
                         <div class="team-name">
                             {% if match.equipeExterieur.image %}
                                 <div class="team-logo">
-                                    <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}">
+                                    <img src="{{ media_url(match.equipeExterieur.image, 'equipes') }}" alt="{{ match.equipeExterieur.nom }}">
                                 </div>
                             {% endif %}
                             {{ match.equipeExterieur.nom }}
@@ -359,9 +388,9 @@
                                     {% for lineup in exterieurLineups %}
                                         <div class="joueur-lineup-card">
                                             {% if lineup.joueur.image %}
-                                                <img src="{{ asset('uploads/joueurs/' ~ lineup.joueur.image) }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
+                                    <img src="{{ media_url(lineup.joueur.image, 'joueurs') }}" alt="{{ lineup.joueur.prenom }} {{ lineup.joueur.nom }}" class="joueur-lineup-image">
                                             {% else %}
-                                                <div style="width: 60px; height: 60px; margin: 0 auto 8px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
+                                                <div class="joueur-lineup-placeholder">👤</div>
                                             {% endif %}
                                             <div class="joueur-lineup-numero">{{ lineup.joueur.numero }}</div>
                                             <div class="joueur-lineup-nom">{{ lineup.joueur.nom }}</div>

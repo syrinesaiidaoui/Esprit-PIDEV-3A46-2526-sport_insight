@@ -208,7 +208,7 @@
                 <div class="team-box">
                     <div class="team-name">
                         {% if match.equipeDomicile.image %}
-                            <img src="{{ asset('uploads/equipes/' ~ match.equipeDomicile.image) }}" alt="{{ match.equipeDomicile.nom }}" class="team-logo" style="width:35px; height:35px;">
+                        <img src="{{ media_url(match.equipeDomicile.image, 'equipes') }}" alt="{{ match.equipeDomicile.nom }}" class="team-logo" style="width:35px; height:35px;">
                         {% endif %}
                         {{ match.equipeDomicile.nom }}
                     </div>
@@ -229,7 +229,7 @@
                 <div class="team-box">
                     <div class="team-name">
                         {% if match.equipeExterieur.image %}
-                            <img src="{{ asset('uploads/equipes/' ~ match.equipeExterieur.image) }}" alt="{{ match.equipeExterieur.nom }}" class="team-logo" style="width:35px; height:35px;">
+                        <img src="{{ media_url(match.equipeExterieur.image, 'equipes') }}" alt="{{ match.equipeExterieur.nom }}" class="team-logo" style="width:35px; height:35px;">
                         {% endif %}
                         {{ match.equipeExterieur.nom }}
                     </div>

@@ -1,0 +1,60 @@
+{% if joueursGroupes is not empty %}
+    <div class="players-groups">
+        {% for equipeId, groupe in joueursGroupes %}
+            <details class="players-group" data-equipe-id="{{ equipeId }}">
+                <summary class="players-group__summary">
+                    <span class="players-group__left">
+                        <span class="players-group__caret" aria-hidden="true"><i class="lucide-chevron-down"></i></span>
+                        <span class="players-group__logo-wrap">
+                            {% if groupe.equipe.image %}
+                                <img src="{{ media_url(groupe.equipe.image, 'equipes') }}" alt="{{ groupe.equipe.nom }}" class="players-group__logo">
+                            {% else %}
+                                <span class="players-group__logo-fallback">{{ groupe.equipe.nom|slice(0, 1)|upper }}</span>
+                            {% endif %}
+                        </span>
+                        <span class="players-group__name">{{ groupe.equipe.nom }}</span>
+                    </span>
+                    <span class="players-group__count">{{ groupe.joueurs|length }} joueur{{ groupe.joueurs|length > 1 ? 's' : '' }}</span>
+                </summary>
+
+                <div class="players-group__body">
+                    <div class="players-grid">
+                        {% for joueur in groupe.joueurs %}
+                            {% set age = date('now').diff(joueur.dateNaissance).y %}
+                            <article class="player-card">
+                                <div class="player-card__media">
+                                    {% if joueur.image %}
+                                        <img src="{{ media_url(joueur.image, 'joueurs') }}" alt="{{ joueur.prenom }} {{ joueur.nom }}" class="player-card__image">
+                                    {% else %}
+                                        <span class="player-card__placeholder"><i class="lucide-user-round"></i></span>
+                                    {% endif %}
+                                    <span class="player-card__number">#{{ joueur.numero }}</span>
+                                </div>
+
+                                <div class="player-card__content">
+                                    <h3 class="player-card__name">{{ joueur.prenom }} {{ joueur.nom }}</h3>
+                                    <p class="player-card__team">{{ groupe.equipe.nom }}</p>
+
+                                    <div class="player-card__meta">
+                                        <span><i class="lucide-cake"></i> {{ age }} ans</span>
+                                        <span><i class="lucide-calendar-days"></i> {{ joueur.dateNaissance|date('d/m/Y') }}</span>
+                                    </div>
+
+                                    <a href="{{ path('app_joueur_show', {'id': joueur.id}) }}" class="player-card__link">
+                                        Voir le profil
+                                    </a>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </details>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="players-empty-state">
+        <div class="players-empty-state__icon"><i class="lucide-users-round"></i></div>
+        <h2>Aucun joueur trouve</h2>
+        <p>Aucun resultat ne correspond aux filtres actuels.</p>
+    </div>
+{% endif %}

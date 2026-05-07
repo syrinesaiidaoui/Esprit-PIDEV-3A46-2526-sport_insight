@@ -77,7 +77,7 @@ final class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_equipe_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_equipe_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Equipe $equipe): Response
     {
         return $this->render('equipe/show.html.twig', [
@@ -85,7 +85,7 @@ final class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_equipe_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_equipe_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, Equipe $equipe, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(EquipeType::class, $equipe);
@@ -123,7 +123,7 @@ final class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_equipe_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_equipe_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Equipe $equipe, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $equipe->getId(), $request->request->get('_token'))) {

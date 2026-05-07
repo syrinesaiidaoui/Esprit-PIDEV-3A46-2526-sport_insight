@@ -3,18 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\MatchsRepository;
-<<<<<<< HEAD
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-=======
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 
 #[ORM\Entity(repositoryClass: MatchsRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Matchs
 {
     #[ORM\Id]
@@ -32,20 +28,6 @@ class Matchs
     private ?\DateTime $heureDebut = null;
 
     #[ORM\Column(length: 100)]
-<<<<<<< HEAD
-    private ?string $lieu = null;
-
-    #[ORM\Column(length: 50)]
-    private ?string $type = null;
-
-    #[ORM\Column(length: 50)]
-    private ?string $statut = null;
-
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $lineup_domicile = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-=======
     #[Assert\NotBlank(message: 'Le lieu du match est obligatoire')]
     #[Assert\Length(min: 3, max: 100, minMessage: 'Le lieu doit contenir au moins 3 caractères', maxMessage: 'Le lieu ne peut pas dépasser 100 caractères')]
     private ?string $lieu = null;
@@ -66,19 +48,12 @@ class Matchs
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(min: 3, minMessage: 'La composition doit contenir au moins 3 caractères')]
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     private ?string $lineup_exterieur = null;
 
     #[ORM\ManyToOne(inversedBy: 'matchs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Equipe $equipeDomicile = null;
 
-<<<<<<< HEAD
-    #[ORM\ManyToOne(inversedBy: 'matchs')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Equipe $equipeExterieur = null;
-
-=======
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Equipe $equipeExterieur = null;
@@ -91,7 +66,16 @@ class Matchs
     #[Assert\GreaterThanOrEqual(0, message: 'Le score doit être un nombre positif')]
     private ?int $scoreEquipeExterieur = 0;
 
-    #[ORM\OneToMany(mappedBy: 'matchs', targetEntity: MatchLineup::class, cascade: ['remove'])]
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $oddsSnapshotJson = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $oddsSource = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTime $oddsSyncedAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'matchs', targetEntity: MatchLineup::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $matchLineups;
 
     public function __construct()
@@ -99,7 +83,6 @@ class Matchs
         $this->matchLineups = new ArrayCollection();
     }
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     public function getId(): ?int
     {
         return $this->id;
@@ -115,6 +98,14 @@ class Matchs
         $this->id_match = $id_match;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureIdMatch(): void
+    {
+        if (null === $this->id_match || '' === trim($this->id_match)) {
+            $this->id_match = strtoupper(str_replace('.', '', uniqid('MATCH-', true)));
+        }
     }
 
     public function getDateMatch(): ?\DateTime
@@ -182,11 +173,7 @@ class Matchs
         return $this->lineup_domicile;
     }
 
-<<<<<<< HEAD
-    public function setLineupDomicile(string $lineup_domicile): static
-=======
     public function setLineupDomicile(?string $lineup_domicile): static
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     {
         $this->lineup_domicile = $lineup_domicile;
 
@@ -228,8 +215,6 @@ class Matchs
 
         return $this;
     }
-<<<<<<< HEAD
-=======
 
     public function getScoreEquipeDomicile(): ?int
     {
@@ -251,6 +236,42 @@ class Matchs
     public function setScoreEquipeExterieur(?int $scoreEquipeExterieur): static
     {
         $this->scoreEquipeExterieur = $scoreEquipeExterieur;
+
+        return $this;
+    }
+
+    public function getOddsSnapshotJson(): ?array
+    {
+        return $this->oddsSnapshotJson;
+    }
+
+    public function setOddsSnapshotJson(?array $oddsSnapshotJson): static
+    {
+        $this->oddsSnapshotJson = $oddsSnapshotJson;
+
+        return $this;
+    }
+
+    public function getOddsSource(): ?string
+    {
+        return $this->oddsSource;
+    }
+
+    public function setOddsSource(?string $oddsSource): static
+    {
+        $this->oddsSource = $oddsSource;
+
+        return $this;
+    }
+
+    public function getOddsSyncedAt(): ?\DateTime
+    {
+        return $this->oddsSyncedAt;
+    }
+
+    public function setOddsSyncedAt(?\DateTime $oddsSyncedAt): static
+    {
+        $this->oddsSyncedAt = $oddsSyncedAt;
 
         return $this;
     }
@@ -284,5 +305,4 @@ class Matchs
 
         return $this;
     }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

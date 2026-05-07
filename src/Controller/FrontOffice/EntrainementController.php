@@ -5,29 +5,19 @@ namespace App\Controller\FrontOffice;
 use App\Entity\Entrainement;
 use App\Form\EntrainementType;
 use App\Repository\EntrainementRepository;
-<<<<<<< HEAD
-=======
 use App\Repository\ParticipationRepository;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-<<<<<<< HEAD
-=======
 use Symfony\Component\HttpFoundation\JsonResponse;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/front/entrainement', name: 'front_entrainement_')]
 final class EntrainementController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-<<<<<<< HEAD
-    public function index(Request $request, EntrainementRepository $entrainementRepository): Response
-=======
     public function index(Request $request, EntrainementRepository $entrainementRepository, ParticipationRepository $participationRepository, \App\Repository\EvaluationRepository $evaluationRepository): Response
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     {
         $searchType = $request->query->get('search_type', '');
         $sortBy = $request->query->get('sort_by', '');
@@ -45,8 +35,6 @@ final class EntrainementController extends AbstractController
         }
         $entrainements = $qb->getQuery()->getResult();
 
-<<<<<<< HEAD
-=======
         // build participation map for current user
         $participationMap = [];
         $evaluationMap = [];
@@ -77,19 +65,11 @@ final class EntrainementController extends AbstractController
             }
         }
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         return $this->render('front_office/entrainement/index.html.twig', [
             'entrainements' => $entrainements,
             'search_type' => $searchType,
             'sort_by' => $sortBy,
             'sort_dir' => $sortDir,
-<<<<<<< HEAD
-        ]);
-    }
-
-    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-=======
             'participation_map' => $participationMap,
             'evaluation_map' => $evaluationMap,
         ]);
@@ -155,7 +135,6 @@ final class EntrainementController extends AbstractController
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, \App\Service\NotificationService $notifier): Response
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     {
         $entrainement = new Entrainement();
         $form = $this->createForm(EntrainementType::class, $entrainement);
@@ -165,8 +144,6 @@ final class EntrainementController extends AbstractController
             $entityManager->persist($entrainement);
             $entityManager->flush();
 
-<<<<<<< HEAD
-=======
             $recipients = $entrainement->getJoueurs()->toArray();
             if ($entrainement->getEntraineur()) {
                 $recipients[] = $entrainement->getEntraineur();
@@ -184,7 +161,6 @@ final class EntrainementController extends AbstractController
             }
 
             $this->addFlash('success', 'Entraînement créé et notifications envoyées !');
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             return $this->redirectToRoute('front_entrainement_index');
         }
 
@@ -194,12 +170,6 @@ final class EntrainementController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-<<<<<<< HEAD
-    public function show(Entrainement $entrainement): Response
-    {
-        return $this->render('front_office/entrainement/show.html.twig', [
-            'entrainement' => $entrainement,
-=======
     public function show(Entrainement $entrainement, ParticipationRepository $participationRepository): Response
     {
         $user = $this->getUser();
@@ -211,7 +181,6 @@ final class EntrainementController extends AbstractController
         return $this->render('front_office/entrainement/show.html.twig', [
             'entrainement' => $entrainement,
             'user_participation' => $userParticipation,
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         ]);
     }
 

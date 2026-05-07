@@ -155,6 +155,10 @@
         font-size: 20px;
     }
 
+    .cart-checkout-btn {
+        margin-bottom: 12px;
+    }
+
     .empty-cart {
         background: #f9fafb;
         border: 2px dashed #e5e7eb;
@@ -180,7 +184,7 @@
     {# Header #}
     <div class="cart-header">
         <h1><i class="fa fa-shopping-cart"></i> Panier</h1>
-        <a href="{{ path('app_shop_index') }}" class="btn btn-secondary">
+        <a href="{{ path('front_equipement_index') }}" class="btn btn-secondary">
             <i class="fa fa-arrow-left"></i> Continuer les achats
         </a>
     </div>
@@ -191,7 +195,7 @@
                 <i class="fa fa-inbox"></i>
             </div>
             <div class="empty-cart-text">Votre panier est vide</div>
-            <a href="{{ path('app_shop_index') }}" class="btn btn-primary btn-lg">
+            <a href="{{ path('front_equipement_index') }}" class="btn btn-primary btn-lg">
                 <i class="fa fa-shopping"></i> Commencer à acheter
             </a>
         </div>
@@ -274,7 +278,7 @@
                             <h5>{{ total|number_format(2, ',', '.') }} USD</h5>
                         </div>
 
-                        <a href="{{ path('app_checkout_index') }}" class="btn btn-primary btn-lg w-100" style="margin-bottom: 12px;">
+                        <a href="{{ path('front_equipement_checkout') }}" class="btn btn-primary btn-lg w-100 cart-checkout-btn">
                             <i class="fa fa-lock"></i> Procéder à la caisse
                         </a>
                         

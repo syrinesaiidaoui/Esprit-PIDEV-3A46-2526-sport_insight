@@ -15,7 +15,6 @@
             {% for contrat in sponsors_contrats %}
                 <div class="sponsor-card">
                     <div class="sponsor-card-header">
-                        {% if contrat.sponsor.logo %}
                             {% set logo = contrat.sponsor.logoName ?? contrat.sponsor.logo %}
                             {% if logo %}
                                 <img src="{{ asset('uploads/logos/' ~ logo) }}" 

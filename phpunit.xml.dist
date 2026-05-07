@@ -15,6 +15,12 @@
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
+        <env name="TWILIO_SID" value="test_sid" />
+        <env name="TWILIO_TOKEN" value="test_token" />
+        <env name="TWILIO_FROM" value="+10000000000" />
+        <env name="TWILIO_AUTH_TOKEN" value="test_auth_token" />
+        <env name="TWILIO_PHONE" value="+10000000000" />
+        <env name="TWILIO_DEFAULT_COUNTRY" value="US" />
     </php>
 
     <testsuites>

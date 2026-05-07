@@ -4,18 +4,12 @@
 {% block page_title %}Sponsoring{% endblock %}
 
 {% block header_actions %}
-<<<<<<< HEAD
-    <button class="btn btn-primary btn-sm">
-        <i class="lucide-plus" style="font-size:14px"></i> Nouveau sponsor
-    </button>
-=======
     <a href="{{ path('app_sponsor_new') }}" class="btn btn-primary btn-sm">
         <i class="lucide-plus" style="font-size:14px"></i> Nouveau sponsor
     </a>
     <a href="{{ path('app_contrat_sponsor_new') }}" class="btn btn-success btn-sm">
         <i class="lucide-plus" style="font-size:14px"></i> Nouveau contrat
     </a>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 {% endblock %}
 
 {% block body %}
@@ -23,57 +17,32 @@
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-label">Sponsors actifs</div>
-<<<<<<< HEAD
-                <div class="stat-card-value">6</div>
-                <div class="stat-card-sub">2 en negociation</div>
-=======
                 <div class="stat-card-value">{{ sponsors|length }}</div>
                 <div class="stat-card-sub">Total sponsors</div>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-label">Revenu annuel</div>
-<<<<<<< HEAD
-                <div class="stat-card-value">320K DT</div>
-                <div class="stat-card-sub">+25% vs an dernier</div>
-=======
                 <div class="stat-card-value">{{ (sponsors|reduce((carry, sponsor) => carry + sponsor.budget, 0) / 1000)|round(0) }}K DT</div>
                 <div class="stat-card-sub">Budget total</div>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-label">Contrats actifs</div>
-<<<<<<< HEAD
-                <div class="stat-card-value">8</div>
-                <div class="stat-card-sub">2 expirent bientot</div>
-=======
                 <div class="stat-card-value">{{ contrats|length }}</div>
                 <div class="stat-card-sub">Total contrats</div>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-label">Valeur moyenne</div>
-<<<<<<< HEAD
-                <div class="stat-card-value">40K DT</div>
-=======
                 <div class="stat-card-value">{% if contrats|length > 0 %}{{ (contrats|reduce((carry, contrat) => carry + contrat.montant, 0) / contrats|length / 1000)|round(0) }}K{% else %}0{% endif %} DT</div>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
                 <div class="stat-card-sub">Par contrat</div>
             </div>
         </div>
     </div>
-<<<<<<< HEAD
-
-    <div class="data-table">
-        <div class="data-table-header">
-            <h3>Liste des sponsors</h3>
-=======
     <!-- Graphiques -->
     <div class="row g-4 mb-4">
         <div class="col-lg-6">
@@ -155,18 +124,10 @@
             <a href="{{ path('app_contrat_sponsor_new') }}" class="btn btn-sm btn-primary btn-add-product">
                 <i class="lucide-plus" style="font-size:14px; margin-right:4px;"></i> Ajouter contrat
             </a>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
         </div>
         <table>
             <thead>
                 <tr>
-<<<<<<< HEAD
-                    <th>Sponsor</th>
-                    <th>Type</th>
-                    <th>Montant</th>
-                    <th>Debut</th>
-                    <th>Fin</th>
-=======
                     <th>Logo</th>
                     <th>Sponsor</th>
                     <th>Montant</th>
@@ -174,53 +135,11 @@
                     <th>Début</th>
                     <th>Fin</th>
                     <th>Équipe</th>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
                     <th>Statut</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-<<<<<<< HEAD
-                <tr>
-                    <td><strong>Tunisie Telecom</strong></td>
-                    <td>Maillot principal</td>
-                    <td>120 000 DT/an</td>
-                    <td>01/07/2025</td>
-                    <td>30/06/2027</td>
-                    <td><span class="badge-success">Actif</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary">Modifier</button>
-                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>BIAT</strong></td>
-                    <td>Stade</td>
-                    <td>80 000 DT/an</td>
-                    <td>01/01/2025</td>
-                    <td>31/12/2026</td>
-                    <td><span class="badge-success">Actif</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary">Modifier</button>
-                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Coca-Cola</strong></td>
-                    <td>Boissons officiel</td>
-                    <td>45 000 DT/an</td>
-                    <td>01/09/2025</td>
-                    <td>31/08/2026</td>
-                    <td><span class="badge-warning">Expire bientot</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary">Modifier</button>
-                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-=======
                 {% if contrats|length > 0 %}
                     {% for contrat in contrats %}
                         <tr>
@@ -301,5 +220,4 @@
             padding: 20px;
         }
     </style>
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 {% endblock %}

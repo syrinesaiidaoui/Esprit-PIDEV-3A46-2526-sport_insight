@@ -1,0 +1,85 @@
+<div class="comments-section" style="margin-top: 0; clear: both;">
+    <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 20px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px;">💬 Commentaires</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">{{ annonce.commentaires|length }} commentaire(s)</p>
+    </div>
+
+    {% if annonce.commentaires|length > 0 %}
+        <div class="comments-list" style="display: flex; flex-direction: column; gap: 16px;">
+            {% for commentaire in annonce.commentaires|reverse %}
+                <div class="comment-card" style="padding: 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <div style="flex: 1;">
+                            <h4 style="font-weight: 600; color: var(--text-dark); margin-bottom: 4px;">
+                                👤 {{ commentaire.joueur ? commentaire.joueur.prenom ~ ' ' ~ commentaire.joueur.nom : commentaire.auteurAnonyme }}
+                            </h4>
+                            <p style="font-size: 12px; color: var(--text-muted);">
+                                📅 {{ commentaire.dateCommentaire ? commentaire.dateCommentaire|date('d/m/Y à H:i') : 'N/A' }}
+                            </p>
+                        </div>
+                        
+                        {% if app.user and commentaire.joueur and (app.user.id == commentaire.joueur.id or is_granted('ROLE_ADMIN')) %}
+                            <div style="display: flex; gap: 8px; margin-left: 12px;">
+                                <a href="{{ path('app_commentaire_edit', {'id': commentaire.id}) }}" 
+                                   style="color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 600; padding: 4px 8px; border-radius: 4px; hover: background: rgba(16, 185, 129, 0.1);">
+                                    ✏️ Éditer
+                                </a>
+                                <form method="post" action="{{ path('app_commentaire_delete', {'id': commentaire.id}) }}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('Êtes-vous sûr?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 13px; font-weight: 600; text-decoration: underline; padding: 4px 8px; margin: 0;">
+                                        🗑️ Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <p id="comment-text-{{ commentaire.id }}" style="color: var(--text-dark); line-height: 1.6; margin-bottom: 12px; word-wrap: break-word; padding: 12px; background: rgba(16, 185, 129, 0.02); border-radius: 8px; border-left: 3px solid var(--primary);">
+                        {{ commentaire.contenu }}
+                    </p>
+
+                    <!-- AI Result Container -->
+                    <div id="ai-result-comment-{{ commentaire.id }}" style="display:none; margin-bottom: 12px; padding: 12px; background: #fff; border-radius: 8px; border: 1px dashed var(--primary); font-size: 14px; position: relative;">
+                        <button type="button" onclick="this.parentElement.style.display='none'" style="position: absolute; top: 4px; right: 4px; background: none; border: none; font-size: 16px; cursor: pointer;">&times;</button>
+                        <div class="ai-content" style="color: var(--text-dark);"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <form method="post" action="{{ path('app_commentaire_like', {'id': commentaire.id}) }}" style="display: inline;">
+                            <button type="submit" 
+                                    class="btn btn-sm btn-outline-success" 
+                                    style="font-size: 11px; padding: 2px 8px; border-radius: 4px; border-color: rgba(16, 185, 129, 0.2); color: var(--text-dark);">
+                                👍 {{ commentaire.nbLikes }}
+                            </button>
+                        </form>
+                        
+                        <button type="button" 
+                                onclick="processAI('ai-result-comment-{{ commentaire.id }}', 'comment-text-{{ commentaire.id }}', 'translate', 'ar')"
+                                class="btn btn-sm btn-outline-secondary" 
+                                style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+                           TR (AR)
+                        </button>
+                        <button type="button" 
+                                onclick="processAI('ai-result-comment-{{ commentaire.id }}', 'comment-text-{{ commentaire.id }}', 'translate', 'en')"
+                                class="btn btn-sm btn-outline-secondary" 
+                                style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+                           TR (EN)
+                        </button>
+                        <button type="button" 
+                                onclick="processAI('ai-result-comment-{{ commentaire.id }}', 'comment-text-{{ commentaire.id }}', 'summarize')"
+                                class="btn btn-sm btn-outline-info" 
+                                style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+                           Résumer
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="front-card" style="padding: 40px; text-align: center; border: 2px dashed var(--border-color);">
+            <p style="color: var(--text-muted); font-size: 14px; margin: 0;">😶 Aucun commentaire pour le moment. Soyez le premier à commenter!</p>
+        </div>
+    {% endif %}
+</div>

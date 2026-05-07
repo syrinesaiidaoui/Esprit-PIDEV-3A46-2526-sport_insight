@@ -6,13 +6,9 @@ use App\Repository\SponsorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
-
-#[ORM\Entity(repositoryClass: SponsorRepository::class)]
-=======
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Vich\UploaderBundle\Mapping\Attribute as Vich;
 use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity(repositoryClass: SponsorRepository::class)]
@@ -22,7 +18,6 @@ use Symfony\Component\HttpFoundation\File\File;
     message: 'Ce sponsor existe déjà dans la base de données'
 )]
 #[Vich\Uploadable]
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 class Sponsor
 {
     #[ORM\Id]
@@ -31,19 +26,6 @@ class Sponsor
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-<<<<<<< HEAD
-    private ?string $nom = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 20)]
-    private ?string $telephone = null;
-
-    #[ORM\Column]
-    private ?float $budget = null;
-
-=======
     #[Assert\NotBlank(message: 'Le nom du sponsor est obligatoire')]
     #[Assert\Length(
         min: 3,
@@ -79,9 +61,7 @@ class Sponsor
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    /**
-     * @deprecated kept for legacy forms; not stored
-     */
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $adresse = null;
 
     #[Vich\UploadableField(mapping: 'sponsor_logo', fileNameProperty: 'logoName')]
@@ -92,7 +72,6 @@ class Sponsor
     )]
     private ?File $logoFile = null;
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     /**
      * @var Collection<int, ContratSponsor>
      */
@@ -157,20 +136,6 @@ class Sponsor
         return $this;
     }
 
-<<<<<<< HEAD
-=======
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(?string $adresse): static
-    {
-        $this->adresse = $adresse;
-
-        return $this;
-    }
-
     public function getLogoName(): ?string
     {
         return $this->logoName;
@@ -220,7 +185,6 @@ class Sponsor
         return $this;
     }
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     /**
      * @return Collection<int, ContratSponsor>
      */
@@ -250,8 +214,16 @@ class Sponsor
 
         return $this;
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
+    public function getAdresse(): ?string
+    {
+        return $this->adresse;
+    }
+
+    public function setAdresse(?string $adresse): static
+    {
+        $this->adresse = $adresse;
+
+        return $this;
+    }
 }

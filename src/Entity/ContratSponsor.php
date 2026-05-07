@@ -5,10 +5,7 @@ namespace App\Entity;
 use App\Repository\ContratSponsorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
-=======
 use Symfony\Component\Validator\Constraints as Assert;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 
 #[ORM\Entity(repositoryClass: ContratSponsorRepository::class)]
 class ContratSponsor
@@ -19,14 +16,6 @@ class ContratSponsor
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-<<<<<<< HEAD
-    private ?\DateTime $dateDebut = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $dateFin = null;
-
-    #[ORM\Column]
-=======
     #[Assert\NotBlank(message: 'La date de début est obligatoire')]
     #[Assert\Type(\DateTimeInterface::class, message: 'La date de début doit être une date valide')]
     private ?\DateTime $dateDebut = null;
@@ -40,23 +29,15 @@ class ContratSponsor
     #[Assert\NotBlank(message: 'Le montant du contrat est obligatoire')]
     #[Assert\Positive(message: 'Le montant doit être un nombre positif')]
     #[Assert\Type(type: 'float', message: 'Le montant doit être un nombre')]
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     private ?float $montant = null;
 
     #[ORM\ManyToOne(inversedBy: 'contratSponsors')]
     #[ORM\JoinColumn(nullable: false)]
-<<<<<<< HEAD
-=======
     #[Assert\NotNull(message: 'Le sponsor est obligatoire')]
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     private ?Sponsor $sponsor = null;
 
     #[ORM\ManyToOne(inversedBy: 'contratSponsors')]
     #[ORM\JoinColumn(nullable: false)]
-<<<<<<< HEAD
-    private ?Equipe $equipe = null;
-
-=======
     #[Assert\NotNull(message: 'L\'équipe est obligatoire')]
     private ?Equipe $equipe = null;
 
@@ -73,7 +54,6 @@ class ContratSponsor
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $notified = false;
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     public function getId(): ?int
     {
         return $this->id;
@@ -138,8 +118,6 @@ class ContratSponsor
 
         return $this;
     }
-<<<<<<< HEAD
-=======
 
     public function getDescription(): ?string
     {
@@ -196,5 +174,4 @@ class ContratSponsor
 
         return $this;
     }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

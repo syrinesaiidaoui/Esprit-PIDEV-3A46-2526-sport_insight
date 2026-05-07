@@ -40,8 +40,6 @@ class EquipeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-<<<<<<< HEAD
-=======
 
     /**
      * @return Equipe[] Returns an array of Equipe objects sorted by ID
@@ -53,5 +51,4 @@ class EquipeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

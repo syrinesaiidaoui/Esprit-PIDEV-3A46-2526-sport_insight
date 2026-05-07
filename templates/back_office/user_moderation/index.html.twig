@@ -1,0 +1,236 @@
+{% extends 'back_office/base.html.twig' %}
+
+{% block title %}Users & Moderation{% endblock %}
+{% block page_title %}Users & Moderation{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .moderation-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .admin-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .admin-panel-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-panel-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .admin-table-wrap {
+            max-height: 520px;
+            overflow: auto;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(59, 130, 246, 0.12);
+            color: #1d4ed8;
+        }
+
+        .role-badge.role-admin {
+            background: rgba(16, 185, 129, 0.16);
+            color: #047857;
+        }
+
+        .role-badge.role-entraineur {
+            background: rgba(245, 158, 11, 0.16);
+            color: #b45309;
+        }
+
+        .role-badge.role-joueur {
+            background: rgba(168, 85, 247, 0.16);
+            color: #7e22ce;
+        }
+
+        .role-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            min-width: 260px;
+        }
+
+        .role-form .form-select {
+            min-width: 150px;
+        }
+
+        .excerpt {
+            max-width: 260px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        @media (max-width: 1200px) {
+            .moderation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <section class="data-table" style="margin-bottom: 20px;">
+        <div class="data-table-header">
+            <div>
+                <h3>Admin controls</h3>
+                <p class="muted">Manage user roles, clean invitations, and moderate comments from one page.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="moderation-grid">
+        <section class="admin-panel">
+            <header class="admin-panel-header">
+                <h4 class="admin-panel-title">User roles</h4>
+                <span class="muted-soft">{{ users|length }} users</span>
+            </header>
+            <div class="admin-table-wrap">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Current role</th>
+                        <th>Change role</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        {% set currentRole = userPrimaryRoles[user.id]|default('ROLE_USER') %}
+                        {% set roleClass = currentRole|replace({'ROLE_': ''})|lower %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">{{ user.prenom }} {{ user.nom }}</div>
+                                <div class="muted-soft">Joined {{ user.dateInscription ? user.dateInscription|date('Y-m-d') : '-' }}</div>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="role-badge role-{{ roleClass }}">{{ currentRole }}</span>
+                            </td>
+                            <td>
+                                <form method="post" action="{{ path('admin_user_moderation_role', {id: user.id}) }}" class="role-form">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('change_role_' ~ user.id) }}">
+                                    <select name="role" class="form-select form-select-sm">
+                                        {% for role in allowedRoles %}
+                                            <option value="{{ role }}" {{ role == currentRole ? 'selected' : '' }}>{{ role }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="4">No users found.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div style="display: grid; gap: 16px;">
+            <section class="admin-panel">
+                <header class="admin-panel-header">
+                    <h4 class="admin-panel-title">Invitations</h4>
+                    <span class="muted-soft">{{ invitations|length }} records</span>
+                </header>
+                <div class="admin-table-wrap">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for invitation in invitations %}
+                            <tr>
+                                <td>{{ invitation.sender ? invitation.sender.email : '-' }}</td>
+                                <td>{{ invitation.receiver ? invitation.receiver.email : '-' }}</td>
+                                <td><span class="excerpt">{{ invitation.content }}</span></td>
+                                <td>{{ invitation.sentAt ? invitation.sentAt|date('Y-m-d H:i') : '-' }}</td>
+                                <td>
+                                    <form method="post" action="{{ path('admin_user_moderation_invitation_delete', {id: invitation.id}) }}" onsubmit="return confirm('Remove this invitation?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_invitation_' ~ invitation.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5">No invitation records available.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-panel">
+                <header class="admin-panel-header">
+                    <h4 class="admin-panel-title">Commentaires</h4>
+                    <span class="muted-soft">{{ commentaires|length }} records</span>
+                </header>
+                <div class="admin-table-wrap">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Auteur</th>
+                            <th>Annonce</th>
+                            <th>Contenu</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for commentaire in commentaires %}
+                            <tr>
+                                <td>
+                                    {% if commentaire.joueur %}
+                                        {{ commentaire.joueur.prenom }} {{ commentaire.joueur.nom }}
+                                    {% else %}
+                                        {{ commentaire.auteurAnonyme ?: 'Anonyme' }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ commentaire.annonce ? commentaire.annonce.titre : '-' }}</td>
+                                <td><span class="excerpt">{{ commentaire.contenu }}</span></td>
+                                <td>{{ commentaire.dateCommentaire ? commentaire.dateCommentaire|date('Y-m-d H:i') : '-' }}</td>
+                                <td>
+                                    <form method="post" action="{{ path('admin_user_moderation_comment_delete', {id: commentaire.id}) }}" onsubmit="return confirm('Remove this comment?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_moderation_' ~ commentaire.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5">No comments found.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+{% endblock %}

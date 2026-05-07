@@ -2,11 +2,6 @@
 
 namespace App\Controller\BackOffice;
 
-<<<<<<< HEAD
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-=======
 use App\Repository\SponsorRepository;
 use App\Repository\ContratSponsorRepository;
 use App\Repository\UserRepository;
@@ -19,17 +14,11 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Psr\Log\LoggerInterface;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 
 #[Route('/admin/sponsoring')]
 class SponsoringController extends AbstractController
 {
     #[Route('/', name: 'back_sponsoring_index')]
-<<<<<<< HEAD
-    public function index(): Response
-    {
-        return $this->render('back_office/sponsoring/index.html.twig');
-=======
     public function index(
         Request $request, 
         SponsorRepository $sponsorRepository, 
@@ -131,6 +120,5 @@ class SponsoringController extends AbstractController
             'montantTotal' => $montantTotal,
             'valeurMoyenne' => $valeurMoyenne,
         ]);
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     }
 }

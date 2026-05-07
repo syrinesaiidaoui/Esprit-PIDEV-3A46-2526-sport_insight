@@ -2,11 +2,7 @@
 
 namespace App\Repository;
 
-<<<<<<< HEAD
-use App\Entity\Order;
-=======
 use App\Entity\ProductOrder\Order;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

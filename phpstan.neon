@@ -1,0 +1,17 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
+parameters:
+    level: 4
+    paths:
+        - src
+    tmpDir: var/cache/phpstan
+    bootstrapFiles:
+        - vendor/autoload.php
+        - phpstan-bootstrap.php
+    symfony:
+        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
+    excludePaths:
+        - src/Service/OrderCopilotService.php

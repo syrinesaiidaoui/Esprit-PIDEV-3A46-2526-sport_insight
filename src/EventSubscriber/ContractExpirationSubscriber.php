@@ -8,73 +8,100 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ContractExpirationSubscriber implements EventSubscriberInterface
 {
-    private ContratSponsorRepository $contratRepo;
-    private TwilioService $twilio;
-    private EntityManagerInterface $entityManager;
-    private LoggerInterface $logger;
+    private const CHECK_INTERVAL_SECONDS = 300;
+
+    private bool $shouldRunCheck = false;
 
     public function __construct(
-        ContratSponsorRepository $contratRepo,
-        TwilioService $twilio,
-        EntityManagerInterface $entityManager,
-        LoggerInterface $logger
+        private ContratSponsorRepository $contratRepo,
+        private TwilioService $twilio,
+        private EntityManagerInterface $entityManager,
+        private LoggerInterface $logger,
+        private CacheInterface $cache
     ) {
-        $this->contratRepo = $contratRepo;
-        $this->twilio = $twilio;
-        $this->entityManager = $entityManager;
-        $this->logger = $logger;
     }
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        // Ne pas exécuter sur les sous-requêtes
         if (!$event->isMainRequest()) {
             return;
         }
 
-        $this->logger->info("ContractExpirationSubscriber: Checking for expired contracts...");
+        $route = (string) $event->getRequest()->attributes->get('_route', '');
+        if ($route === 'web_profiler_wdt' || $route === 'web_profiler_profiler') {
+            return;
+        }
+
+        $shouldRunCheck = false;
+
+        $this->cache->get('contracts.expiration.periodic_check.v1', function (ItemInterface $item) use (&$shouldRunCheck): bool {
+            $item->expiresAfter(self::CHECK_INTERVAL_SECONDS);
+            $shouldRunCheck = true;
+
+            return true;
+        });
+
+        $this->shouldRunCheck = $shouldRunCheck;
+    }
+
+    public function onKernelTerminate(TerminateEvent $event): void
+    {
+        if (!$this->shouldRunCheck) {
+            return;
+        }
+
+        $this->shouldRunCheck = false;
+        $this->runExpirationCheck();
+    }
+
+    private function runExpirationCheck(): void
+    {
+        $this->logger->info('ContractExpirationSubscriber: Checking for expired contracts...');
 
         $qb = $this->contratRepo->createQueryBuilder('c')
             ->where('c.dateFin < :today')
             ->andWhere('c.notified = false')
             ->setParameter('today', new \DateTime());
-            
-        $expiredContracts = $qb->getQuery()->getResult();
 
+        $expiredContracts = $qb->getQuery()->getResult();
         $sentCount = 0;
 
         foreach ($expiredContracts as $contrat) {
-            // On s'assure qu'on n'envoie pas le SMS deux fois
-            if (!$contrat->isNotified()) {
-                $equipePhone = $contrat->getEquipe()?->getTelephone();
-                $sponsorName = $contrat->getSponsor()?->getNom() ?? 'Unknown Sponsor';
+            if ($contrat->isNotified()) {
+                continue;
+            }
 
-                if ($equipePhone) {
-                    $smsMessage = sprintf(
-                        "Alerte: Le contrat avec le sponsor %s est arrivé à expiration.",
-                        $sponsorName
-                    );
+            $equipePhone = $contrat->getEquipe()?->getTelephone();
+            $sponsorName = $contrat->getSponsor()?->getNom() ?? 'Unknown Sponsor';
 
-                    // Envoyer le SMS
-                    $success = $this->twilio->sendSms($equipePhone, $smsMessage);
+            if (!$equipePhone) {
+                continue;
+            }
 
-                    if ($success) {
-                        $this->logger->info("SMS automatisé envoyé pour le contrat expiré #{$contrat->getId()}");
-                        $contrat->setNotified(true);
-                        $this->entityManager->persist($contrat);
-                        $sentCount++;
-                    } else {
-                        $this->logger->error("Échec de l'envoi du SMS automatisé pour le contrat #{$contrat->getId()}");
-                    }
-                }
+            $smsMessage = sprintf(
+                'Alerte: Le contrat avec le sponsor %s est arrive a expiration.',
+                $sponsorName
+            );
+
+            $success = $this->twilio->sendSms($equipePhone, $smsMessage);
+
+            if ($success) {
+                $this->logger->info(sprintf('Automated SMS sent for expired contract #%d', $contrat->getId()));
+                $contrat->setNotified(true);
+                $this->entityManager->persist($contrat);
+                $sentCount++;
+            } else {
+                $this->logger->error(sprintf('Automated SMS failed for contract #%d', $contrat->getId()));
             }
         }
 
-        // Sauvegarder les changements
         if ($sentCount > 0) {
             $this->entityManager->flush();
         }
@@ -84,6 +111,7 @@ class ContractExpirationSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST => 'onKernelRequest',
+            KernelEvents::TERMINATE => 'onKernelTerminate',
         ];
     }
 }

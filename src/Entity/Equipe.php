@@ -6,10 +6,7 @@ use App\Repository\EquipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
-=======
 use Symfony\Component\Validator\Constraints as Assert;
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
 class Equipe
@@ -19,17 +16,6 @@ class Equipe
     #[ORM\Column]
     private ?int $id = null;
 
-<<<<<<< HEAD
-    #[ORM\Column(length: 100)]
-    private ?string $id_equipe = null;
-
-    #[ORM\Column(length: 100)]
-    private ?string $nom = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $coach = null;
-
-=======
     #[Assert\NotBlank(message: 'Le nom de l\'équipe est obligatoire.')]
     #[Assert\Length(
         max: 100,
@@ -57,7 +43,6 @@ class Equipe
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     /**
      * @var Collection<int, Matchs>
      */
@@ -70,23 +55,17 @@ class Equipe
     #[ORM\OneToMany(targetEntity: ContratSponsor::class, mappedBy: 'equipe')]
     private Collection $contratSponsors;
 
-<<<<<<< HEAD
-=======
     /**
      * @var Collection<int, Joueur>
      */
-    #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe', cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe', cascade: ['persist'], orphanRemoval: true)]
     private Collection $joueurs;
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     public function __construct()
     {
         $this->matchs = new ArrayCollection();
         $this->contratSponsors = new ArrayCollection();
-<<<<<<< HEAD
-=======
         $this->joueurs = new ArrayCollection();
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     }
 
     public function getId(): ?int
@@ -94,21 +73,6 @@ class Equipe
         return $this->id;
     }
 
-<<<<<<< HEAD
-    public function getIdEquipe(): ?string
-    {
-        return $this->id_equipe;
-    }
-
-    public function setIdEquipe(string $id_equipe): static
-    {
-        $this->id_equipe = $id_equipe;
-
-        return $this;
-    }
-
-=======
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     public function getNom(): ?string
     {
         return $this->nom;
@@ -133,8 +97,6 @@ class Equipe
         return $this;
     }
 
-<<<<<<< HEAD
-=======
     public function getImage(): ?string
     {
         return $this->image;
@@ -147,7 +109,6 @@ class Equipe
         return $this;
     }
 
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
     /**
      * @return Collection<int, Matchs>
      */
@@ -207,8 +168,6 @@ class Equipe
 
         return $this;
     }
-<<<<<<< HEAD
-=======
 
     public function getAdresse(): ?string
     {
@@ -275,5 +234,4 @@ class Equipe
 
         return $this;
     }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

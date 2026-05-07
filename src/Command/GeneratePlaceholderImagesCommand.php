@@ -2,15 +2,17 @@
 
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'app:generate-placeholder-images',
+    description: 'Generate placeholder PNG images for logo and signature'
+)]
 class GeneratePlaceholderImagesCommand extends Command
 {
-    protected static $defaultName = 'app:generate-placeholder-images';
-    protected static $defaultDescription = 'Generate placeholder PNG images for logo and signature';
-
     public function __construct()
     {
         parent::__construct();

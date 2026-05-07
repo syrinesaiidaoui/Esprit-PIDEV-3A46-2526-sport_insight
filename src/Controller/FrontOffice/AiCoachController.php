@@ -37,9 +37,9 @@ class AiCoachController extends AbstractController
     #[Route('/front/coach/api/nutrition', name: 'front_ai_nutrition_api')]
     public function nutritionAdvice(Request $request, NutritionService $nutritionService): JsonResponse
     {
-        $p = (float)$request->query->get('p', 10);
-        $t = (float)$request->query->get('t', 10);
-        $ta = (float)$request->query->get('ta', 10);
+        $p = (float)$request->query->get('p', '10');
+        $t = (float)$request->query->get('t', '10');
+        $ta = (float)$request->query->get('ta', '10');
         $type = $request->query->get('type', '');
 
         try {

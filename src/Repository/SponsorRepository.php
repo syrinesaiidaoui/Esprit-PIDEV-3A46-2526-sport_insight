@@ -16,32 +16,6 @@ class SponsorRepository extends ServiceEntityRepository
         parent::__construct($registry, Sponsor::class);
     }
 
-<<<<<<< HEAD
-    //    /**
-    //     * @return Sponsor[] Returns an array of Sponsor objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Sponsor
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
-=======
     /**
      * Recherche les sponsors par email et/ou budget
      */
@@ -62,5 +36,4 @@ class SponsorRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
->>>>>>> a3faf68b6604ba7c00e7a1f70865a40a96aacf2d
 }

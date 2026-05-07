@@ -1,0 +1,282 @@
+{% extends 'front_office/base.html.twig' %}
+
+{% block title %}Annonces - FC Club{% endblock %}
+
+{% block body %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .page-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--ink);
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    /* Modern Filter Bar */
+    .filter-section {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 40px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--soft-shadow);
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        align-items: flex-end;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .modern-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 14px;
+        color: var(--input-text);
+        transition: all 0.2s;
+    }
+
+    .modern-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    /* Annonce Cards */
+    .annonce-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 30px;
+    }
+
+    .annonce-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .annonce-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        border-color: var(--primary);
+    }
+
+    .card-tag {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+    .card-date {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 16px;
+        line-height: 1.4;
+    }
+
+    .card-details {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .detail-item:last-child { margin-bottom: 0; }
+    .detail-label { color: var(--text-muted); font-weight: 500; }
+    .detail-value { color: var(--ink); font-weight: 700; }
+
+    .card-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: auto;
+    }
+
+    .btn-view {
+        flex: 2;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        padding: 12px;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .btn-view:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-edit {
+        flex: 1;
+        background: var(--card-bg);
+        color: var(--muted);
+        text-decoration: none;
+        padding: 12px;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 14px;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+
+    .btn-edit:hover {
+        background: var(--surface);
+        border-color: var(--border-color);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: var(--surface);
+        border-radius: 24px;
+        border: 2px dashed var(--border-color);
+    }
+
+    [data-theme="dark"] .annonce-card:hover {
+        box-shadow: 0 18px 30px rgba(2, 6, 23, 0.45), 0 8px 14px rgba(2, 6, 23, 0.35);
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Nos Annonces</h1>
+    <div style="display: flex; gap: 16px;">
+        <a href="{{ path('app_statistics') }}" class="btn-edit" style="text-decoration: none;">
+            📊 Statistiques
+        </a>
+        <a href="{{ path('app_annonce_new') }}" class="btn-view" style="padding: 12px 24px; text-decoration: none;">
+           + Créer une annonce
+        </a>
+    </div>
+</div>
+
+<div class="filter-section">
+    <form method="get" action="{{ path('app_annonce_index') }}" class="filter-grid">
+        <div class="form-group">
+            <label for="titre">Rechercher</label>
+            <input type="text" id="titre" name="titre" value="{{ app.request.query.get('titre', '') }}" placeholder="Mots-clés..." class="modern-input">
+        </div>
+
+        <div class="form-group">
+            <label for="niveau">Niveau requis</label>
+            <select id="niveau" name="niveau" class="modern-input">
+                <option value="">Tous les niveaux</option>
+                <option value="Débutant" {% if app.request.query.get('niveau') == 'Débutant' %}selected{% endif %}>Débutant</option>
+                <option value="Intermédiaire" {% if app.request.query.get('niveau') == 'Intermédiaire' %}selected{% endif %}>Intermédiaire</option>
+                <option value="Avancé" {% if app.request.query.get('niveau') == 'Avancé' %}selected{% endif %}>Avancé</option>
+                <option value="Expert" {% if app.request.query.get('niveau') == 'Expert' %}selected{% endif %}>Expert</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="sort">Tri</label>
+            <select id="sort" name="sort" class="modern-input">
+                <option value="recent" {% if app.request.query.get('sort') != 'alpha' %}selected{% endif %}>Plus récent</option>
+                <option value="alpha" {% if app.request.query.get('sort') == 'alpha' %}selected{% endif %}>Alphabétique A-Z</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-view" style="border: none; cursor: pointer; flex: 1;">Appliquer</button>
+            <a href="{{ path('app_annonce_index') }}" class="btn-edit" style="text-decoration: none;">Reset</a>
+        </div>
+    </form>
+</div>
+
+{% if annonces|length > 0 %}
+    <div class="annonce-grid">
+        {% for annonce in annonces %}
+            <article class="annonce-card">
+                <div class="card-tag">
+                    {% if annonce.statut == 'active' %}
+                        <span class="badge-success">Actif</span>
+                    {% else %}
+                        <span class="badge-warning">{{ annonce.statut }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-date">
+                    <i class="lucide-calendar" style="font-size: 14px;"></i>
+                    {{ annonce.datePublication ? annonce.datePublication|date('d M Y') : 'N/A' }}
+                </div>
+
+                <h2 class="card-title">{{ annonce.titre }}</h2>
+
+                <div class="card-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Poste</span>
+                        <span class="detail-value">{{ annonce.posteRecherche }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Niveau</span>
+                        <span class="detail-value">{{ annonce.niveauRequis }}</span>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <a href="{{ path('app_annonce_show', {'id': annonce.id}) }}" class="btn-view">Voir détails</a>
+                    <a href="{{ path('app_annonce_edit', {'id': annonce.id}) }}" class="btn-edit">Éditer</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
+        <h3 style="color: var(--ink); margin-bottom: 8px;">Aucune annonce trouvée</h3>
+        <p style="color: var(--text-muted);">Essayez de modifier vos filtres de recherche.</p>
+    </div>
+{% endif %}
+{% endblock %}
+

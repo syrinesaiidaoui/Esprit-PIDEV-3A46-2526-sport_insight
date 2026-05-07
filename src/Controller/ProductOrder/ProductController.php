@@ -15,8 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
-use Symfony\UX\Chartjs\Model\Chart;
 // security attribute import removed for public/no-login mode
 
 #[Route('/product')]
@@ -30,8 +28,7 @@ class ProductController extends AbstractController
     public function index(
         Request $request,
         ProductRepository $productRepository,
-        OrderRepository $orderRepository,
-        ChartBuilderInterface $chartBuilder
+        OrderRepository $orderRepository
     ): Response
     {
         // Pagination and search
@@ -95,6 +92,18 @@ class ProductController extends AbstractController
         $deliveredOrders = 0;
         $revenueByProduct = [];
         $revenueStatuses = ['confirmed', 'shipped', 'delivered'];
+        $orderedQtyByProduct = [];
+        $now = new \DateTimeImmutable('first day of this month');
+        $monthlySeries = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = $now->modify(sprintf('-%d month', $i));
+            $key = $month->format('Y-m');
+            $monthlySeries[$key] = [
+                'label' => $month->format('M Y'),
+                'orders' => 0,
+                'revenue' => 0.0,
+            ];
+        }
 
         foreach ($allOrders as $order) {
             $status = (string) $order->getStatus();
@@ -105,12 +114,26 @@ class ProductController extends AbstractController
                 $deliveredOrders++;
             }
 
+            $orderDate = $order->getOrderDate();
+            if ($orderDate instanceof \DateTimeInterface) {
+                $monthKey = $orderDate->format('Y-m');
+                if (isset($monthlySeries[$monthKey])) {
+                    $monthlySeries[$monthKey]['orders']++;
+                }
+            }
+
             if (!in_array($status, $revenueStatuses, true)) {
                 continue;
             }
 
             $orderTotal = $order->getComputedTotal();
             $revenue += $orderTotal;
+            if ($orderDate instanceof \DateTimeInterface) {
+                $monthKey = $orderDate->format('Y-m');
+                if (isset($monthlySeries[$monthKey])) {
+                    $monthlySeries[$monthKey]['revenue'] += $orderTotal;
+                }
+            }
 
             if (!$order->getItems()->isEmpty()) {
                 foreach ($order->getItems() as $item) {
@@ -121,6 +144,7 @@ class ProductController extends AbstractController
                     $name = $product->getName() ?? 'Produit';
                     $line = (float) $item->getUnitPrice() * (int) $item->getQuantity();
                     $revenueByProduct[$name] = ($revenueByProduct[$name] ?? 0.0) + $line;
+                    $orderedQtyByProduct[$name] = ($orderedQtyByProduct[$name] ?? 0) + (int) $item->getQuantity();
                 }
                 continue;
             }
@@ -129,64 +153,51 @@ class ProductController extends AbstractController
             if ($product) {
                 $name = $product->getName() ?? 'Produit';
                 $revenueByProduct[$name] = ($revenueByProduct[$name] ?? 0.0) + $orderTotal;
+                $orderedQtyByProduct[$name] = ($orderedQtyByProduct[$name] ?? 0) + (int) ($order->getQuantity() ?? 0);
             }
         }
 
         arsort($revenueByProduct);
         $revenueByProduct = array_slice($revenueByProduct, 0, 6, true);
+        arsort($orderedQtyByProduct);
+        $orderedQtyByProduct = array_slice($orderedQtyByProduct, 0, 6, true);
 
         $totalOrders = count($allOrders);
         $deliveryRate = $totalOrders > 0 ? (int) round(($deliveredOrders / $totalOrders) * 100) : 0;
 
-        // ===== Charts (Power BI-style quick views) =====
-        $categoryStockChart = $chartBuilder->createChart(Chart::TYPE_BAR);
-        $categoryStockChart->setData([
-            'labels' => array_keys($categoryStock),
-            'datasets' => [[
-                'label' => 'Stock par catégorie',
-                'data' => array_values($categoryStock),
-                'backgroundColor' => 'rgba(59, 130, 246, 0.75)',
-                'borderColor' => 'rgb(37, 99, 235)',
-                'borderWidth' => 1,
-            ]],
-        ]);
-        $categoryStockChart->setOptions([
-            'indexAxis' => 'y',
-            'plugins' => ['legend' => ['display' => true]],
-            'scales' => ['x' => ['beginAtZero' => true]],
-        ]);
+        if ($categoryStock === []) {
+            $categoryStock = ['Aucune categorie' => 0];
+        }
+        if ($revenueByProduct === []) {
+            $revenueByProduct = ['Aucune vente' => 0];
+        }
+        if ($orderedQtyByProduct === []) {
+            $orderedQtyByProduct = ['Aucune vente' => 0];
+        }
 
-        $stockHealthChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
-        $stockHealthChart->setData([
-            'labels' => array_keys($stockHealth),
-            'datasets' => [[
-                'data' => array_values($stockHealth),
-                'backgroundColor' => ['#22c55e', '#f59e0b', '#ef4444'],
-                'borderWidth' => 0,
-            ]],
-        ]);
-        $stockHealthChart->setOptions([
-            'plugins' => [
-                'legend' => ['display' => true, 'position' => 'bottom'],
+        $productDashboard = [
+            'trend' => [
+                'labels' => array_column($monthlySeries, 'label'),
+                'orders' => array_column($monthlySeries, 'orders'),
+                'revenue' => array_map(static fn (float $value): float => round($value, 2), array_column($monthlySeries, 'revenue')),
             ],
-        ]);
-
-        $revenueByProductChart = $chartBuilder->createChart(Chart::TYPE_BAR);
-        $revenueByProductChart->setData([
-            'labels' => array_keys($revenueByProduct),
-            'datasets' => [[
-                'label' => 'CA par produit (USD)',
-                'data' => array_values($revenueByProduct),
-                'backgroundColor' => 'rgba(234, 88, 12, 0.75)',
-                'borderColor' => 'rgb(194, 65, 12)',
-                'borderWidth' => 1,
-            ]],
-        ]);
-        $revenueByProductChart->setOptions([
-            'indexAxis' => 'y',
-            'plugins' => ['legend' => ['display' => true]],
-            'scales' => ['x' => ['beginAtZero' => true]],
-        ]);
+            'categoryStock' => [
+                'labels' => array_keys($categoryStock),
+                'values' => array_values($categoryStock),
+            ],
+            'stockHealth' => [
+                'labels' => array_keys($stockHealth),
+                'values' => array_values($stockHealth),
+            ],
+            'topRevenueProducts' => [
+                'labels' => array_keys($revenueByProduct),
+                'values' => array_map(static fn (float $value): float => round($value, 2), array_values($revenueByProduct)),
+            ],
+            'topVolumeProducts' => [
+                'labels' => array_keys($orderedQtyByProduct),
+                'values' => array_values($orderedQtyByProduct),
+            ],
+        ];
 
         return $this->render('product/index.html.twig', [
             'products' => $products,
@@ -204,9 +215,7 @@ class ProductController extends AbstractController
                 'outOfStockCount' => $outOfStockCount,
                 'deliveryRate' => $deliveryRate,
             ],
-            'categoryStockChart' => $categoryStockChart,
-            'stockHealthChart' => $stockHealthChart,
-            'revenueByProductChart' => $revenueByProductChart,
+            'productDashboard' => $productDashboard,
         ]);
     }
 
