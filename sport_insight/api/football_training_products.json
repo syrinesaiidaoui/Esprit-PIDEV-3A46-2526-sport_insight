@@ -1,0 +1,59 @@
+{
+  "products": [
+    {
+      "id": 201,
+      "name": "Pro Training Cones Set",
+      "description": "Twenty flexible cones for agility circuits, warmups, and small-sided football drills.",
+      "price": 29.9,
+      "brand": "Sport Insight Lab",
+      "category": "training",
+      "imageUrl": "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",
+      "badge": "Coach Pick",
+      "featured": true
+    },
+    {
+      "id": 202,
+      "name": "Speed Ladder Elite",
+      "description": "Lightweight coordination ladder designed for acceleration sessions and technical footwork.",
+      "price": 34.5,
+      "brand": "MatchMove",
+      "category": "training",
+      "imageUrl": "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?auto=format&fit=crop&w=900&q=80",
+      "badge": "Fast Feet",
+      "featured": true
+    },
+    {
+      "id": 203,
+      "name": "Recovery Compression Top",
+      "description": "Breathable compression layer for post-match recovery and cold-weather sessions.",
+      "price": 41.0,
+      "brand": "AeroFit",
+      "category": "jerseys",
+      "imageUrl": "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=900&q=80",
+      "badge": "Recovery",
+      "featured": false
+    },
+    {
+      "id": 204,
+      "name": "Turf Session Boots",
+      "description": "Stable multi-ground boots for academy training and daily technical repetition.",
+      "price": 72.0,
+      "brand": "PitchCore",
+      "category": "boots",
+      "imageUrl": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80",
+      "badge": "Daily Drill",
+      "featured": false
+    },
+    {
+      "id": 205,
+      "name": "Smart Match Ball",
+      "description": "Durable football with textured panels for passing drills, rondos, and shooting practice.",
+      "price": 38.75,
+      "brand": "VisionPlay",
+      "category": "training",
+      "imageUrl": "https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&w=900&q=80",
+      "badge": "Best Seller",
+      "featured": true
+    }
+  ]
+}
